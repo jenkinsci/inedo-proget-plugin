@@ -1,0 +1,19 @@
+# Gradle
+.gradle
+build/
+gradle.properties
+
+# Eclipse
+.checkstyle
+.classpath
+.project
+.settings/
+bin/
+
+# IDEA
+.idea/
+*.iml
+
+# Jenkins
+work
+target

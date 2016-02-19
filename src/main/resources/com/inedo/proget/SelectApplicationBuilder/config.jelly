@@ -1,0 +1,42 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+  <!--
+    This jelly script is used for per-project configuration.
+    See global.jelly for a general discussion about jelly script.
+  -->
+
+  <!--
+    Creates a text field that shows the value of the "key" and "value" property.
+    When submitted, it will be passed to the corresponding constructor parameter.
+  -->
+  
+  <j:if test="${!descriptor.isProGetAvailable}">  
+  	<f:block><br /><span style="color:red; font-weight: bold">Error: Unable to connect to ProGet. ${descriptor.connectionError}</span><br /><br /></f:block>
+  </j:if>
+
+  <f:entry title="Application" field="applicationId"> 
+ 	<j:choose>
+   	  <j:when test="${descriptor.isProGetAvailable}"><f:select /></j:when>
+      <j:otherwise><f:textbox /></j:otherwise>
+    </j:choose>
+  </f:entry>
+  
+  <f:entry title="Release Number" field="releaseNumber">
+ 	<j:choose>
+   	  <j:when test="${descriptor.isBuildMasterAvailable}"><f:select default="LATEST"/></j:when>
+      <j:otherwise><f:textbox default="LATEST" /></j:otherwise>
+    </j:choose>
+  </f:entry>
+  
+  <f:entry title="Build Number" field="buildNumberSource">
+    <f:select default="BUILDMASTER"/>
+  </f:entry>
+  
+  <f:entry title="Deployable" field="deployableId">
+ 	<j:choose>
+   	  <j:when test="${descriptor.isBuildMasterAvailable}"><f:select default="NOT_REQUIRED"/></j:when>
+      <j:otherwise><f:textbox default="NOT_REQUIRED" /></j:otherwise>
+    </j:choose>
+  </f:entry>
+    
+</j:jelly>

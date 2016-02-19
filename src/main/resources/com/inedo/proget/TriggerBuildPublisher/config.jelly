@@ -1,0 +1,44 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+  <!--
+    This jelly script is used for per-project configuration.
+    See global.jelly for a general discussion about jelly script.
+  -->
+
+  <!--
+    Creates a text field that shows the value of the "key" and "value" property.
+    When submitted, it will be passed to the corresponding constructor parameter.
+  -->
+  <f:optionalBlock title="Wait Till Build Completed" field="waitTillBuildCompleted" >
+    <f:entry title="Show BuildMaster Log on Failure" field="printLogOnFailure" >
+      <f:checkbox default="false" />
+    </f:entry>
+  </f:optionalBlock>
+
+  <f:optionalBlock title="Set Build Variables in BuildMaster" field="setBuildVariables" >
+    <f:entry title="Copy Previous Build's Variables" field="preserveVariables" >
+      <f:checkbox default="false" />
+    </f:entry>
+    <f:entry title="Variables" field="variables" >
+      <f:expandableTextbox /> 
+    </f:entry>  
+  </f:optionalBlock>
+
+  <f:optionalBlock title="Enable Deployable in BuildMaster" field="enableReleaseDeployable" >
+    <f:entry title="Deployable Id" field="deployableId" >
+      <f:textbox default="$${BUILDMASTER_DEPLOYABLE_ID}" />
+    </f:entry>
+  </f:optionalBlock>
+  
+  <f:advanced title="Advanced Settings">
+    <f:entry title="Application" field="applicationId" >
+      <f:textbox default="$${BUILDMASTER_APPLICATION_ID}" />
+    </f:entry>
+    <f:entry title="Release" field="releaseNumber" >
+      <f:textbox default="$${BUILDMASTER_RELEASE_NUMBER}" />
+    </f:entry>
+    <f:entry title="Build Number" field="buildNumber" >
+      <f:textbox default="${descriptor.defaultBuildNumber}" />
+    </f:entry>
+  </f:advanced>
+</j:jelly>

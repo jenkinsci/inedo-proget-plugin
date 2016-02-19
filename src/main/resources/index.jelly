@@ -1,0 +1,6 @@
+<!--
+  This view is used to render the installed plugins page.
+-->
+<div>
+  This plugin adds support for Inedo BuildMaster to Jenkins.
+</div>

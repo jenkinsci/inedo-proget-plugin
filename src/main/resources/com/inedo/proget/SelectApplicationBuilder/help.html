@@ -1,0 +1,17 @@
+<div>
+  <p>Requests the Release Number for the selected BuildMaster application from BuildMaster and injects these environment 
+  variables into the build job:
+	<ul>
+	  <li>BUILDMASTER_APPLICATION_ID</li>
+	  <li>BUILDMASTER_RELEASE_NUMBER</li>
+	  <li>BUILDMASTER_BUILD_NUMBER</li>
+	  <li>BUILDMASTER_DEPLOYABLE_ID</li>
+  	</ul>
+  </p>
+  
+  <p>Because the Release Number and build numbers could be required by several build and post-build actions selecting the application and setting up 
+  the environment variable has been separated from the trigger build action.</p>
+  
+  <p><i>If you have multiple jobs all triggering builds on the same BuildMaster application this build step will queue those jobs so that you cannot get two jobs
+  trigger a build at the same time.</i></p>
+</div>

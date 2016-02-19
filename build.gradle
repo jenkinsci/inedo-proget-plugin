@@ -1,0 +1,69 @@
+/**
+ * Gradle Jenkins JPI Plugin
+ * 
+ * https://wiki.jenkins-ci.org/display/JENKINS/Gradle+JPI+Plugin
+ * https://github.com/jenkinsci/gradle-jpi-plugin
+ *  
+ * Gradle Tasks
+ * ---------------
+ * jpi:		Generates the JPI package
+ * server: 	Run Jenkins in place with the plugin being developed
+ *
+ */
+
+buildscript {
+    repositories {
+		jcenter()		
+    }
+    dependencies {
+        classpath 'org.jenkins-ci.tools:gradle-jpi-plugin:0.12.2'
+    }
+}
+
+apply plugin: 'org.jenkins-ci.jpi'
+apply plugin: 'java'
+
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
+group = 'com.inedo.proget'
+version = '1.4-SNAPSHOT'
+description = 'Inedo ProGet plugin for Jenkins'
+
+ext {
+	jenkinsVersion='1.596.1'
+}
+
+jenkinsPlugin {
+    coreVersion = "$jenkinsVersion"
+    displayName = 'Inedo ProGet plugin for Jenkins.'
+    url = 'http://wiki.jenkins-ci.org/display/JENKINS/Inedo+ProGet+Plugin'
+    gitHubUrl = 'https://github.com/jenkinsci/inedo-proget-plugin'
+    developers {
+        developer {
+            id 'andrew-sumner'
+            name 'Andrew Sumner'
+            email 'andrew.sumner@xtra.co.nz'
+        }
+    }
+}
+
+repositories {
+	jcenter()
+}
+
+dependencies {
+	compile 'org.apache.httpcomponents:httpclient:4.5.1'
+	compile 'com.google.code.gson:gson:2.6.1'
+	
+	testCompile 'junit:junit:4.8.2'
+	testCompile 'org.mockito:mockito-core:2.0.5-beta'
+	//testCompile "org.jenkins-ci.main:jenkins-test-harness:$jenkinsVersion"
+	
+	// https://issues.jenkins-ci.org/browse/JENKINS-27826
+	jenkinsTest 'org.jenkins-ci.plugins:matrix-project:1.4@jar'
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.10'
+}
