@@ -25,7 +25,7 @@ import com.inedo.rest.RestRequest;
  */
 public class ProGet {
 	private ProGetConfig config;
-	private boolean logRequest = true;
+//	private boolean logRequest = true;
 	
 	public ProGet(ProGetConfig config) {
 		this.config = config;

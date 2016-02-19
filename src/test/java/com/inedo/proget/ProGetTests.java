@@ -24,7 +24,6 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 
 import com.inedo.proget.ProGetHelper;
-import com.inedo.proget.api.ProGet;
 
 /**
  * Tests for the TriggerBuildHelper class

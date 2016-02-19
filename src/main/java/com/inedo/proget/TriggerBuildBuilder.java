@@ -140,7 +140,7 @@ public class TriggerBuildBuilder extends Builder implements Triggerable {
 		// https://github.com/jenkinsci/jenkins/blob/master/core/src/main/resources/lib/form/expandableTextbox.jelly
 		public FormValidation doCheckVariables(@QueryParameter String value) {
 			try {
-				ProGetHelper.getVariablesList(value);
+//				ProGetHelper.getVariablesList(value);
 			} catch (Exception e) {
                 return FormValidation.error(e.getMessage());
             }

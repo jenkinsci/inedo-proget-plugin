@@ -5,14 +5,10 @@ import hudson.model.BuildListener;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.HashMap;
-import java.util.Map;
-
 import jenkins.model.Jenkins;
 
 import com.inedo.proget.api.ProGet;
 import com.inedo.proget.api.ProGetConfig;
-import com.inedo.proget.domain.Variable;
 
 /**
  * Does the real work of Trigger a BuildMaster build, has been seperated out from the Builder and Publisher actions
