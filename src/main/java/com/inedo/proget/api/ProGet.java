@@ -16,6 +16,7 @@ import java.io.IOException;
 //import org.apache.http.impl.client.HttpClients;
 //import com.inedo.proget.ConnectionType;
 import com.inedo.proget.domain.Feed;
+import com.inedo.proget.domain.ProGetPackage;
 import com.inedo.rest.RestRequest;
 
 /**
@@ -81,17 +82,54 @@ public class ProGet {
 
 	public void upload(String feedName) throws IOException {
 		
-	}	
+	}
+	
+	/** Gets the details of a feed by its name */
+	public Feed getFeed(String feedName) throws IOException {
+		Feed feed = RestRequest.request().
+				baseURI(config.url).
+				path("api/json/Feeds_GetFeed?API_Key={}&Feed_Name={}").
+				pathParameters(config.apiKey, feedName).
+				get().asJson(Feed.class);
+		
+		if (feed == null) {
+			throw new IOException("Feed " + feedName + " was not found");
+		}
+		
+		return feed;
+	}
 
-	/** Get all active feeds. */
+	/** Get all active feeds */
 	public Feed[] getFeeds() throws IOException {
 		Feed[] result = RestRequest.request().
 				baseURI(config.url).
 				path("api/json/Feeds_GetFeeds?API_Key={}&IncludeInactive_Indicator={}").
-				pathParameters(1, "N").
+				pathParameters(config.apiKey, "N").
 				get().asJson(Feed[].class);
 		
 		return result;
 	}
+	
+	/** Gets the packages in a ProGet feed */
+	public ProGetPackage[] getPackages(String feedId) throws IOException {
+		return RestRequest.request().
+				baseURI(config.url).
+				path("api/json/ProGetPackages_GetPackages?API_Key={}&Feed_Id={}&IncludeVersions_Indicator=Y").
+				pathParameters(config.apiKey, feedId, "Y").
+				get().asJson(ProGetPackage[].class);
+	}
+
+	public void downloadPackage(String feedName, ProGetPackage pkg) throws IOException {
+
+		RestRequest.request().
+			baseURI(config.url).
+			path("upack/{«feed-name»}/download/{«group-name»}/{«package-name»}/{«package-version»}").
+			pathParameters(feedName, pkg.Group_Name, pkg.Package_Name, pkg.LatestVersion_Text).
+			get().
+			downloadFile("giveitago.zip", "C:/temp/andrew");
+		
+	}
+
+	
 
 }

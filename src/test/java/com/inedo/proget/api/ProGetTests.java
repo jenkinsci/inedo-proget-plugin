@@ -6,8 +6,12 @@ import static org.hamcrest.Matchers.*;
 import com.inedo.proget.MockServer;
 import com.inedo.proget.api.ProGet;
 import com.inedo.proget.domain.Feed;
+import com.inedo.proget.domain.ProGetPackage;
+
 import java.io.IOException;
 import java.net.UnknownHostException;
+import java.util.Arrays;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -57,6 +61,27 @@ public class ProGetTests {
 	public void getFeeds() throws IOException  {
     	Feed[] feeds = proget.getFeeds();
     	
-        assertThat("Expect BuildMaster to have applications created", feeds.length, is(greaterThan(0)));
+        assertThat("Expect to have a feed", feeds.length, is(greaterThan(0)));
 	}
+	
+	@Test
+	public void getPackages() throws IOException  {
+		Feed feed = proget.getFeed("Example");
+		
+		ProGetPackage[] packages = proget.getPackages(feed.Feed_Id);
+    	
+        assertThat("Expect more than one package", packages.length, is(greaterThan(0)));
+	}
+	
+	@Test
+	public void downloadPackage() throws IOException  {
+		Feed feed = proget.getFeed("Example");
+		
+		ProGetPackage proGetPackage = proget.getPackages(feed.Feed_Id)[0];
+		
+		proget.downloadPackage("Example", proGetPackage);
+    	
+//        assertThat("Expect more than one package", packages.length, is(greaterThan(0)));
+	}
+	
 }

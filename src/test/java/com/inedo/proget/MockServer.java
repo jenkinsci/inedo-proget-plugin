@@ -57,7 +57,7 @@ public class MockServer {
 //			config.user = cred[0];
 //			config.password = cred[1];
 //			config.domain = cred[2];
-//			config.apiKey = cred[3];
+			config.apiKey = "1";
 		}
 	}
 	
