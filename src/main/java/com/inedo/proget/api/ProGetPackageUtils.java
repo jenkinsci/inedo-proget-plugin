@@ -11,7 +11,7 @@ import java.util.zip.ZipOutputStream;
 
 import com.inedo.proget.domain.PackageMetadata;
 
-public class ProGetPackageUtils
+class ProGetPackageUtils
 {
 	private File sourceFolder;
 	private File zipFile;
