@@ -1,5 +1,6 @@
 package com.inedo.proget.api;
 
+import java.io.File;
 import java.io.IOException;
 //import java.net.InetSocketAddress;
 //import java.net.Proxy;
@@ -119,17 +120,22 @@ public class ProGet {
 				get().asJson(ProGetPackage[].class);
 	}
 
-	public void downloadPackage(String feedName, ProGetPackage pkg) throws IOException {
-
-		RestRequest.request().
-			baseURI(config.url).
-			path("upack/{«feed-name»}/download/{«group-name»}/{«package-name»}/{«package-version»}").
-			pathParameters(feedName, pkg.Group_Name, pkg.Package_Name, pkg.LatestVersion_Text).
-			get().
-			downloadFile("giveitago.zip", "C:/temp/andrew");
-		
+	public File downloadPackage(String feedName, ProGetPackage pkg, String toFolder) throws IOException {
+		return RestRequest.request().
+				baseURI(config.url).
+				path("upack/{«feed-name»}/download/{«group-name»}/{«package-name»}/{«package-version»}").
+				pathParameters(feedName, pkg.Group_Name, pkg.Package_Name, pkg.LatestVersion_Text).
+				get().
+				downloadFile(toFolder);
 	}
 
-	
+	public void updloadPackage() {
+		//http://java-monitor.com/forum/showthread.php?t=4090
+		//http://www.codejava.net/java-se/networking/upload-files-by-sending-multipart-request-programmatically
+	}
 
+	public void createPackage() {
+		//http://www.mkyong.com/java/how-to-compress-files-in-zip-format/
+		//http://www.avajava.com/tutorials/lessons/how-can-i-create-a-zip-file-from-a-set-of-files.html
+	}
 }

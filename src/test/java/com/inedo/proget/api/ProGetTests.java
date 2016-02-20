@@ -8,13 +8,16 @@ import com.inedo.proget.api.ProGet;
 import com.inedo.proget.domain.Feed;
 import com.inedo.proget.domain.ProGetPackage;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 /**
  * Tests for the ProGet API class
@@ -27,6 +30,9 @@ public class ProGetTests {
 	private final boolean MOCK_REQUESTS = false;	// Set this value to false to run against a live BuildMaster installation 
 	private MockServer mockServer;
 	private ProGet proget;
+	
+	@Rule
+	public TemporaryFolder folder = new TemporaryFolder();
 	
 	@Before
     public void before() throws IOException {
@@ -79,9 +85,9 @@ public class ProGetTests {
 		
 		ProGetPackage proGetPackage = proget.getPackages(feed.Feed_Id)[0];
 		
-		proget.downloadPackage("Example", proGetPackage);
+		File downloaded = proget.downloadPackage("Example", proGetPackage, folder.getRoot().getAbsolutePath());
     	
-//        assertThat("Expect more than one package", packages.length, is(greaterThan(0)));
+        assertThat("File has content", downloaded.length(), is(greaterThan((long)1000)));
 	}
 	
 }
