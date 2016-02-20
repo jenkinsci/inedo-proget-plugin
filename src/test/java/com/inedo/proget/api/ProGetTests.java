@@ -8,7 +8,9 @@ import com.inedo.proget.api.ProGet;
 import com.inedo.proget.domain.Feed;
 import com.inedo.proget.domain.ProGetPackage;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.Arrays;
@@ -87,6 +89,26 @@ public class ProGetTests {
 		
 		File downloaded = proget.downloadPackage("Example", proGetPackage, folder.getRoot().getAbsolutePath());
     	
+        assertThat("File has content", downloaded.length(), is(greaterThan((long)1000)));
+	}
+	
+	@Test
+	public void createPackage() throws IOException {
+		Feed feed = proget.getFeed("Example");
+		
+		ProGetPackage proGetPackage = proget.getPackages(feed.Feed_Id)[0];
+		
+		File file = new File(folder.getRoot(), "sample.data");
+		
+		try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+			writer.write("This is a sample file");
+		}
+		
+		ProGetPackageUtils pkg = new ProGetPackageUtils();
+		pkg.create(folder, metadata)
+		proget.createPackage(folder.getRoot());
+		
+		
         assertThat("File has content", downloaded.length(), is(greaterThan((long)1000)));
 	}
 	

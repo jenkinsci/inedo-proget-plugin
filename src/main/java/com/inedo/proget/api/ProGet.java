@@ -129,13 +129,16 @@ public class ProGet {
 				downloadFile(toFolder);
 	}
 
+	public File createPackage(File sourceFolder) {
+		//http://www.mkyong.com/java/how-to-compress-files-in-zip-format/
+		//http://www.avajava.com/tutorials/lessons/how-can-i-create-a-zip-file-from-a-set-of-files.html
+		
+		
+		
+	}
+	
 	public void updloadPackage() {
 		//http://java-monitor.com/forum/showthread.php?t=4090
 		//http://www.codejava.net/java-se/networking/upload-files-by-sending-multipart-request-programmatically
-	}
-
-	public void createPackage() {
-		//http://www.mkyong.com/java/how-to-compress-files-in-zip-format/
-		//http://www.avajava.com/tutorials/lessons/how-can-i-create-a-zip-file-from-a-set-of-files.html
-	}
+	}	
 }
