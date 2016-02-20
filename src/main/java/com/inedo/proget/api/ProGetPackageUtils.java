@@ -1,13 +1,11 @@
 package com.inedo.proget.api;
 
-import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.InputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -15,30 +13,33 @@ import com.inedo.proget.domain.PackageMetadata;
 
 public class ProGetPackageUtils
 {
-	private List<ZipItem> fileList;
 	private File sourceFolder;
+	private File zipFile;
+	private ZipOutputStream zos = null;
 	
-
 	public File createPackage(File sourceFolder, PackageMetadata metadata) throws IOException {		
-		this.fileList = new ArrayList<ZipItem>();
+		FileOutputStream fos = null;
+		
 		this.sourceFolder = sourceFolder;
+		this.zipFile = new File(sourceFolder, metadata.name.replace(" ",  "") + ".unpack");
 		
-		generateFileList(sourceFolder, "unpack/");
-		
-		File metaFile = createMetadataFile(metadata);
-		File zipFile = new File(sourceFolder, metadata.name.replace(" ",  "") + ".unpack");
-		fileList.add(generateZipEntry(metaFile, ""));
-		
-		zipIt(zipFile, "unpack/");
-		metaFile.delete();
+		try {
+			fos = new FileOutputStream(zipFile);
+			zos = new ZipOutputStream(fos);
 
+			appendMetadata(metadata);
+			appendFiles(sourceFolder, "unpack/");
+		} finally {
+			if (zos != null) zos.closeEntry();
+			if (zos != null) zos.close(); 
+			if (fos != null) fos.close();
+		}
+		
 		return zipFile;
 	}
 
-	private File createMetadataFile(PackageMetadata metadata) throws IOException {
-		File file = new File(sourceFolder, "upack.json");
+	private void appendMetadata(PackageMetadata metadata) throws IOException {
 		String newLine = System.getProperty("line.separator");;
-		
 		StringBuilder sb = new StringBuilder();
 		
 		sb.append("{").append(newLine);
@@ -59,74 +60,60 @@ public class ProGetPackageUtils
 		}
 		sb.append("}");
 		
-		try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-			writer.write(sb.toString());
-		}
+		ZipEntry ze = new ZipEntry("upack.json");
+		byte[] buffer = new byte[1024];
+		int len;
 		
-		return file;
+		zos.putNextEntry(ze);
+		
+		try (InputStream in = new ByteArrayInputStream(sb.toString().getBytes());) {
+			while ((len = in.read(buffer)) > 0) {
+				zos.write(buffer, 0, len);
+			}
+		}
 	}
 
 	private boolean isProvided(String value) {
 		return value !=null && !value.isEmpty();
 	}
-
-	private void zipIt(File zipFile, String zipFolder) {
-
-		byte[] buffer = new byte[1024];
-
-		try{
-
-			FileOutputStream fos = new FileOutputStream(zipFile);
-			ZipOutputStream zos = new ZipOutputStream(fos);
-
-			System.out.println("Output to Zip : " + zipFile);
-
-			for(ZipItem entry : this.fileList) {
-
-				System.out.println("File Added : " + entry.sourceFile);
-				ZipEntry ze = new ZipEntry(entry.destinationFile);
-				zos.putNextEntry(ze);
-
-				FileInputStream in = new FileInputStream(new File(entry.sourceFile));
-
-				int len;
-				while ((len = in.read(buffer)) > 0) {
-					zos.write(buffer, 0, len);
-				}
-
-				in.close();
-			}
-
-			zos.closeEntry();
-			zos.close();
-
-			System.out.println("Done");
-		}catch(IOException ex){
-			ex.printStackTrace();   
-		}
-	}
-
+	
 	/**
 	 * Traverse a directory and get all files,
 	 * and add the file into fileList  
 	 * @param node file or directory
+	 * @throws IOException 
 	 */
-	private void generateFileList(File node, String destinationFolder){
+	private void appendFiles(File node, String destinationFolder) throws IOException {
 
 		//add file only
-		if(node.isFile()){
-			fileList.add(generateZipEntry(node, destinationFolder));
+		if(node.isFile()) {
+			if (node.equals(zipFile)) {
+				return;
+			}
+			
+			ZipItem entry = generateZipEntry(node, destinationFolder);			
+			ZipEntry ze = new ZipEntry(entry.destinationFile);
+			byte[] buffer = new byte[1024];
+			int len;
+			
+			zos.putNextEntry(ze);
+
+			try (FileInputStream in = new FileInputStream(new File(entry.sourceFile))) {
+				while ((len = in.read(buffer)) > 0) {
+					zos.write(buffer, 0, len);
+				}
+			}
 		}
 
 		if(node.isDirectory()){
 			String[] subNote = node.list();
 			for(String filename : subNote){
-				generateFileList(new File(node, filename), destinationFolder);
+				appendFiles(new File(node, filename), destinationFolder);
 			}
 		}
 
 	}
-
+	
 	/**
 	 * Format the file path for zip
 	 * @param file file path

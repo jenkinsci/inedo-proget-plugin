@@ -133,8 +133,7 @@ public class ProGet {
 	}
 
 	public File createPackage(File sourceFolder, PackageMetadata metadata) throws IOException {
-		ProGetPackageUtils pkger = new ProGetPackageUtils();
-		return pkger.createPackage(sourceFolder, metadata);
+		return new ProGetPackageUtils().createPackage(sourceFolder, metadata);
 	}
 	
 	public void updloadPackage() {

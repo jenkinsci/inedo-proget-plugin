@@ -112,7 +112,6 @@ public class ProGetTests {
 		File pkg = proget.createPackage(folder.getRoot(), metadata);
 		
 		try (ZipFile zip = new ZipFile(pkg)) {
-	        assertThat("File has content", pkg.length(), is(greaterThan((long)1000)));
 	        assertThat("Zip file contains 2 entries", zip.size(), is(equalTo(2)));
 		}
 	}
