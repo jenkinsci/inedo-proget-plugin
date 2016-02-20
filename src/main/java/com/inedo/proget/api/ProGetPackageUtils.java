@@ -1,15 +1,16 @@
 package com.inedo.proget.api;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import com.inedo.proget.domain.PackageMetadata;
-import com.inedo.proget.domain.ProGetPackage;
 
 public class ProGetPackageUtils
 {
@@ -17,12 +18,51 @@ public class ProGetPackageUtils
 	private File sourceFolder;
 	
 
-	public File create(File sourceFolder, PackageMetadata metadata) {
+	public File create(File sourceFolder, PackageMetadata metadata) throws IOException {		
 		File zipFile = new File(sourceFolder, metadata.name.replace(" ",  "") + ".unpack");
+		
 		generateFileList(sourceFolder);
+		File metaFile = createMetadataFile(metadata);
 		zipIt(zipFile);
+		metaFile.delete();
 
 		return zipFile;
+	}
+
+	private File createMetadataFile(PackageMetadata metadata) throws IOException {
+		File file = new File(sourceFolder, "upack.json");
+		String newLine = System.getProperty("line.separator");;
+		
+		StringBuilder sb = new StringBuilder();
+		
+		sb.append("{").append(newLine);
+		sb.append("\"group\": \"").append(metadata.group).append("\"").append(newLine);
+		sb.append("\"name\": \"").append(metadata.name).append("\"").append(newLine);
+		sb.append("\"version\": \"").append(metadata.version).append("\"").append(newLine);
+		sb.append("\"version\": \"").append(metadata.version).append("\"").append(newLine);
+		if (isProvided(metadata.title)) {
+			sb.append("\"title\": \"").append(metadata.title).append("\"").append(newLine);
+		}
+		if (isProvided(metadata.icon)) {
+			sb.append("\"icon\": \"").append(metadata.icon).append("\"").append(newLine);
+		}
+		if (isProvided(metadata.description)) {
+			sb.append("\"description\": \"").append(metadata.description).append("\"").append(newLine);
+		}
+		if (isProvided(metadata.dependencies)) {
+			sb.append("\"dependencies\": \"").append(metadata.dependencies).append("\"").append(newLine);
+		}
+		sb.append("}");
+		
+		try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+			writer.write(sb.toString());
+		}
+		
+		return file;
+	}
+
+	private boolean isProvided(String value) {
+		return value !=null && !value.isEmpty();
 	}
 
 	private void zipIt(File zipFile) {
@@ -53,7 +93,6 @@ public class ProGetPackageUtils
 			}
 
 			zos.closeEntry();
-			//remember close it
 			zos.close();
 
 			System.out.println("Done");

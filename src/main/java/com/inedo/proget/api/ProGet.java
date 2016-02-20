@@ -1,6 +1,8 @@
 package com.inedo.proget.api;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 //import java.net.InetSocketAddress;
 //import java.net.Proxy;
@@ -130,6 +132,11 @@ public class ProGet {
 	}
 
 	public File createPackage(File sourceFolder) {
+		File file = new File(sourceFolder, "sample.data");
+		
+		try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+			writer.write("This is a sample file");
+		}
 		//http://www.mkyong.com/java/how-to-compress-files-in-zip-format/
 		//http://www.avajava.com/tutorials/lessons/how-can-i-create-a-zip-file-from-a-set-of-files.html
 		

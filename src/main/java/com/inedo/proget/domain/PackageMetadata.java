@@ -33,7 +33,10 @@ public class PackageMetadata {
 	 */
 	public String version;
 	
-	/** A string of no more than fifty characters */
+	/** 
+	 * A string of no more than fifty characters 
+	 * Optional
+	 */
 	public String title;
 	
 	/** 
