@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.*;
 import com.inedo.proget.MockServer;
 import com.inedo.proget.api.ProGet;
 import com.inedo.proget.domain.Feed;
+import com.inedo.proget.domain.PackageMetadata;
 import com.inedo.proget.domain.ProGetPackage;
 
 import java.io.BufferedWriter;
@@ -14,6 +15,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.Arrays;
+import java.util.zip.ZipFile;
 
 import org.junit.After;
 import org.junit.Before;
@@ -94,9 +96,31 @@ public class ProGetTests {
 	
 	@Test
 	public void createPackage() throws IOException {
-		Feed feed = proget.getFeed("Example");
+		File file = new File(folder.getRoot(), "sample.data");
 		
-		ProGetPackage proGetPackage = proget.getPackages(feed.Feed_Id)[0];
+		try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+			writer.write("This is a sample file");
+		}
+		
+		PackageMetadata metadata = new PackageMetadata();
+		metadata.group = "com/inedo/proget";
+		metadata.name = "ExamplePackage";
+		metadata.version = "0.0.1";
+		metadata.title = "Example Package";
+		metadata.description = "Example package for testing";
+		
+		File pkg = proget.createPackage(folder.getRoot(), metadata);
+		
+		try (ZipFile zip = new ZipFile(pkg)) {
+	        assertThat("File has content", pkg.length(), is(greaterThan((long)1000)));
+	        assertThat("Zip file contains 2 entries", zip.size(), is(equalTo(2)));
+		}
+	}
+	
+	@Test
+	public void uploadPackage() throws IOException {
+		
+		Feed feed = proget.getFeed("Example");
 		
 		File file = new File(folder.getRoot(), "sample.data");
 		
@@ -105,11 +129,11 @@ public class ProGetTests {
 		}
 		
 		ProGetPackageUtils pkg = new ProGetPackageUtils();
-		pkg.create(folder, metadata)
-		proget.createPackage(folder.getRoot());
+		//pkg.create(folder, metadata)
+//		proget.createPackage(folder.getRoot());
 		
 		
-        assertThat("File has content", downloaded.length(), is(greaterThan((long)1000)));
+//        assertThat("File has content", downloaded.length(), is(greaterThan((long)1000)));
 	}
 	
 }

@@ -19,6 +19,7 @@ import java.io.IOException;
 //import org.apache.http.impl.client.HttpClients;
 //import com.inedo.proget.ConnectionType;
 import com.inedo.proget.domain.Feed;
+import com.inedo.proget.domain.PackageMetadata;
 import com.inedo.proget.domain.ProGetPackage;
 import com.inedo.rest.RestRequest;
 
@@ -131,17 +132,9 @@ public class ProGet {
 				downloadFile(toFolder);
 	}
 
-	public File createPackage(File sourceFolder) {
-		File file = new File(sourceFolder, "sample.data");
-		
-		try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-			writer.write("This is a sample file");
-		}
-		//http://www.mkyong.com/java/how-to-compress-files-in-zip-format/
-		//http://www.avajava.com/tutorials/lessons/how-can-i-create-a-zip-file-from-a-set-of-files.html
-		
-		
-		
+	public File createPackage(File sourceFolder, PackageMetadata metadata) throws IOException {
+		ProGetPackageUtils pkger = new ProGetPackageUtils();
+		return pkger.createPackage(sourceFolder, metadata);
 	}
 	
 	public void updloadPackage() {
