@@ -14,7 +14,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.UnknownHostException;
-import java.util.Arrays;
 import java.util.zip.ZipFile;
 
 import org.junit.After;
@@ -118,7 +117,7 @@ public class ProGetTests {
 	
 	@Test
 	public void uploadPackage() throws IOException {
-		
+		ProGetPackageUtils a = new ProGetPackageUtils();
 		Feed feed = proget.getFeed("Example");
 		
 		File file = new File(folder.getRoot(), "sample.data");
