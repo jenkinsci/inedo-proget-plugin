@@ -62,6 +62,8 @@ dependencies {
 	
 	// https://issues.jenkins-ci.org/browse/JENKINS-27826
 	jenkinsTest 'org.jenkins-ci.plugins:matrix-project:1.4@jar'
+	
+	compile 'org.slf4j:slf4j-api:1.7.12'
 }
 
 task wrapper(type: Wrapper) {

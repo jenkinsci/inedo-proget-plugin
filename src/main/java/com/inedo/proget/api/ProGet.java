@@ -2,6 +2,8 @@ package com.inedo.proget.api;
 
 import java.io.File;
 import java.io.IOException;
+
+import com.google.common.net.MediaType;
 //import java.net.InetSocketAddress;
 //import java.net.Proxy;
 //import java.util.Arrays;
@@ -113,7 +115,7 @@ public class ProGet {
 	}
 	
 	/** Gets the packages in a ProGet feed */
-	public ProGetPackage[] getPackages(String feedId) throws IOException {
+	public ProGetPackage[] getPackageList(String feedId) throws IOException {
 		return RestRequest.request().
 				baseURI(config.url).
 				path("api/json/ProGetPackages_GetPackages?API_Key={}&Feed_Id={}&IncludeVersions_Indicator=Y").
@@ -134,8 +136,16 @@ public class ProGet {
 		return new ProGetPackageUtils().createPackage(sourceFolder, metadata);
 	}
 	
-	public void updloadPackage() {
+	public void updloadPackage(String feedName, File progetPackage) throws IOException {
 		//http://java-monitor.com/forum/showthread.php?t=4090
 		//http://www.codejava.net/java-se/networking/upload-files-by-sending-multipart-request-programmatically
+		
+		RestRequest.request().
+				baseURI(config.url).
+				path("upack/{«feed-name»}/upload").
+				pathParameters(feedName).
+				attachment(MediaType.ZIP, progetPackage).
+				authorization("Admin", "Admin").
+				post();
 	}	
 }

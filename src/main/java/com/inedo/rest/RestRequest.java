@@ -1,7 +1,10 @@
 package com.inedo.rest;
 
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -97,6 +100,10 @@ import com.inedo.rest.RestResultReader.Family;
  * 			...
  * 		}
  * 
+ * Multiple Attachments
+ * =====================
+ * Not currently supported - will take a single file / string
+ * 
  */
 public class RestRequest
 {
@@ -118,8 +125,9 @@ public class RestRequest
     private String path = "";
     private Object[] pathParams = new Object[0];
     MediaType mediaType = null;    
-    private String data = "";
-    private Map<String, Object> parameters = new LinkedHashMap<String, Object>();	
+    private String uploadData = "";
+    private File uploadFile = null;
+    private Map<String, Object> formFields = new LinkedHashMap<String, Object>();	
     private Map<String, Object> headers = new LinkedHashMap<String, Object>();
 
     public static RestRequestDefaults withDefaults() {
@@ -164,7 +172,25 @@ public class RestRequest
 		this.ignoreResponseFamily = responseFamily;
 		return this;
 	}
+	
+	public RestRequest attachment(MediaType mediaType, Map<String, Object> formFields) throws IOException {
+		this.mediaType = mediaType;
+		this.formFields = formFields;
+		return this;
+	}
 
+	public RestRequest attachment(MediaType mediaType, String data) {
+		this.mediaType = mediaType;
+		this.uploadData = data;
+		return this;
+	}
+
+	public RestRequest attachment(MediaType mediaType, File file) {
+		this.mediaType = mediaType;
+		this.uploadFile = file;
+		return this;
+	}
+	
 	public RestResultReader get() throws IOException
 	{	
 		return new RestResultReader(getConnectionMethod("GET"), this);
@@ -174,33 +200,12 @@ public class RestRequest
 		return new RestResultReader(getConnectionMethod("HEAD"), this);
 	}
 
-	private RestResultReader post() throws IOException {
+	public RestResultReader post() throws IOException {
 		return new RestResultReader(getConnectionMethod("POST"), this);
 	}
-	public RestResultReader post(MediaType mediaType, String data) throws IOException {
-		this.mediaType = mediaType;
-		this.data = data;
-		return post();
-	}
-	public RestResultReader post(MediaType mediaType, Map<String, Object> parameters) throws IOException {
-		this.mediaType = mediaType;
-		this.parameters = parameters;
-		return post();
-	}
 	
-
-	private RestResultReader put() throws IOException {
+	public RestResultReader put() throws IOException {
 		return new RestResultReader(getConnectionMethod("PUT"), this);
-	}
-	public RestResultReader put(MediaType mediaType, String data) throws IOException {
-		this.mediaType = mediaType;
-		this.data = data;
-		return put();
-	}
-	public RestResultReader put(MediaType mediaType, Map<String, Object> parameters) throws IOException {
-		this.mediaType = mediaType;
-		this.parameters = parameters;
-		return put();
 	}
 
 	public RestResultReader delete() throws IOException {
@@ -211,7 +216,7 @@ public class RestRequest
 	{	
 		URL url = getURL();
 		HttpURLConnection connection = getConnection(url);
-
+                
 		setHeaders(connection);
 
 		connection.setRequestMethod(requestMethod);
@@ -222,30 +227,37 @@ public class RestRequest
 		byte[] postEndcoded = null;
 		
 		if (isPost) {
-			StringBuilder postData = new StringBuilder();
-			
-			if (url.getQuery() != null) {
-				postData.append(url.getQuery());
+			if (uploadFile != null) {
+				connection.setRequestProperty("Content-Type", mediaType.toString());
+				connection.setRequestProperty("Content-Length", Long.toString(uploadFile.length()));
+//				connection.setFixedLengthStreamingMode(uploadFile.length());
+				connection.setRequestProperty("Content-Disposition", "attachment; filename=\"" + uploadFile.getName() + "\"");
+			} else {
+				StringBuilder postData = new StringBuilder();
+				
+				if (url.getQuery() != null) {
+					postData.append(url.getQuery());
+				}
+					
+				for (Map.Entry<String, Object> param : formFields.entrySet()) {
+		            if (postData.length() > 0) postData.append('&');
+		            postData.append(URLEncoder.encode(param.getKey(), "UTF-8"));
+		            postData.append('=');
+		            postData.append(URLEncoder.encode(String.valueOf(param.getValue()), "UTF-8"));
+		        }
+	
+				if (uploadData != null && !uploadData.isEmpty()) {
+					// Assume data is encoded correctly
+					postData.append(uploadData);
+					//postData.append(URLEncoder.encode(String.valueOf(data), "UTF-8"));
+		        }
+				
+				postEndcoded = postData.toString().getBytes(StandardCharsets.UTF_8);
+				
+				connection.setRequestProperty("charset", "utf-8");
+				connection.setRequestProperty("Content-Type", mediaType.toString());
+				connection.setRequestProperty("Content-Length", Integer.toString(postEndcoded.length));
 			}
-
-			for (Map.Entry<String, Object> param : parameters.entrySet()) {
-	            if (postData.length() > 0) postData.append('&');
-	            postData.append(URLEncoder.encode(param.getKey(), "UTF-8"));
-	            postData.append('=');
-	            postData.append(URLEncoder.encode(String.valueOf(param.getValue()), "UTF-8"));
-	        }
-
-			if (data != null && !data.isEmpty()) {
-				// Assume data is encoded correctly
-				postData.append(data);
-				//postData.append(URLEncoder.encode(String.valueOf(data), "UTF-8"));
-	        }
-
-			postEndcoded = postData.toString().getBytes(StandardCharsets.UTF_8);
-			
-			connection.setRequestProperty("charset", "utf-8");
-			connection.setRequestProperty("Content-Type", mediaType.toString());
-			connection.setRequestProperty("Content-Length", Integer.toString(postEndcoded.length));
 			
 			connection.setDoOutput(true);
 		}
@@ -254,8 +266,21 @@ public class RestRequest
 		connection.connect();
 
 		if (isPost) {
-			try (DataOutputStream wr = new DataOutputStream(connection.getOutputStream())) {
-				wr.write(postEndcoded);
+			if (uploadFile != null) {
+				OutputStream outputStream = connection.getOutputStream();
+				
+				try (FileInputStream inputStream = new FileInputStream(uploadFile)) {
+					byte[] buffer = new byte[4096];
+			        int bytesRead = -1;
+			        while ((bytesRead = inputStream.read(buffer)) != -1) {
+			            outputStream.write(buffer, 0, bytesRead);
+			        }
+			        outputStream.flush();
+				}
+			} else {
+				try (DataOutputStream wr = new DataOutputStream(connection.getOutputStream())) {
+					wr.write(postEndcoded);
+				}
 			}
 		}
 		

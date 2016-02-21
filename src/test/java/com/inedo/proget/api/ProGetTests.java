@@ -74,10 +74,10 @@ public class ProGetTests {
 	}
 	
 	@Test
-	public void getPackages() throws IOException  {
+	public void getPackageList() throws IOException  {
 		Feed feed = proget.getFeed("Example");
 		
-		ProGetPackage[] packages = proget.getPackages(feed.Feed_Id);
+		ProGetPackage[] packages = proget.getPackageList(feed.Feed_Id);
     	
         assertThat("Expect more than one package", packages.length, is(greaterThan(0)));
 	}
@@ -86,7 +86,7 @@ public class ProGetTests {
 	public void downloadPackage() throws IOException  {
 		Feed feed = proget.getFeed("Example");
 		
-		ProGetPackage proGetPackage = proget.getPackages(feed.Feed_Id)[0];
+		ProGetPackage proGetPackage = proget.getPackageList(feed.Feed_Id)[0];
 		
 		File downloaded = proget.downloadPackage("Example", proGetPackage, folder.getRoot().getAbsolutePath());
     	
@@ -95,18 +95,7 @@ public class ProGetTests {
 	
 	@Test
 	public void createPackage() throws IOException {
-		File file = new File(folder.getRoot(), "sample.data");
-		
-		try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-			writer.write("This is a sample file");
-		}
-		
-		PackageMetadata metadata = new PackageMetadata();
-		metadata.group = "com/inedo/proget";
-		metadata.name = "ExamplePackage";
-		metadata.version = "0.0.1";
-		metadata.title = "Example Package";
-		metadata.description = "Example package for testing";
+		PackageMetadata metadata = preparePackageFiles();
 		
 		File pkg = proget.createPackage(folder.getRoot(), metadata);
 		
@@ -117,21 +106,30 @@ public class ProGetTests {
 	
 	@Test
 	public void uploadPackage() throws IOException {
-		ProGetPackageUtils a = new ProGetPackageUtils();
-		Feed feed = proget.getFeed("Example");
+		PackageMetadata metadata = preparePackageFiles();
 		
+		File pkg = proget.createPackage(folder.getRoot(), metadata);
+		
+		proget.updloadPackage("Example", pkg);
+		
+		// Success is fact that no exception thrown...
+	}
+
+
+	private PackageMetadata preparePackageFiles() throws IOException {
 		File file = new File(folder.getRoot(), "sample.data");
 		
 		try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
 			writer.write("This is a sample file");
 		}
 		
-		ProGetPackageUtils pkg = new ProGetPackageUtils();
-		//pkg.create(folder, metadata)
-//		proget.createPackage(folder.getRoot());
-		
-		
-//        assertThat("File has content", downloaded.length(), is(greaterThan((long)1000)));
+		PackageMetadata metadata = new PackageMetadata();
+		metadata.group = "com/inedo/proget";
+		metadata.name = "ExamplePackage";
+		metadata.version = "0.0.2";
+		metadata.title = "Example Package";
+		metadata.description = "Example package for testing";
+		return metadata;
 	}
 	
 }
