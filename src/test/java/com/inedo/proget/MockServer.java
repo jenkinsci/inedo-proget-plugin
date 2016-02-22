@@ -33,7 +33,9 @@ public class MockServer {
 	
 	public MockServer(boolean mockRequests, PrintStream logger) throws IOException {
 		config = new ProGetConfig();
-		config.url = "http://localhost:81";
+		config.url = "http://requestb.in/1llud6c1";
+		//config.url = "http://httpresponder.com/inedo";
+		//config.url = "http://localhost:81";
 		config.printStream = logger;
 		
 		if (mockRequests) {

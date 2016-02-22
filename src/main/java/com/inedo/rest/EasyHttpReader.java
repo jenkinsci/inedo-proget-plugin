@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.util.List;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -14,25 +15,25 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
 // Class to segregate reading return values
-public class RestResultReader {
+public class EasyHttpReader {
 	HttpURLConnection connection;
 	JsonElement json = null;
 	String returned = null;
 	
-	public RestResultReader(HttpURLConnection connection, RestRequest request) throws IOException {
+	public EasyHttpReader(HttpURLConnection connection, EasyHttp request) throws IOException {
 		this.connection = connection;
 		
 		Family resposeFamily = getResponseCodeFamily(); 
 		
 		if (resposeFamily != Family.SUCCESSFUL) {
-			if (arrayContains(request.ignoreResponseCodes, getResponseCode())) return;
-			if (arrayContains(request.ignoreResponseFamily, resposeFamily)) return;
+			if (listContains(request.ignoreResponseCodes, getResponseCode())) return;
+			if (listContains(request.ignoreResponseFamily, resposeFamily)) return;
 
 			throw new IOException("Server returned HTTP response code " + connection.getResponseCode() + ": " + connection.getResponseMessage());
 		}
 	}
 	
-	private <T> boolean arrayContains(T[] array, T targetValue) {
+	private <T> boolean listContains(List<T> array, T targetValue) {
 		for(T s : array){
 			if(s.equals(targetValue))
 			{

@@ -11,8 +11,8 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 // Class to segregate the setting of 'global' properties 
-public class RestRequestDefaults {
-	public RestRequestDefaults trustAllCertificates() {
+public class EasyHttpDefaults {
+	public EasyHttpDefaults trustAllCertificates() {
 		// Create a trust manager that does not validate certificate chains
 		TrustManager[] trustAllCerts = new TrustManager[] {
 				new X509TrustManager() {
@@ -32,13 +32,13 @@ public class RestRequestDefaults {
 			sc.init(null, trustAllCerts, new java.security.SecureRandom());
 			HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 		} catch (Exception e) {
-			RestRequest.LOGGER.error(e.getMessage());
+			EasyHttp.LOGGER.error(e.getMessage());
 		}
 		
 		return this;
 	}
 
-	public RestRequestDefaults allowAllHosts() {
+	public EasyHttpDefaults allowAllHosts() {
 		// Create all-trusting host name verifier
 		HostnameVerifier allHostsValid = new HostnameVerifier() {
 			public boolean verify(String hostname, SSLSession session) {
@@ -60,18 +60,18 @@ public class RestRequestDefaults {
 	 * 
 	 * @see java.net.Proxy.Proxy
 	 */
-	public RestRequestDefaults proxy(Proxy proxy) {
-		RestRequest.proxy = proxy ;
+	public EasyHttpDefaults proxy(Proxy proxy) {
+		EasyHttp.proxy = proxy ;
 		return this;
 	}
 	
-	public RestRequestDefaults proxyAuth(String userName, String password) {
-		RestRequest.proxyUser = userName ;
-		RestRequest.proxyPassword = password;
+	public EasyHttpDefaults proxyAuth(String userName, String password) {
+		EasyHttp.proxyUser = userName ;
+		EasyHttp.proxyPassword = password;
 		return this;
 	}
 
 	public void bypassProxyForLocalAddresses(boolean bypassLocalAddresses) {
-		RestRequest.bypassProxyForLocalAddresses = bypassLocalAddresses;
+		EasyHttp.bypassProxyForLocalAddresses = bypassLocalAddresses;
 	}	
 }

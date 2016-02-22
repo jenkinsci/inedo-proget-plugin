@@ -21,7 +21,7 @@ import com.google.common.net.MediaType;
 import com.inedo.proget.domain.Feed;
 import com.inedo.proget.domain.PackageMetadata;
 import com.inedo.proget.domain.ProGetPackage;
-import com.inedo.rest.RestRequest;
+import com.inedo.rest.EasyHttp;
 
 /**
  * BuildMaster json api interface
@@ -90,10 +90,10 @@ public class ProGet {
 	
 	/** Gets the details of a feed by its name */
 	public Feed getFeed(String feedName) throws IOException {
-		Feed feed = RestRequest.request().
+		Feed feed = EasyHttp.request().
 				baseURI(config.url).
 				path("api/json/Feeds_GetFeed?API_Key={}&Feed_Name={}").
-				pathParameters(config.apiKey, feedName).
+				urlParameters(config.apiKey, feedName).
 				get().asJson(Feed.class);
 		
 		if (feed == null) {
@@ -105,10 +105,10 @@ public class ProGet {
 
 	/** Get all active feeds */
 	public Feed[] getFeeds() throws IOException {
-		Feed[] result = RestRequest.request().
+		Feed[] result = EasyHttp.request().
 				baseURI(config.url).
 				path("api/json/Feeds_GetFeeds?API_Key={}&IncludeInactive_Indicator={}").
-				pathParameters(config.apiKey, "N").
+				urlParameters(config.apiKey, "N").
 				get().asJson(Feed[].class);
 		
 		return result;
@@ -116,18 +116,18 @@ public class ProGet {
 	
 	/** Gets the packages in a ProGet feed */
 	public ProGetPackage[] getPackageList(String feedId) throws IOException {
-		return RestRequest.request().
+		return EasyHttp.request().
 				baseURI(config.url).
 				path("api/json/ProGetPackages_GetPackages?API_Key={}&Feed_Id={}&IncludeVersions_Indicator=Y").
-				pathParameters(config.apiKey, feedId, "Y").
+				urlParameters(config.apiKey, feedId, "Y").
 				get().asJson(ProGetPackage[].class);
 	}
 
 	public File downloadPackage(String feedName, ProGetPackage pkg, String toFolder) throws IOException {
-		return RestRequest.request().
+		return EasyHttp.request().
 				baseURI(config.url).
 				path("upack/{«feed-name»}/download/{«group-name»}/{«package-name»}/{«package-version»}").
-				pathParameters(feedName, pkg.Group_Name, pkg.Package_Name, pkg.LatestVersion_Text).
+				urlParameters(feedName, pkg.Group_Name, pkg.Package_Name, pkg.LatestVersion_Text).
 				get().
 				downloadFile(toFolder);
 	}
@@ -140,11 +140,11 @@ public class ProGet {
 		//http://java-monitor.com/forum/showthread.php?t=4090
 		//http://www.codejava.net/java-se/networking/upload-files-by-sending-multipart-request-programmatically
 		
-		RestRequest.request().
+		EasyHttp.request().
 				baseURI(config.url).
 				path("upack/{«feed-name»}/upload").
-				pathParameters(feedName).
-				attachment(MediaType.ZIP, progetPackage).
+				urlParameters(feedName).
+				field("package", progetPackage, MediaType.ZIP).
 				authorization("Admin", "Admin").
 				post();
 	}	

@@ -10,12 +10,12 @@ import static org.hamcrest.Matchers.*;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.inedo.rest.RestRequest;
+import com.inedo.rest.EasyHttp;
 
 public class RestTest {
 	@BeforeClass 
 	public static void setup() {
-		RestRequest.withDefaults()
+		EasyHttp.withDefaults()
 			.allowAllHosts()
 			.trustAllCertificates();
 		
@@ -33,7 +33,7 @@ public class RestTest {
 	public void httpGet() throws Exception {
 		String url = "http://jsonplaceholder.typicode.com/posts";
 		
-		String json = RestRequest.request()
+		String json = EasyHttp.request()
 				.path(url)
 				.get()
 				.asString();
@@ -45,7 +45,7 @@ public class RestTest {
 	public void httpsGet() throws Exception {
 		String url = "https://jsonplaceholder.typicode.com/posts";
 		
-		String json = RestRequest.request()
+		String json = EasyHttp.request()
 				.path(url)
 				.get()
 				.asString();
