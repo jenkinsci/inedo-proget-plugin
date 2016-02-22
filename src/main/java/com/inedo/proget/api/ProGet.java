@@ -144,7 +144,7 @@ public class ProGet {
 				baseURI(config.url).
 				path("upack/{«feed-name»}/upload").
 				urlParameters(feedName).
-				field("package", progetPackage, MediaType.ZIP).
+				data(progetPackage, MediaType.ZIP).
 				authorization("Admin", "Admin").
 				post();
 	}	

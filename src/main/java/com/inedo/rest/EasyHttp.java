@@ -105,7 +105,7 @@ public class EasyHttp {
 	private String baseURI = "";
 	private String path = "";
 	private Object[] urlParams = new Object[0];
-	private String rawData = null;
+	private Object rawData = null;
 	private MediaType rawDataMediaType = null;
 	private Map<String, Object> headers = new LinkedHashMap<String, Object>();
 	private List<Field> fields = new ArrayList<Field>();
@@ -153,7 +153,7 @@ public class EasyHttp {
 		return this;
 	}
 
-	public EasyHttp data(MediaType mediaType, String data) {
+	public EasyHttp data(Object data, MediaType mediaType) {
 		if (rawData != null) {
 			throw new InvalidParameterException("Only a single data value can be added");
 		}
@@ -222,7 +222,7 @@ public class EasyHttp {
 		
 		if (isPost) {
 			if (rawData != null) {
-				dataWriter = new RawDataWriter(connection, rawDataMediaType, rawData);
+				dataWriter = new RawDataWriter(connection, rawData, rawDataMediaType);
 			}
 			
 			if (!fields.isEmpty()) {
