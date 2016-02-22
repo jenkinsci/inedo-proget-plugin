@@ -42,23 +42,24 @@ public class ProGetPackageUtils
 		String newLine = System.getProperty("line.separator");;
 		StringBuilder sb = new StringBuilder();
 		
-		sb.append("{").append(newLine);
-		sb.append("\t\"group\": \"").append(metadata.group).append("\"").append(newLine);
-		sb.append("\t\"name\": \"").append(metadata.name).append("\"").append(newLine);
-		sb.append("\t\"version\": \"").append(metadata.version).append("\"").append(newLine);
+		sb.append("{");
+		sb.append(newLine).append("\t\"group\": \"").append(metadata.group).append("\",");
+		sb.append(newLine).append("\t\"name\": \"").append(metadata.name).append("\",");
+		sb.append(newLine).append("\t\"version\": \"").append(metadata.version).append("\"");
+		
 		if (isProvided(metadata.title)) {
-			sb.append("\t\"title\": \"").append(metadata.title).append("\"").append(newLine);
+			sb.append(",").append(newLine).append("\t\"title\": \"").append(metadata.title).append("\"");
 		}
 		if (isProvided(metadata.icon)) {
-			sb.append("\t\"icon\": \"").append(metadata.icon).append("\"").append(newLine);
+			sb.append(",").append(newLine).append("\t\"icon\": \"").append(metadata.icon).append("\"");
 		}
 		if (isProvided(metadata.description)) {
-			sb.append("\t\"description\": \"").append(metadata.description).append("\"").append(newLine);
+			sb.append(",").append(newLine).append("\t\"description\": \"").append(metadata.description).append("\"");
 		}
 		if (isProvided(metadata.dependencies)) {
-			sb.append("\t\"dependencies\": \"").append(metadata.dependencies).append("\"").append(newLine);
+			sb.append(",").append(newLine).append("\t\"dependencies\": \"").append(metadata.dependencies).append("\"");
 		}
-		sb.append("}");
+		sb.append(newLine).append("}");
 		
 		ZipEntry ze = new ZipEntry("upack.json");
 		byte[] buffer = new byte[1024];
