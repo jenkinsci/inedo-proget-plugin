@@ -1,4 +1,4 @@
-package com.inedo.rest;
+package com.inedo.http;
 
 import java.net.Proxy;
 import java.security.cert.X509Certificate;
@@ -11,8 +11,8 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 // Class to segregate the setting of 'global' properties 
-public class EasyHttpDefaults {
-	public EasyHttpDefaults trustAllCertificates() {
+public class HttpEasyDefaults {
+	public HttpEasyDefaults trustAllCertificates() {
 		// Create a trust manager that does not validate certificate chains
 		TrustManager[] trustAllCerts = new TrustManager[] {
 				new X509TrustManager() {
@@ -32,13 +32,13 @@ public class EasyHttpDefaults {
 			sc.init(null, trustAllCerts, new java.security.SecureRandom());
 			HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 		} catch (Exception e) {
-			EasyHttp.LOGGER.error(e.getMessage());
+			HttpEasy.LOGGER.error(e.getMessage());
 		}
 		
 		return this;
 	}
 
-	public EasyHttpDefaults allowAllHosts() {
+	public HttpEasyDefaults allowAllHosts() {
 		// Create all-trusting host name verifier
 		HostnameVerifier allHostsValid = new HostnameVerifier() {
 			public boolean verify(String hostname, SSLSession session) {
@@ -60,18 +60,18 @@ public class EasyHttpDefaults {
 	 * 
 	 * @see java.net.Proxy.Proxy
 	 */
-	public EasyHttpDefaults proxy(Proxy proxy) {
-		EasyHttp.proxy = proxy ;
+	public HttpEasyDefaults proxy(Proxy proxy) {
+		HttpEasy.proxy = proxy ;
 		return this;
 	}
 	
-	public EasyHttpDefaults proxyAuth(String userName, String password) {
-		EasyHttp.proxyUser = userName ;
-		EasyHttp.proxyPassword = password;
+	public HttpEasyDefaults proxyAuth(String userName, String password) {
+		HttpEasy.proxyUser = userName ;
+		HttpEasy.proxyPassword = password;
 		return this;
 	}
 
 	public void bypassProxyForLocalAddresses(boolean bypassLocalAddresses) {
-		EasyHttp.bypassProxyForLocalAddresses = bypassLocalAddresses;
+		HttpEasy.bypassProxyForLocalAddresses = bypassLocalAddresses;
 	}	
 }

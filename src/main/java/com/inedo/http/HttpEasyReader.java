@@ -1,4 +1,4 @@
-package com.inedo.rest;
+package com.inedo.http;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -15,12 +15,12 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
 // Class to segregate reading return values
-public class EasyHttpReader {
+public class HttpEasyReader {
 	HttpURLConnection connection;
 	JsonElement json = null;
 	String returned = null;
 	
-	public EasyHttpReader(HttpURLConnection connection, EasyHttp request) throws IOException {
+	public HttpEasyReader(HttpURLConnection connection, HttpEasy request) throws IOException {
 		this.connection = connection;
 		
 		Family resposeFamily = getResponseCodeFamily(); 

@@ -1,4 +1,4 @@
-package com.inedo.rest;
+package com.inedo.http;
 
 import com.google.common.net.MediaType;
 

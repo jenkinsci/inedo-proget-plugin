@@ -1,4 +1,4 @@
-package com.inedo.rest;
+package com.inedo.http;
 
 import java.io.File;
 import java.io.FileInputStream;

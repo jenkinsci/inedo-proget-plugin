@@ -1,4 +1,4 @@
-package com.inedo.rest;
+package com.inedo.http;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,7 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.net.MediaType;
-import com.inedo.rest.EasyHttpReader.Family;
+import com.inedo.http.HttpEasyReader.Family;
 
 /**
  * Rest request utility that supports NTLM proxy authentication.
@@ -87,8 +87,8 @@ import com.inedo.rest.EasyHttpReader.Family;
  * if (response.getResponseCodeFamily() == Family.REDIRECTION) { ... }
  * 
  */
-public class EasyHttp {
-	static final Logger LOGGER = LoggerFactory.getLogger(EasyHttp.class);
+public class HttpEasy {
+	static final Logger LOGGER = LoggerFactory.getLogger(HttpEasy.class);
 
 	// Static values are set by RestRequestDefaults and apply to all requests
 	static Proxy proxy = Proxy.NO_PROXY;
@@ -110,50 +110,50 @@ public class EasyHttp {
 	private Map<String, Object> headers = new LinkedHashMap<String, Object>();
 	private List<Field> fields = new ArrayList<Field>();
 
-	public static EasyHttpDefaults withDefaults() {
-		return new EasyHttpDefaults();
+	public static HttpEasyDefaults withDefaults() {
+		return new HttpEasyDefaults();
 	}
 
-	public static EasyHttp request() {
-		return new EasyHttp();
+	public static HttpEasy request() {
+		return new HttpEasy();
 	}
 
-	public EasyHttp header(String name, String value) {
+	public HttpEasy header(String name, String value) {
 		headers.put(name, value);
 		return this;
 	}
 
-	public EasyHttp authorization(String name, String value) {
+	public HttpEasy authorization(String name, String value) {
 		authString = name + ":" + value;
 		return this;
 	}
 
-	public EasyHttp baseURI(String uri) {
+	public HttpEasy baseURI(String uri) {
 		this.baseURI = uri;
 		return this;
 	}
 
-	public EasyHttp path(String path) {
+	public HttpEasy path(String path) {
 		this.path = path;
 		return this;
 	}
 
-	public EasyHttp urlParameters(Object... pathParams) {
+	public HttpEasy urlParameters(Object... pathParams) {
 		this.urlParams = pathParams;
 		return this;
 	}
 
-	public EasyHttp doNotFailOn(Integer... reponseCodes) {
+	public HttpEasy doNotFailOn(Integer... reponseCodes) {
 		this.ignoreResponseCodes.addAll(Arrays.asList(reponseCodes));
 		return this;
 	}
 
-	public EasyHttp doNotFailOn(Family... responseFamily) {
+	public HttpEasy doNotFailOn(Family... responseFamily) {
 		this.ignoreResponseFamily.addAll(Arrays.asList(responseFamily));
 		return this;
 	}
 
-	public EasyHttp data(Object data, MediaType mediaType) {
+	public HttpEasy data(Object data, MediaType mediaType) {
 		if (rawData != null) {
 			throw new InvalidParameterException("Only a single data value can be added");
 		}
@@ -168,7 +168,7 @@ public class EasyHttp {
 		return this;
 	}
 
-	public EasyHttp field(String name, Object value) {
+	public HttpEasy field(String name, Object value) {
 		if (rawData != null) {
 			throw new InvalidParameterException("Data cannot be used at the same time as fields");
 		}
@@ -177,7 +177,7 @@ public class EasyHttp {
 		return this;
 	}
 
-	public EasyHttp field(String name, Object value, MediaType type) {
+	public HttpEasy field(String name, Object value, MediaType type) {
 		if (rawData != null) {
 			throw new InvalidParameterException("Data cannot be used at the same time as fields");
 		}
@@ -186,24 +186,24 @@ public class EasyHttp {
 		return this;
 	}
 
-	public EasyHttpReader get() throws IOException {
-		return new EasyHttpReader(getConnectionMethod("GET"), this);
+	public HttpEasyReader get() throws IOException {
+		return new HttpEasyReader(getConnectionMethod("GET"), this);
 	}
 
-	public EasyHttpReader head() throws IOException {
-		return new EasyHttpReader(getConnectionMethod("HEAD"), this);
+	public HttpEasyReader head() throws IOException {
+		return new HttpEasyReader(getConnectionMethod("HEAD"), this);
 	}
 
-	public EasyHttpReader post() throws IOException {
-		return new EasyHttpReader(getConnectionMethod("POST"), this);
+	public HttpEasyReader post() throws IOException {
+		return new HttpEasyReader(getConnectionMethod("POST"), this);
 	}
 
-	public EasyHttpReader put() throws IOException {
-		return new EasyHttpReader(getConnectionMethod("PUT"), this);
+	public HttpEasyReader put() throws IOException {
+		return new HttpEasyReader(getConnectionMethod("PUT"), this);
 	}
 
-	public EasyHttpReader delete() throws IOException {
-		return new EasyHttpReader(getConnectionMethod("DELETE"), this);
+	public HttpEasyReader delete() throws IOException {
+		return new HttpEasyReader(getConnectionMethod("DELETE"), this);
 	}
 
 	private HttpURLConnection getConnectionMethod(String requestMethod) throws IOException 

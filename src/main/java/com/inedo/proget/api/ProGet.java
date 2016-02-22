@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 import com.google.common.net.MediaType;
+import com.inedo.http.HttpEasy;
 //import java.net.InetSocketAddress;
 //import java.net.Proxy;
 //import java.util.Arrays;
@@ -21,7 +22,6 @@ import com.google.common.net.MediaType;
 import com.inedo.proget.domain.Feed;
 import com.inedo.proget.domain.PackageMetadata;
 import com.inedo.proget.domain.ProGetPackage;
-import com.inedo.rest.EasyHttp;
 
 /**
  * BuildMaster json api interface
@@ -90,7 +90,7 @@ public class ProGet {
 	
 	/** Gets the details of a feed by its name */
 	public Feed getFeed(String feedName) throws IOException {
-		Feed feed = EasyHttp.request().
+		Feed feed = HttpEasy.request().
 				baseURI(config.url).
 				path("api/json/Feeds_GetFeed?API_Key={}&Feed_Name={}").
 				urlParameters(config.apiKey, feedName).
@@ -105,7 +105,7 @@ public class ProGet {
 
 	/** Get all active feeds */
 	public Feed[] getFeeds() throws IOException {
-		Feed[] result = EasyHttp.request().
+		Feed[] result = HttpEasy.request().
 				baseURI(config.url).
 				path("api/json/Feeds_GetFeeds?API_Key={}&IncludeInactive_Indicator={}").
 				urlParameters(config.apiKey, "N").
@@ -116,7 +116,7 @@ public class ProGet {
 	
 	/** Gets the packages in a ProGet feed */
 	public ProGetPackage[] getPackageList(String feedId) throws IOException {
-		return EasyHttp.request().
+		return HttpEasy.request().
 				baseURI(config.url).
 				path("api/json/ProGetPackages_GetPackages?API_Key={}&Feed_Id={}&IncludeVersions_Indicator=Y").
 				urlParameters(config.apiKey, feedId, "Y").
@@ -124,7 +124,7 @@ public class ProGet {
 	}
 
 	public File downloadPackage(String feedName, ProGetPackage pkg, String toFolder) throws IOException {
-		return EasyHttp.request().
+		return HttpEasy.request().
 				baseURI(config.url).
 				path("upack/{«feed-name»}/download/{«group-name»}/{«package-name»}/{«package-version»}").
 				urlParameters(feedName, pkg.Group_Name, pkg.Package_Name, pkg.LatestVersion_Text).
@@ -137,7 +137,7 @@ public class ProGet {
 	}
 	
 	public void updloadPackage(String feedName, File progetPackage) throws IOException {
-		EasyHttp.request().
+		HttpEasy.request().
 				baseURI(config.url).
 				path("upack/{«feed-name»}/upload").
 				urlParameters(feedName).
