@@ -137,9 +137,6 @@ public class ProGet {
 	}
 	
 	public void updloadPackage(String feedName, File progetPackage) throws IOException {
-		//http://java-monitor.com/forum/showthread.php?t=4090
-		//http://www.codejava.net/java-se/networking/upload-files-by-sending-multipart-request-programmatically
-		
 		EasyHttp.request().
 				baseURI(config.url).
 				path("upack/{«feed-name»}/upload").
