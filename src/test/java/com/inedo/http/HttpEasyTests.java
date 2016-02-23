@@ -1,4 +1,4 @@
-package com.inedo.rest;
+package com.inedo.http;
 
 import static org.junit.Assert.assertThat;
 
@@ -12,7 +12,7 @@ import org.junit.Test;
 
 import com.inedo.http.HttpEasy;
 
-public class RestTest {
+public class HttpEasyTests {
 	@BeforeClass 
 	public static void setup() {
 		HttpEasy.withDefaults()

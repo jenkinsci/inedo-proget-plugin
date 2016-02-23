@@ -2,7 +2,13 @@ package com.inedo.proget.api;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.fail;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
 import com.inedo.proget.MockServer;
 import com.inedo.proget.api.ProGet;
 import com.inedo.proget.domain.Feed;
@@ -13,13 +19,17 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.UnknownHostException;
+import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.internal.runners.statements.Fail;
 import org.junit.rules.TemporaryFolder;
 
 /**
@@ -100,7 +110,24 @@ public class ProGetTests {
 		File pkg = proget.createPackage(folder.getRoot(), metadata);
 		
 		try (ZipFile zip = new ZipFile(pkg)) {
-	        assertThat("Zip file contains 2 entries", zip.size(), is(equalTo(2)));
+	        assertThat("Package file contains 2 entries", zip.size(), is(equalTo(2)));
+	        
+	        ZipEntry ze = zip.getEntry("upack.json");
+	        assertThat("Package file contains upack.json", ze, is(notNullValue()));
+	        
+	        try (InputStream zin = zip.getInputStream(ze)) {
+		        byte[] bytes= new byte[(int)ze.getSize()];
+		        zin.read(bytes, 0, bytes.length);
+	            String json = new String( bytes, "UTF-8" );
+	            
+	            // Will throw JsonParseException if not valid json
+	            new JsonParser().parse(json);
+	        }  catch (JsonParseException e) {
+	        	fail("unpack.json is not a valid json file");
+	        }
+	        
+	        ze = zip.getEntry("unpack/sample.data");
+	        assertThat("Package file contains unpack folder", ze, is(notNullValue()));
 		}
 	}
 	
@@ -126,7 +153,7 @@ public class ProGetTests {
 		PackageMetadata metadata = new PackageMetadata();
 		metadata.group = "com/inedo/proget";
 		metadata.name = "ExamplePackage";
-		metadata.version = "0.0.2";
+		metadata.version = "0.0.3";
 		metadata.title = "Example Package";
 		metadata.description = "Example package for testing";
 		return metadata;
