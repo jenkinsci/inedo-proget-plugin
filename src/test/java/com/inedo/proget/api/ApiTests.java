@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.UnknownHostException;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 import org.junit.After;
 import org.junit.Before;
@@ -90,9 +91,9 @@ public class ApiTests {
 	public void downloadPackage() throws IOException  {
 		Feed feed = proget.getFeed("Example");
 		
-		ProGetPackage proGetPackage = proget.getPackageList(feed.Feed_Id)[0];
+		ProGetPackage pkg = proget.getPackageList(feed.Feed_Id)[0];
 		
-		File downloaded = proget.downloadPackage("Example", proGetPackage, folder.getRoot().getAbsolutePath());
+		File downloaded = proget.downloadPackage(feed.Feed_Name, pkg.Group_Name, pkg.Package_Name, pkg.LatestVersion_Text, folder.getRoot().getAbsolutePath());
     	
         assertThat("File has content", downloaded.length(), is(greaterThan((long)1000)));
 	}
@@ -136,7 +137,19 @@ public class ApiTests {
 		// Success is fact that no exception thrown...
 	}
 
-
+	@Test
+	public void unpackContent() throws ZipException, IOException {
+		Feed feed = proget.getFeed("Example");
+		
+		ProGetPackage pkg = proget.getPackageList(feed.Feed_Id)[0];
+		
+		File downloaded = proget.downloadPackage(feed.Feed_Name, pkg.Group_Name, pkg.Package_Name, pkg.LatestVersion_Text, folder.getRoot().getAbsolutePath());
+    	        
+		ProGetPackageUtils.unpackContent(downloaded);
+		
+		assertThat("File has content", downloaded.length(), is(greaterThan((long)1000)));
+	}
+	
 	private PackageMetadata preparePackageFiles() throws IOException {
 		File file = new File(folder.getRoot(), "sample.data");
 		

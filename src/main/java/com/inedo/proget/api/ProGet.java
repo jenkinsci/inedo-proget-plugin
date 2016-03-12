@@ -24,7 +24,10 @@ import com.inedo.proget.domain.PackageMetadata;
 import com.inedo.proget.domain.ProGetPackage;
 
 /**
- * BuildMaster json api interface
+ * BuildMaster json api interface 
+ * 
+ * http://localhost:81/api/json
+ * http://inedo.com/support/documentation/proget/reference/universal-feed-api-and-package-format
  * 
  * @author Andrew Sumner
  */
@@ -89,11 +92,29 @@ public class ProGet {
 				get().asJson(ProGetPackage[].class);
 	}
 
-	public File downloadPackage(String feedName, ProGetPackage pkg, String toFolder) throws IOException {
+	/**
+	 * 
+	 * @param feedName		Required
+	 * @param groupName		Required
+	 * @param packageName	Required
+	 * @param version		Optional - empty string returns latest version
+	 * @param toFolder		Folder to save file to
+	 * @return	Reference to downloaded file
+	 * @throws IOException
+	 */
+	public File downloadPackage(String feedName, String groupName, String packageName, String version, String toFolder) throws IOException {
+		String path = "upack/{«feed-name»}/download/{«group-name»}/{«package-name»}";
+		
+		if (version == null || version.trim().isEmpty()) {
+			version = "";
+		} else {
+			path += "/{«package-version»}";
+		}
+		
 		return HttpEasy.request().
 				baseURI(config.url).
-				path("upack/{«feed-name»}/download/{«group-name»}/{«package-name»}/{«package-version»}").
-				urlParameters(feedName, pkg.Group_Name, pkg.Package_Name, pkg.LatestVersion_Text).
+				path(path).
+				urlParameters(feedName, groupName, packageName, version).
 				get().
 				downloadFile(toFolder);
 	}

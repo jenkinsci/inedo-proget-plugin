@@ -1,0 +1,35 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+  <!--
+    This jelly script is used for per-project configuration.
+    See global.jelly for a general discussion about jelly script.
+  -->
+
+  <!--
+    Creates a text field that shows the value of the "key" and "value" property.
+    When submitted, it will be passed to the corresponding constructor parameter.
+  -->
+    <f:entry title="Feed Name" field="feedName" >
+      <f:textbox /> 
+    </f:entry>
+    
+    <f:entry title="Group Name" field="groupName" >
+      <f:textbox /> 
+    </f:entry>
+    
+    <f:entry title="Package Name" field="packageName" >
+      <f:textbox /> 
+    </f:entry>
+    
+    <f:entry title="Version" field="version" >
+      <f:textbox /> 
+    </f:entry>
+    
+    <f:entry title="Download Folder" field="downloadFolder" >
+      <f:textbox /> 
+    </f:entry> 
+    
+	<f:entry title="Unpack" field="unpack" >
+      <f:checkbox default="false" />
+    </f:entry>
+</j:jelly>

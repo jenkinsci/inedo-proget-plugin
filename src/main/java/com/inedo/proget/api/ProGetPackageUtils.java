@@ -6,7 +6,10 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Enumeration;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
+import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
 import com.inedo.proget.domain.PackageMetadata;
@@ -138,4 +141,52 @@ public class ProGetPackageUtils
 			this.destinationFile = destinationFile;
 		}
 	}
+
+	/**
+	 * Unzips the content of the unpack folder in the package to the same folder as the package is located in
+	 * 
+	 * @param pkg
+	 * @throws IOException 
+	 * @throws ZipException 
+	 */
+	public static void unpackContent(File pkg) throws ZipException, IOException {
+		try(ZipFile archive = new ZipFile(pkg)) {
+		
+        Enumeration<? extends ZipEntry> e = archive.entries();
+        
+        while (e.hasMoreElements()) {
+            ZipEntry entry = e.nextElement();
+            
+            boolean ex = false;
+            
+            if (entry.getName().startsWith("unpack/") && !entry.getName().equals("unpack/")) {
+            	ex = true;            	
+            }
+            /*
+            
+            File file = new File(extractTo, entry.getName());
+            if (entry.isDirectory() && !file.exists()) {
+                file.mkdirs();
+            } else {
+                if (!file.getParentFile().exists()) {
+                    file.getParentFile().mkdirs();
+                }
+
+                InputStream in = archive.getInputStream(entry);
+                BufferedOutputStream out = new BufferedOutputStream(
+                        new FileOutputStream(file));
+
+                byte[] buffer = new byte[8192];
+                int read;
+
+                while (-1 != (read = in.read(buffer))) {
+                    out.write(buffer, 0, read);
+                }
+                in.close();
+                out.close();
+            }
+            */
+        }
+		}
+    }
 }
