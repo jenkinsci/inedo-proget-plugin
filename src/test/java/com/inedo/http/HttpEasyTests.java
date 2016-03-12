@@ -2,9 +2,6 @@ package com.inedo.http;
 
 import static org.junit.Assert.assertThat;
 
-import java.net.InetSocketAddress;
-import java.net.Proxy;
-
 import static org.hamcrest.Matchers.*;
 
 import org.junit.BeforeClass;

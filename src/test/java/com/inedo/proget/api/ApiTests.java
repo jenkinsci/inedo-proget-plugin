@@ -4,9 +4,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.fail;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import com.inedo.proget.MockServer;
@@ -23,13 +20,10 @@ import java.io.InputStream;
 import java.net.UnknownHostException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-import java.util.zip.ZipInputStream;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.internal.runners.statements.Fail;
 import org.junit.rules.TemporaryFolder;
 
 /**
@@ -39,7 +33,7 @@ import org.junit.rules.TemporaryFolder;
  * 
  * @author Andrew Sumner
  */
-public class ProGetTests {
+public class ApiTests {
 	private final boolean MOCK_REQUESTS = false;	// Set this value to false to run against a live BuildMaster installation 
 	private MockServer mockServer;
 	private ProGet proget;

@@ -31,7 +31,7 @@ import hudson.model.AbstractProject;
  * 
  * @author Andrew Sumner
  */
-public class ProGetTests {
+public class PluginTests {
 	public MockServer mockServer;
 		
 	@SuppressWarnings("rawtypes")
