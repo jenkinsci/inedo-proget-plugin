@@ -1,5 +1,6 @@
 package com.inedo.proget.api;
 
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -145,48 +146,53 @@ public class ProGetPackageUtils
 	/**
 	 * Unzips the content of the unpack folder in the package to the same folder as the package is located in
 	 * 
+	 * Does not delete the original package file.
+	 * 
 	 * @param pkg
 	 * @throws IOException 
 	 * @throws ZipException 
 	 */
 	public static void unpackContent(File pkg) throws ZipException, IOException {
-		try(ZipFile archive = new ZipFile(pkg)) {
+		final String UNPACK = "unpack/";
 		
-        Enumeration<? extends ZipEntry> e = archive.entries();
-        
-        while (e.hasMoreElements()) {
-            ZipEntry entry = e.nextElement();
-            
-            boolean ex = false;
-            
-            if (entry.getName().startsWith("unpack/") && !entry.getName().equals("unpack/")) {
-            	ex = true;            	
+		try(ZipFile archive = new ZipFile(pkg)) {
+			File extractTo = pkg.getParentFile();
+		
+	        Enumeration<? extends ZipEntry> e = archive.entries();
+	        
+	        while (e.hasMoreElements()) {
+	            ZipEntry entry = e.nextElement();
+	            
+	            String entryName = entry.getName();
+	            
+	            if (entryName.startsWith(UNPACK) && !entryName.equals(UNPACK)) {
+	            	entryName = entryName.substring(UNPACK.length());
+	            	
+		            File file = new File(extractTo, entryName);
+		            if (entry.isDirectory()) {
+		            	if (!file.exists()) {
+		            		file.mkdirs();
+		            	}
+		            } else {
+		                if (!file.getParentFile().exists()) {
+		                    file.getParentFile().mkdirs();
+		                }
+		
+		                InputStream in = archive.getInputStream(entry);
+		                
+		                try (BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(file))) {
+		
+			                byte[] buffer = new byte[8192];
+			                int read;
+			
+			                while (-1 != (read = in.read(buffer))) {
+			                    out.write(buffer, 0, read);
+			                }
+			                in.close();
+		                }
+		            }
+	            }
             }
-            /*
-            
-            File file = new File(extractTo, entry.getName());
-            if (entry.isDirectory() && !file.exists()) {
-                file.mkdirs();
-            } else {
-                if (!file.getParentFile().exists()) {
-                    file.getParentFile().mkdirs();
-                }
-
-                InputStream in = archive.getInputStream(entry);
-                BufferedOutputStream out = new BufferedOutputStream(
-                        new FileOutputStream(file));
-
-                byte[] buffer = new byte[8192];
-                int read;
-
-                while (-1 != (read = in.read(buffer))) {
-                    out.write(buffer, 0, read);
-                }
-                in.close();
-                out.close();
-            }
-            */
-        }
 		}
     }
 }

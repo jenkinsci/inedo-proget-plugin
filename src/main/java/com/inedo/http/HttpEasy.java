@@ -133,6 +133,8 @@ public class HttpEasy {
 	private Map<String, Object> headers = new LinkedHashMap<String, Object>();
 	private List<Field> fields = new ArrayList<Field>();
 	
+	private LogWriter logWriter = null;
+	
 	public static HttpEasyDefaults withDefaults() {
 		return new HttpEasyDefaults();
 	}
@@ -261,6 +263,10 @@ public class HttpEasy {
 		return this;
 	}
 
+	public HttpEasy withLogWriter(LogWriter logWriter) {
+		this.logWriter = logWriter;
+		return this;
+	}
 	
 	/**
 	 * Add a list of response family codes to ignore that would otherwise case a exception to be thrown
@@ -309,7 +315,11 @@ public class HttpEasy {
 			connection.setDoOutput(true);
 		}
 		
-		LOGGER.trace("Sending " + requestMethod + " to " + url.toString());
+		if (logWriter == null) {
+			LOGGER.trace("Sending " + requestMethod + " to " + url.toString());
+		} else {
+			logWriter.writeLogMessage("Sending " + requestMethod + " to " + url.toString());
+		}
 		connection.connect();
 
 		if (dataWriter != null) {

@@ -3,11 +3,9 @@ package com.inedo.proget.jenkins;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 
-import java.io.IOException;
 import java.io.PrintStream;
 import jenkins.model.Jenkins;
 
-import com.inedo.proget.api.ProGet;
 import com.inedo.proget.api.ProGetConfig;
 
 /**
@@ -48,21 +46,20 @@ public class ProGetHelper {
 		return (ProGetConfiguration.DescriptorImpl) Jenkins.getInstance().getDescriptorOrDie(ProGetConfiguration.class);
 	}
 	
-	public static boolean triggerBuild(AbstractBuild<?, ?> build, BuildListener listener, Triggerable trigger) throws IOException, InterruptedException {
-		if (!validateProGetConfig()) {
-			listener.getLogger().println("Please configure PorGet Plugin global settings");
-			return false;
+	public static String expandVariable(AbstractBuild<?, ?> build, BuildListener listener, String variable) {
+		if (variable == null || variable.isEmpty()) {
+			return variable;
 		}
 		
-		ProGetConfig config = getProGetConfig(listener.getLogger());
-		ProGet proget = new ProGet(config);		
-		String feedName = trigger.getFeedName();
+		String expanded = variable;
 		
-		listener.getLogger().println(LOG_PREFIX + "Upload to " + feedName);
-			
-		proget.upload(feedName);
+		try {
+			expanded = build.getEnvironment(listener).expand(variable);
+		} catch (Exception e) {
+			listener.getLogger().println(LOG_PREFIX + "Exception thrown expanding '" + variable + "' : " + e.getClass().getName() + " " + e.getMessage());
+		}
 		
-		return true;
+		return expanded;
 	}
-
+	
 }

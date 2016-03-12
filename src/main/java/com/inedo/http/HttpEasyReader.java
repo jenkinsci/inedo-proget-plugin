@@ -123,7 +123,12 @@ public class HttpEasyReader {
 //		System.out.println("Content-Disposition = " + disposition);
 //		System.out.println("Content-Length = " + connection.getContentLength());
 //		System.out.println("fileName = " + fileName);
-
+	
+		File folder = new File(saveDir);
+		if (!folder.exists()) {
+            folder.mkdirs();
+		}
+		
 		File saveFile = new File(saveDir, fileName);;
 		InputStream inputStream = null;
 		FileOutputStream outputStream = null;

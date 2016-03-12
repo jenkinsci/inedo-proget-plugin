@@ -2,30 +2,29 @@ package com.inedo.proget.jenkins;
 
 import hudson.Launcher;
 import hudson.Extension;
-import hudson.util.FormValidation;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.AbstractProject;
 import hudson.tasks.Builder;
 import hudson.tasks.BuildStepDescriptor;
 import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.QueryParameter;
 
+import com.inedo.http.LogWriter;
 import com.inedo.proget.api.ProGet;
 import com.inedo.proget.api.ProGetPackageUtils;
 
 import java.io.File;
 import java.io.IOException;
-
-import javax.servlet.ServletException;
+import java.io.PrintStream;
 
 /**
  * Downloads a universal package from ProGet.
  *
  * @author Andrew Sumner
  */
-public class DownloadPackageBuilder extends Builder {
-	public static final String LOG_PREFIX = "[ProGet] "; 
+public class DownloadPackageBuilder extends Builder implements LogWriter {
+	private static final String LOG_PREFIX = "[ProGet] "; 
+	private PrintStream logger = null;
 	
 	private final String feedName;
 	private final String groupName;
@@ -64,17 +63,28 @@ public class DownloadPackageBuilder extends Builder {
 	
 	@Override
 	public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws IOException {
-		ProGet proget = new ProGet(ProGetHelper.getProGetConfig(listener.getLogger()));
+		logger = listener.getLogger();
 		
-		listener.getLogger().println(LOG_PREFIX + "Upload to " + feedName);
-		
-		File file = proget.downloadPackage(feedName, groupName, packageName, version, downloadFolder);
-		
-		if (unpack) {
-			ProGetPackageUtils.unpackContent(file);
+		if (!ProGetHelper.validateProGetConfig()) {
+			writeLogMessage("Please configure ProGet Plugin global settings");
+			return false;
 		}
 		
-		return file.exists();
+		ProGet proget = new ProGet(ProGetHelper.getProGetConfig(listener.getLogger()), this);
+		
+		String downloadTo = ProGetHelper.expandVariable(build, listener, downloadFolder);
+		writeLogMessage("Download to " + downloadTo);
+		
+		
+		File downloaded = proget.downloadPackage(feedName, groupName, packageName, version, downloadTo);
+		
+		if (unpack) {
+			writeLogMessage("Unpack " + downloaded.getName());
+			ProGetPackageUtils.unpackContent(downloaded);
+			downloaded.delete();
+		}
+		
+		return true;
 	}
 
 	@Extension
@@ -95,5 +105,10 @@ public class DownloadPackageBuilder extends Builder {
 		public String getDisplayName() {
 			return "Download ProGet Package";
 		}
+	}
+
+	@Override
+	public void writeLogMessage(String message) {
+		logger.println(LOG_PREFIX + message);
 	}
 }

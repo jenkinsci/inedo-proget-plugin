@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import com.google.common.net.MediaType;
 import com.inedo.http.HttpEasy;
+import com.inedo.http.LogWriter;
 //import java.net.InetSocketAddress;
 //import java.net.Proxy;
 //import java.util.Arrays;
@@ -33,11 +34,13 @@ import com.inedo.proget.domain.ProGetPackage;
  */
 public class ProGet {
 	private ProGetConfig config;
+	private LogWriter logWriter;
 //	private boolean logRequest = true;
 	
-	public ProGet(ProGetConfig config) {
+	public ProGet(ProGetConfig config, LogWriter logWriter) {
 		this.config = config;
-
+		this.logWriter = logWriter;
+		
 		HttpEasy.withDefaults()
 			.allowAllHosts()
 			.trustAllCertificates()
@@ -115,6 +118,7 @@ public class ProGet {
 				baseURI(config.url).
 				path(path).
 				urlParameters(feedName, groupName, packageName, version).
+				withLogWriter(logWriter).
 				get().
 				downloadFile(toFolder);
 	}
@@ -123,7 +127,7 @@ public class ProGet {
 		return new ProGetPackageUtils().createPackage(sourceFolder, metadata);
 	}
 	
-	public void updloadPackage(String feedName, File progetPackage) throws IOException {
+	public void uploadPackage(String feedName, File progetPackage) throws IOException {
 		HttpEasy.request().
 				baseURI(config.url).
 				path("upack/{«feed-name»}/upload").

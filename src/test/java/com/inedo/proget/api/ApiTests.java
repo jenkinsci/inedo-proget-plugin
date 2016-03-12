@@ -45,7 +45,7 @@ public class ApiTests {
 	@Before
     public void before() throws IOException {
 		mockServer = new MockServer(MOCK_REQUESTS, System.out);
-		proget = new ProGet(mockServer.getProGetConfig());
+		proget = new ProGet(mockServer.getProGetConfig(), null);
 	}
 	
 	@After
@@ -132,7 +132,7 @@ public class ApiTests {
 		
 		File pkg = proget.createPackage(folder.getRoot(), metadata);
 		
-		proget.updloadPackage("Example", pkg);
+		proget.uploadPackage("Example", pkg);
 		
 		// Success is fact that no exception thrown...
 	}
@@ -144,10 +144,14 @@ public class ApiTests {
 		ProGetPackage pkg = proget.getPackageList(feed.Feed_Id)[0];
 		
 		File downloaded = proget.downloadPackage(feed.Feed_Name, pkg.Group_Name, pkg.Package_Name, pkg.LatestVersion_Text, folder.getRoot().getAbsolutePath());
-    	        
+    	
+		int fileCount = downloaded.getParentFile().listFiles().length;
+		
 		ProGetPackageUtils.unpackContent(downloaded);
 		
-		assertThat("File has content", downloaded.length(), is(greaterThan((long)1000)));
+		assertThat("File have been unpacked", downloaded.getParentFile().listFiles().length, is(greaterThan(fileCount)));
+		
+		ProGetPackageUtils.unpackContent(downloaded);
 	}
 	
 	private PackageMetadata preparePackageFiles() throws IOException {
