@@ -73,5 +73,9 @@ public class HttpEasyDefaults {
 
 	public void bypassProxyForLocalAddresses(boolean bypassLocalAddresses) {
 		HttpEasy.bypassProxyForLocalAddresses = bypassLocalAddresses;
+	}
+
+	public void baseUrl(String baseUrl) {
+		HttpEasy.defaultbaseURI = baseUrl;
 	}	
 }

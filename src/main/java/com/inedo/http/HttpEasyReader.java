@@ -25,6 +25,7 @@ public class HttpEasyReader {
 		
 		Family resposeFamily = getResponseCodeFamily(); 
 		
+		//TODO - Automatically follow redirect as per BlueMix.java?
 		if (resposeFamily != Family.SUCCESSFUL) {
 			if (listContains(request.ignoreResponseCodes, getResponseCode())) return;
 			if (listContains(request.ignoreResponseFamily, resposeFamily)) return;

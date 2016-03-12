@@ -37,7 +37,7 @@ public class MockServer {
 		config.printStream = logger;
 		
 		if (mockRequests) {
-			config.authentication = "none";
+//			config.authentication = "none";
 			
 			handler = new HttpHandler();
 			
@@ -52,12 +52,11 @@ public class MockServer {
 		    
 		    config.url = "http://" + server.getInetAddress().getHostName() + ":" + server.getLocalPort();
 		} else {
-//			String[] cred = FileUtils.readFileToString(new File("c:/temp/bm.txt")).split(Pattern.quote("|"));
-//			config.authentication = "ntlm";
-//			config.user = cred[0];
-//			config.password = cred[1];
-//			config.domain = cred[2];
 			config.apiKey = "1";
+			//TODO pull user and password from config file
+			//TODO test with Domain user
+			config.user = "Admin";
+			config.password = "Admin";
 		}
 	}
 	

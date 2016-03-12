@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.net.MediaType;
 import com.inedo.http.HttpEasyReader.Family;
 
+
 /**
  * Rest request utility that supports NTLM proxy authentication.
  * 
@@ -114,6 +115,7 @@ public class HttpEasy {
 	static String proxyUser = null;
 	static String proxyPassword = null;
 	static boolean bypassProxyForLocalAddresses = true;
+	static String defaultbaseURI = "";
 
 	// These only apply per request - but are visible to package
 	List<Integer> ignoreResponseCodes = new ArrayList<Integer>();
@@ -123,6 +125,7 @@ public class HttpEasy {
 	private String authString = null;
 	private String baseURI = "";
 	private String path = "";
+	private String query = "";
 	private Object[] urlParams = new Object[0];
 	private DataContentType dataContentType = DataContentType.AUTO_SELECT;
 	private Object rawData = null;
@@ -158,6 +161,11 @@ public class HttpEasy {
 		return this;
 	}
 
+	public HttpEasy query(String query) {
+		this.query = query;
+		return this;
+	}
+	
 	public HttpEasy urlParameters(Object... pathParams) {
 		this.urlParams = pathParams;
 		return this;
@@ -376,56 +384,69 @@ public class HttpEasy {
 	}
 
 	private URL getURL() throws MalformedURLException {
-		// check to / or ? on path and base not end in /
-		String fullUrl = appendSegmentToUrl(baseURI, replaceParameters(path));
+		String spec = "";
+		
+		if (!containsProtol(path) && !containsProtol(query)) {
+			spec = (baseURI == null || baseURI.isEmpty()) ? defaultbaseURI : baseURI;	
+		}
+		
+		spec = appendSegmentToUrl(spec, path, "/");
+		spec = appendSegmentToUrl(spec, query, "?");
+		spec = replaceParameters(spec);
 
-		URL url = new URL(fullUrl);
+		URL url = new URL(spec);
 
 		if (url.getUserInfo() != null) {
 			authString = url.getUserInfo();
-			fullUrl = url.toExternalForm().replace(url.getUserInfo() + "@", "");
-			url = new URL(fullUrl);
+			spec = url.toExternalForm().replace(url.getUserInfo() + "@", "");
+			url = new URL(spec);
 		}
 
 		return url;
 	}
 
-	private String appendSegmentToUrl(String path, String segment) {
-		if (path == null || path.isEmpty()) {
+	private boolean containsProtol(String url) {
+		if (url == null || url.isEmpty()) return false;
+		
+		return url.contains("//");
+	}
+	
+	private String appendSegmentToUrl(String url, String segment, String join) {
+		if (url == null || url.isEmpty()) {
 			return segment;
 		}
 
 		if (segment == null || segment.isEmpty()) {
-			return path;
+			return url;
 		}
 
-		if (path.endsWith("/")) {
-			return path = path.substring(0, path.length() - 1);
+		if (url.endsWith("/")) {
+			url = url.substring(0, url.length() - 1);
 		}
 
-		if (!segment.startsWith("/") && !segment.startsWith("?")) {
-			segment = "/" + segment;
+		if (!segment.startsWith(join)) {
+			segment = join + segment;
 		}
 
-		return path + segment;
+		return url + segment;
 	}
 
-	private String replaceParameters(String value) {
+	private String replaceParameters(String url) {
 		int index = 0;
 		int param = 0;
 		String currentParameter = "";
 
 		// Check all occurrences
-		while ((index = value.indexOf("{", index)) > 0) {
+		while ((index = url.indexOf("{", index)) > 0) {
 			if (param < urlParams.length) {
 				currentParameter = String.valueOf(urlParams[param]);
 				param++;
 			}
 
-			value = value.substring(0, index) + currentParameter + value.substring(value.indexOf("}") + 1);
+			url = url.substring(0, index) + currentParameter + url.substring(url.indexOf("}") + 1);
 		}
 
-		return value;
+		return url;
 	}
 
 	private void setHeaders(HttpURLConnection connection) throws UnsupportedEncodingException {

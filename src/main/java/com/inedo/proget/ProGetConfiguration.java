@@ -38,8 +38,8 @@ public class ProGetConfiguration extends GlobalConfiguration {
          * If you don't want fields to be persisted, use <tt>transient</tt>.
          */
     	private String url;
-    	private String authentication;
-    	private String domain;
+//    	private String authentication;
+//    	private String domain;
     	private String user;
         private Secret password;
         private String apiKey;
@@ -61,7 +61,7 @@ public class ProGetConfiguration extends GlobalConfiguration {
 
         @Override
         public String getDisplayName() {
-            return "BuildMaster Plugin";
+            return "ProGet Plugin";
         }
 
         /**
@@ -71,13 +71,13 @@ public class ProGetConfiguration extends GlobalConfiguration {
             url = value;
         }
 
-        public void setAuthentication(String value) {
-			this.authentication = value;
-		}
-
-        public void setDomain(String value) {
-			this.domain = value;
-		}
+//        public void setAuthentication(String value) {
+//			this.authentication = value;
+//		}
+//
+//        public void setDomain(String value) {
+//			this.domain = value;
+//		}
         
         public void setUser(String value) {
             user = value;
@@ -98,13 +98,13 @@ public class ProGetConfiguration extends GlobalConfiguration {
             return url;
         }
         
-        public String getAuthentication() {
-			return authentication;
-		}
-
-        public String getDomain() {
-			return domain;
-		}
+//        public String getAuthentication() {
+//			return authentication;
+//		}
+//
+//        public String getDomain() {
+//			return domain;
+//		}
 
         public String getUser() {
             return user;
@@ -149,15 +149,15 @@ public class ProGetConfiguration extends GlobalConfiguration {
             return FormValidation.ok();
         }
         
-        public FormValidation doCheckDomain(@QueryParameter String value, @QueryParameter String authentication) throws IOException, ServletException {
-            if (value.length() == 0 && "ntlm".equals(authentication))
-                return FormValidation.error("Domain is required");
-            
-            if (value.length() > 0 && "none".equals(authentication))
-                return FormValidation.warning("Value will be ignored as only valid for NTLM authentication method");
-            
-            return FormValidation.ok();
-        }
+//        public FormValidation doCheckDomain(@QueryParameter String value, @QueryParameter String authentication) throws IOException, ServletException {
+//            if (value.length() == 0 && "ntlm".equals(authentication))
+//                return FormValidation.error("Domain is required");
+//            
+//            if (value.length() > 0 && "none".equals(authentication))
+//                return FormValidation.warning("Value will be ignored as only valid for NTLM authentication method");
+//            
+//            return FormValidation.ok();
+//        }
 
         public FormValidation doCheckUser(@QueryParameter String value, @QueryParameter String authentication) throws IOException, ServletException {
             if (value.length() == 0 && !"none".equals(authentication))
@@ -190,12 +190,12 @@ public class ProGetConfiguration extends GlobalConfiguration {
         }
         
         /**
-         *  BuildMaster connection test
+         *  ProGet connection test
          */
 		public FormValidation doTestConnection(
 			@QueryParameter("url") final String url,
-			@QueryParameter("authentication") final String authentication,
-			@QueryParameter("domain") final String domain,
+//			@QueryParameter("authentication") final String authentication,
+//			@QueryParameter("domain") final String domain,
 			@QueryParameter("user") final String user,
 			@QueryParameter("password") final String password,
 			@QueryParameter("apiKey") final String apiKey) throws IOException, ServletException {
@@ -203,29 +203,29 @@ public class ProGetConfiguration extends GlobalConfiguration {
 			ProGetConfig config = new ProGetConfig();
 			
 			config.url = url;
-			config.authentication = authentication;
-			config.domain = domain;
+//			config.authentication = authentication;
+//			config.domain = domain;
 			config.user = user;
 			config.password = password;
 			config.apiKey = apiKey;
 			
-			ProGet buildmaster = new ProGet(config);
+			ProGet proget = new ProGet(config);
 			
 			try {
-				buildmaster.checkConnection();
+				proget.checkConnection();
 			} catch (Exception ex) {
 				return FormValidation.error("Failed. Please check the configuration. " + ex.getClass().getName() + ": " + ex.getMessage());
 			}
 			
-			return FormValidation.ok("Success. Connection with BuildMaster verified.");			
+			return FormValidation.ok("Success. Connection with ProGet verified.");			
 		}
 
-		public ProGetConfig getBuildMasterConfig() {
+		public ProGetConfig getProGetConfig() {
 			ProGetConfig config = new ProGetConfig();
    		 
 			config.url = url;
-			config.authentication = authentication;
-			config.domain = domain;
+//			config.authentication = authentication;
+//			config.domain = domain;
 			config.user = user;
 			config.password = Secret.toString(password);
 			config.apiKey = apiKey;
@@ -234,7 +234,7 @@ public class ProGetConfiguration extends GlobalConfiguration {
 		}
 
 		public ProGetConfig getProGetConfig(PrintStream logger) {
-			ProGetConfig config = getBuildMasterConfig();
+			ProGetConfig config = getProGetConfig();
 			config.printStream = logger;
 			return config;
 		}

@@ -19,12 +19,14 @@
     <f:entry field="apiKey" title="API Key" >
       <f:textbox />
     </f:entry>
+<!--
     <f:entry field="authentication" title="Authentication Method" >
     	<f:select />
     </f:entry>
     <f:entry field="domain" title="Domain" >
       <f:textbox />
     </f:entry>
+-->
 	<f:entry field="user" title="User" >
       <f:textbox />
     </f:entry>
