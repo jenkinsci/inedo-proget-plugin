@@ -1,4 +1,4 @@
-package com.inedo.proget;
+package com.inedo.proget.jenkins;
 
 import hudson.Launcher;
 import hudson.Extension;

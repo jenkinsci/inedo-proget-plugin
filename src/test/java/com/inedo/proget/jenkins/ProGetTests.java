@@ -1,4 +1,4 @@
-package com.inedo.proget;
+package com.inedo.proget.jenkins;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -8,6 +8,9 @@ import static org.mockito.AdditionalAnswers.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import com.inedo.proget.MockServer;
+import com.inedo.proget.jenkins.ProGetHelper;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -22,8 +25,6 @@ import hudson.EnvVars;
 import hudson.model.BuildListener;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
-
-import com.inedo.proget.ProGetHelper;
 
 /**
  * Tests for the TriggerBuildHelper class

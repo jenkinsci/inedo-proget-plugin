@@ -1,4 +1,4 @@
-package com.inedo.proget;
+package com.inedo.proget.jenkins;
 
 import java.io.IOException;
 import java.io.PrintStream;

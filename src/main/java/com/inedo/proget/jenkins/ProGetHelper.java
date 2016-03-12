@@ -1,4 +1,4 @@
-package com.inedo.proget;
+package com.inedo.proget.jenkins;
 
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;

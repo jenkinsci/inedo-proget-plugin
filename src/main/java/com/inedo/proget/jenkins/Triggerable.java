@@ -1,4 +1,4 @@
-package com.inedo.proget;
+package com.inedo.proget.jenkins;
 
 public interface Triggerable {
 	public boolean getWaitTillBuildCompleted();

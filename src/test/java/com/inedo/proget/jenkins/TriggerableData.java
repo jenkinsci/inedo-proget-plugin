@@ -1,6 +1,6 @@
-package com.inedo.proget;
+package com.inedo.proget.jenkins;
 
-import com.inedo.proget.Triggerable;
+import com.inedo.proget.jenkins.Triggerable;
 
 /**
  * Data to inject into TriggerBuildHelper for testing
