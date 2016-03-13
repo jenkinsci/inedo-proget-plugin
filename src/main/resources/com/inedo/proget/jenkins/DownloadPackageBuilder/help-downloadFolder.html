@@ -1,3 +1,9 @@
 <div>
-	The folder to download the package to
+	The folder to download the package to.  The path can include environment variables in the format ${VAR} or $VAR.
+	
+	<p>If a full pathname is not supplied then the downloaded package 'should' end up in the workspace, but this is
+	 not guaranteed.  If you wish the package to be placed in the workspace the it is best to use the Jenkins variable
+	 <i>${WORKSPACE}</i></p>
+	 
+	 <p>See <a href="/env-vars.html" target="_blank">the list of available environment variables</a>.</p>
 </div>

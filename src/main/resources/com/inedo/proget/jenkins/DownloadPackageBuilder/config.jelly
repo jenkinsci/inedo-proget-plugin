@@ -26,7 +26,7 @@
     </f:entry>
     
     <f:entry title="Download Folder" field="downloadFolder" >
-      <f:textbox /> 
+      <f:textbox default="${descriptor.defaultFolder()}"/> 
     </f:entry> 
     
 	<f:entry title="Unpack" field="unpack" >

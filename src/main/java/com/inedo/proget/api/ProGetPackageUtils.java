@@ -152,7 +152,7 @@ public class ProGetPackageUtils
 	 * @throws IOException 
 	 * @throws ZipException 
 	 */
-	public static void unpackContent(File pkg) throws ZipException, IOException {
+	public static void unpackContent(File pkg) throws IOException {
 		final String UNPACK = "unpack/";
 		
 		try(ZipFile archive = new ZipFile(pkg)) {

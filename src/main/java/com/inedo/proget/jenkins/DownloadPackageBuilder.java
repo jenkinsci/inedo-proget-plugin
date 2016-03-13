@@ -74,14 +74,19 @@ public class DownloadPackageBuilder extends Builder {
 		ProGet proget = new ProGet(helper.getProGetConfig());
 		
 		String downloadTo = helper.expandVariable(build, listener, downloadFolder);
-		helper.writeLogMessage("Download to " + downloadTo);
+		helper.writeLogMessage("Download to " + new File(downloadTo).getAbsolutePath());
 		
-		File downloaded = proget.downloadPackage(feedName, groupName, packageName, version, downloadTo);
-		
-		if (unpack) {
-			helper.writeLogMessage("Unpack " + downloaded.getName());
-			ProGetPackageUtils.unpackContent(downloaded);
-			downloaded.delete();
+		try {
+			File downloaded = proget.downloadPackage(feedName, groupName, packageName, version, downloadTo);
+					
+			if (unpack) {
+				helper.writeLogMessage("Unpack " + downloaded.getName());
+				ProGetPackageUtils.unpackContent(downloaded);
+				downloaded.delete();
+			}
+		} catch (IOException e) {
+			helper.writeLogMessage("Error: " + e.getMessage());
+			return false;
 		}
 		
 		return true;
@@ -93,6 +98,10 @@ public class DownloadPackageBuilder extends Builder {
 	public static final class DescriptorImpl extends BuildStepDescriptor<Builder> {
 		public DescriptorImpl() {
 			super(DownloadPackageBuilder.class);
+		}
+		
+		public String defaultFolder() {
+			return "${WORKSPACE}";
 		}
 		
 		@SuppressWarnings("rawtypes")
