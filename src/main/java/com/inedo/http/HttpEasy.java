@@ -116,7 +116,8 @@ public class HttpEasy {
 	static String proxyPassword = null;
 	static boolean bypassProxyForLocalAddresses = true;
 	static String defaultbaseURI = "";
-
+	static LogWriter defaultLogWriter = null;
+	
 	// These only apply per request - but are visible to package
 	List<Integer> ignoreResponseCodes = new ArrayList<Integer>();
 	List<Family> ignoreResponseFamily = new ArrayList<Family>();
@@ -132,7 +133,6 @@ public class HttpEasy {
 	private MediaType rawDataMediaType = null;
 	private Map<String, Object> headers = new LinkedHashMap<String, Object>();
 	private List<Field> fields = new ArrayList<Field>();
-	
 	private LogWriter logWriter = null;
 	
 	public static HttpEasyDefaults withDefaults() {
@@ -315,11 +315,7 @@ public class HttpEasy {
 			connection.setDoOutput(true);
 		}
 		
-		if (logWriter == null) {
-			LOGGER.trace("Sending " + requestMethod + " to " + url.toString());
-		} else {
-			logWriter.writeLogMessage("Sending " + requestMethod + " to " + url.toString());
-		}
+		log("Sending " + requestMethod + " to " + url.toString());
 		connection.connect();
 
 		if (dataWriter != null) {
@@ -327,6 +323,16 @@ public class HttpEasy {
 		}
 		
 		return connection;
+	}
+
+	private void log(String message) {
+		if (logWriter != null) {
+			logWriter.writeLogMessage(message);
+		} else if (defaultLogWriter != null) {
+			defaultLogWriter.writeLogMessage(message);
+		} else {
+			LOGGER.trace(message);
+		}		
 	}
 
 	private DataWriter getDataWriter(DataWriter dataWriter, URL url, HttpURLConnection connection) throws UnsupportedEncodingException {

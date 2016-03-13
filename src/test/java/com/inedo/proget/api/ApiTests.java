@@ -45,7 +45,7 @@ public class ApiTests {
 	@Before
     public void before() throws IOException {
 		mockServer = new MockServer(MOCK_REQUESTS, System.out);
-		proget = new ProGet(mockServer.getProGetConfig(), null);
+		proget = new ProGet(mockServer.getProGetConfig());
 	}
 	
 	@After

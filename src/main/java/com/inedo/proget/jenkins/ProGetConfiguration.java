@@ -209,7 +209,7 @@ public class ProGetConfiguration extends GlobalConfiguration {
 			config.password = password;
 			config.apiKey = apiKey;
 			
-			ProGet proget = new ProGet(config, null);
+			ProGet proget = new ProGet(config);
 			
 			try {
 				proget.checkConnection();

@@ -71,11 +71,18 @@ public class HttpEasyDefaults {
 		return this;
 	}
 
-	public void bypassProxyForLocalAddresses(boolean bypassLocalAddresses) {
+	public HttpEasyDefaults bypassProxyForLocalAddresses(boolean bypassLocalAddresses) {
 		HttpEasy.bypassProxyForLocalAddresses = bypassLocalAddresses;
+		return this;
 	}
 
-	public void baseUrl(String baseUrl) {
+	public HttpEasyDefaults baseUrl(String baseUrl) {
 		HttpEasy.defaultbaseURI = baseUrl;
-	}	
+		return this;
+	}
+	
+	public HttpEasyDefaults withLogWriter(LogWriter logWriter) {
+		HttpEasy.defaultLogWriter = logWriter;
+		return this;
+	}
 }

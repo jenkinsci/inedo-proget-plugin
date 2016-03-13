@@ -6,6 +6,7 @@ import hudson.model.BuildListener;
 import java.io.PrintStream;
 import jenkins.model.Jenkins;
 
+import com.inedo.http.LogWriter;
 import com.inedo.proget.api.ProGetConfig;
 
 /**
@@ -14,10 +15,14 @@ import com.inedo.proget.api.ProGetConfig;
  * 
  * @author Andrew Sumner
  */
-public class ProGetHelper {
-	public static final String LOG_PREFIX = "[ProGet] "; 
-	public static final String DEFAULT_BUILD_NUMBER = "${BUILDMASTER_BUILD_NUMBER}"; 
+public class ProGetHelper implements LogWriter {
+	private static final String LOG_PREFIX = "[ProGet] "; 
 	private static ProGetConfig config = null;
+	private final PrintStream log;
+	
+	public ProGetHelper(PrintStream log) {
+		this.log = log;
+	}
 	
 	/**
 	 * TODO: As I haven't been able to successfully mock a static class this is my work around for testing purposes
@@ -26,27 +31,33 @@ public class ProGetHelper {
 		config = value;
 	}
 	
-	public static boolean validateProGetConfig() {
+	public boolean validateProGetConfig() {
 		if (config != null) {
 			return true;
 		}
 		
-		return getSharedDescriptor().validatePluginConfiguration();
+		boolean valid = getSharedDescriptor().validatePluginConfiguration();
+		
+		if (!valid) {
+			writeLogMessage("Please configure ProGet Plugin global settings");
+		}
+		
+		return valid;
 	}
 
-	public static ProGetConfig getProGetConfig(PrintStream logger) {
+	public ProGetConfig getProGetConfig() {
 		if (config != null) {
 			return config;
 		}
 		
-		return getSharedDescriptor().getProGetConfig(logger);
+		return getSharedDescriptor().getProGetConfig(log);
 	}
 	
-	private static ProGetConfiguration.DescriptorImpl getSharedDescriptor() {
+	private ProGetConfiguration.DescriptorImpl getSharedDescriptor() {
 		return (ProGetConfiguration.DescriptorImpl) Jenkins.getInstance().getDescriptorOrDie(ProGetConfiguration.class);
 	}
 	
-	public static String expandVariable(AbstractBuild<?, ?> build, BuildListener listener, String variable) {
+	public String expandVariable(AbstractBuild<?, ?> build, BuildListener listener, String variable) {
 		if (variable == null || variable.isEmpty()) {
 			return variable;
 		}
@@ -56,10 +67,14 @@ public class ProGetHelper {
 		try {
 			expanded = build.getEnvironment(listener).expand(variable);
 		} catch (Exception e) {
-			listener.getLogger().println(LOG_PREFIX + "Exception thrown expanding '" + variable + "' : " + e.getClass().getName() + " " + e.getMessage());
+			writeLogMessage("Exception thrown expanding '" + variable + "' : " + e.getClass().getName() + " " + e.getMessage());
 		}
 		
 		return expanded;
 	}
-	
+
+	@Override
+	public void writeLogMessage(String message) {
+		log.println(LOG_PREFIX + message);
+	}
 }

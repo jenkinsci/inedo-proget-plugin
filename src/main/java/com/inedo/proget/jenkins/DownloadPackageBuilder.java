@@ -9,23 +9,18 @@ import hudson.tasks.Builder;
 import hudson.tasks.BuildStepDescriptor;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import com.inedo.http.LogWriter;
 import com.inedo.proget.api.ProGet;
 import com.inedo.proget.api.ProGetPackageUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
 
 /**
  * Downloads a universal package from ProGet.
  *
  * @author Andrew Sumner
  */
-public class DownloadPackageBuilder extends Builder implements LogWriter {
-	private static final String LOG_PREFIX = "[ProGet] "; 
-	private PrintStream logger = null;
-	
+public class DownloadPackageBuilder extends Builder {
 	private final String feedName;
 	private final String groupName;
 	private final String packageName;
@@ -43,14 +38,21 @@ public class DownloadPackageBuilder extends Builder implements LogWriter {
 		this.downloadFolder = downloadFolder;
 		this.unpack = unpack;
 	}
-
 	
 	public String getFeedName() {
 		return feedName;
 	}
 	
+	public String getGroupName() {
+		return groupName;
+	}
+	
 	public String getPackageName() {
 		return packageName;
+	}
+	
+	public String getVersion() {
+		return version;
 	}
 	
 	public String getDownloadFolder() {
@@ -63,23 +65,21 @@ public class DownloadPackageBuilder extends Builder implements LogWriter {
 	
 	@Override
 	public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws IOException {
-		logger = listener.getLogger();
+		ProGetHelper helper = new ProGetHelper(listener.getLogger());
 		
-		if (!ProGetHelper.validateProGetConfig()) {
-			writeLogMessage("Please configure ProGet Plugin global settings");
+		if (!helper.validateProGetConfig()) {
 			return false;
 		}
 		
-		ProGet proget = new ProGet(ProGetHelper.getProGetConfig(listener.getLogger()), this);
+		ProGet proget = new ProGet(helper.getProGetConfig());
 		
-		String downloadTo = ProGetHelper.expandVariable(build, listener, downloadFolder);
-		writeLogMessage("Download to " + downloadTo);
-		
+		String downloadTo = helper.expandVariable(build, listener, downloadFolder);
+		helper.writeLogMessage("Download to " + downloadTo);
 		
 		File downloaded = proget.downloadPackage(feedName, groupName, packageName, version, downloadTo);
 		
 		if (unpack) {
-			writeLogMessage("Unpack " + downloaded.getName());
+			helper.writeLogMessage("Unpack " + downloaded.getName());
 			ProGetPackageUtils.unpackContent(downloaded);
 			downloaded.delete();
 		}
@@ -105,10 +105,5 @@ public class DownloadPackageBuilder extends Builder implements LogWriter {
 		public String getDisplayName() {
 			return "Download ProGet Package";
 		}
-	}
-
-	@Override
-	public void writeLogMessage(String message) {
-		logger.println(LOG_PREFIX + message);
 	}
 }
