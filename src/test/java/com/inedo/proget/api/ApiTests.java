@@ -99,6 +99,17 @@ public class ApiTests {
 	}
 	
 	@Test
+	public void downloadPackageLatestVersion() throws IOException  {
+		Feed feed = proget.getFeed("Example");
+		
+		ProGetPackage pkg = proget.getPackageList(feed.Feed_Id)[0];
+		
+		File downloaded = proget.downloadPackage(feed.Feed_Name, pkg.Group_Name, pkg.Package_Name, "", folder.getRoot().getAbsolutePath());
+    	
+        assertThat("File has content", downloaded.length(), is(greaterThan((long)1000)));
+	}
+	
+	@Test
 	public void createPackage() throws IOException {
 		PackageMetadata metadata = preparePackageFiles();
 		
