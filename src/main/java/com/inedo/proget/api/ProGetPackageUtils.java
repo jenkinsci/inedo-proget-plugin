@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Enumeration;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
@@ -20,7 +21,28 @@ public class ProGetPackageUtils
 	private File sourceFolder;
 	private File zipFile;
 	private ZipOutputStream zos = null;
-	
+		
+	public File createPackage(File workFolder, Map<String, String> files, PackageMetadata metadata) throws IOException {		
+		FileOutputStream fos = null;
+		
+		this.sourceFolder = workFolder;
+		this.zipFile = new File(sourceFolder, metadata.name.replace(" ",  "") + ".unpack");
+		
+		try {
+			fos = new FileOutputStream(zipFile);
+			zos = new ZipOutputStream(fos);
+
+			appendMetadata(metadata);
+			appendFiles(files, "unpack/");
+		} finally {
+			if (zos != null) zos.closeEntry();
+			if (zos != null) zos.close(); 
+			if (fos != null) fos.close();
+		}
+		
+		return zipFile;
+	}
+
 	public File createPackage(File sourceFolder, PackageMetadata metadata) throws IOException {		
 		FileOutputStream fos = null;
 		
@@ -80,6 +102,26 @@ public class ProGetPackageUtils
 
 	private boolean isProvided(String value) {
 		return value !=null && !value.isEmpty();
+	}
+	
+	private void appendFiles(Map<String, String> files, String destinationFolder) {
+		for (Map.Entry<String, String> filePath : files.entrySet())	{
+			//TODO finish off
+//			filePath.getValue();
+//			
+//			ZipItem entry = generateZipEntry(node, destinationFolder);			
+//			ZipEntry ze = new ZipEntry(entry.destinationFile);
+//			byte[] buffer = new byte[1024];
+//			int len;
+//			
+//			zos.putNextEntry(ze);
+//
+//			try (FileInputStream in = new FileInputStream(new File(entry.sourceFile))) {
+//				while ((len = in.read(buffer)) > 0) {
+//					zos.write(buffer, 0, len);
+//				}
+//			}
+		}
 	}
 	
 	/**

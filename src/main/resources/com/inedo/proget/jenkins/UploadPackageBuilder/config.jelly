@@ -16,12 +16,16 @@
     <f:entry title="Package Name" field="packageName" >
       <f:textbox /> 
     </f:entry>
-    
-    <f:entry title="Files to package" field="sourceFiles" >
-      <f:textbox /> 
-    </f:entry> 
-    
+        
 	<f:entry title="Metadata" field="metadata" >
       <f:expandableTextbox default="false" />
     </f:entry>
+    
+    <f:entry title="Files to package" field="artifacts" >
+      <f:textbox /> 
+    </f:entry> 
+    
+    <f:entry title="Excludes" field="excludes" >
+      <f:textbox /> 
+    </f:entry> 
 </j:jelly>

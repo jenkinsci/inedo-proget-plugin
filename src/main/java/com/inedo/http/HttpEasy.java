@@ -327,9 +327,9 @@ public class HttpEasy {
 
 	private void log(String message) {
 		if (logWriter != null) {
-			logWriter.writeLogMessage(message);
+			logWriter.info(message);
 		} else if (defaultLogWriter != null) {
-			defaultLogWriter.writeLogMessage(message);
+			defaultLogWriter.info(message);
 		} else {
 			LOGGER.trace(message);
 		}		

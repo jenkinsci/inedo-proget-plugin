@@ -1,7 +1,6 @@
 package com.inedo.proget;
 
 import java.io.IOException;
-import java.io.PrintStream;
 import java.net.InetAddress;
 import java.net.URI;
 import org.apache.http.HttpException;
@@ -23,18 +22,15 @@ import com.inedo.proget.domain.Feed;
  * @author Andrew Sumner
  */
 public class MockServer {
-	public static final String APPLICATION_ID = "36";	// BuildMaster application id to get/create builds for
-	
 	private ProGetConfig config;
 	
 	// Required for mocking via test server
 	private HttpServer server = null;
 	private HttpRequestHandler handler;
 	
-	public MockServer(boolean mockRequests, PrintStream logger) throws IOException {
+	public MockServer(boolean mockRequests) throws IOException {
 		config = new ProGetConfig();
 		config.url = "http://localhost:81";
-		config.printStream = logger;
 		
 		if (mockRequests) {
 //			config.authentication = "none";

@@ -65,27 +65,27 @@ public class DownloadPackageBuilder extends Builder {
 	
 	@Override
 	public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws IOException {
-		ProGetHelper helper = new ProGetHelper(listener.getLogger());
+		ProGetHelper helper = new ProGetHelper(build, listener);
 		
 		if (!helper.validateProGetConfig()) {
 			return false;
 		}
 		
-		ProGet proget = new ProGet(helper.getProGetConfig());
+		ProGet proget = new ProGet(helper);
 		
-		String downloadTo = helper.expandVariable(build, listener, downloadFolder);
-		helper.writeLogMessage("Download to " + new File(downloadTo).getAbsolutePath());
+		String downloadTo = helper.expandVariable(downloadFolder);
+		helper.info("Download to " + new File(downloadTo).getAbsolutePath());
 		
 		try {
 			File downloaded = proget.downloadPackage(feedName, groupName, packageName, version, downloadTo);
 					
 			if (unpack) {
-				helper.writeLogMessage("Unpack " + downloaded.getName());
+				helper.info("Unpack " + downloaded.getName());
 				ProGetPackageUtils.unpackContent(downloaded);
 				downloaded.delete();
 			}
 		} catch (IOException e) {
-			helper.writeLogMessage("Error: " + e.getMessage());
+			helper.info("Error: " + e.getMessage());
 			return false;
 		}
 		

@@ -11,6 +11,7 @@ import com.inedo.proget.api.ProGet;
 import com.inedo.proget.domain.Feed;
 import com.inedo.proget.domain.PackageMetadata;
 import com.inedo.proget.domain.ProGetPackage;
+import com.inedo.proget.jenkins.ProGetHelper;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -38,14 +39,15 @@ public class ApiTests {
 	private final boolean MOCK_REQUESTS = false;	// Set this value to false to run against a live BuildMaster installation 
 	private MockServer mockServer;
 	private ProGet proget;
-	
+		
 	@Rule
 	public TemporaryFolder folder = new TemporaryFolder();
 	
 	@Before
     public void before() throws IOException {
-		mockServer = new MockServer(MOCK_REQUESTS, System.out);
-		proget = new ProGet(mockServer.getProGetConfig());
+		mockServer = new MockServer(MOCK_REQUESTS);
+		
+		proget = new ProGet(new ProGetHelper(mockServer.getProGetConfig()));
 	}
 	
 	@After
@@ -61,9 +63,12 @@ public class ApiTests {
 	
 	@Test(expected=UnknownHostException.class)
 	public void getWithIncorrectHost() throws IOException {
-		String origUrl = mockServer.getProGetConfig().url; 
-		mockServer.getProGetConfig().url = "http://buildmaster1";
-				
+		ProGetConfig config = mockServer.getProGetConfig();
+		String origUrl = config.url; 
+		config.url = "http://buildmaster1";
+		
+		proget = new ProGet(new ProGetHelper(config));
+		
 		try {
 			proget.getFeeds();
 		} finally {
@@ -94,6 +99,7 @@ public class ApiTests {
 		ProGetPackage pkg = proget.getPackageList(feed.Feed_Id)[0];
 		
 		File downloaded = proget.downloadPackage(feed.Feed_Name, pkg.Group_Name, pkg.Package_Name, pkg.LatestVersion_Text, folder.getRoot().getAbsolutePath());
+//		File downloaded = proget.downloadPackage("Example", "andrew/sumner/example", "examplepackage", "0.0.1", folder.getRoot().getAbsolutePath());
     	
         assertThat("File has content", downloaded.length(), is(greaterThan((long)1000)));
 	}
@@ -138,6 +144,29 @@ public class ApiTests {
 	}
 	
 	@Test
+	public void createPackageUsingAntIncludes() throws IOException {
+		preparePackageFiles();
+		
+		checkFilter("Everything included", 5, "**/*.*", "", false);
+		checkFilter("Log file excluded", 4, "**/*.*", "*.log", false);
+		checkFilter("Only backup file included", 1, "**/*.bak", "", false);
+		checkFilter("Only data file included", 2, "*.data", "", false);
+		checkFilter("Multiple filters", 3, "**/*.data *.txt", "", false);
+	}
+	
+	private void checkFilter(String assertMessage, int expectedFileCount, String include, String exclude, boolean caseSensitive) throws IOException {
+		File pkg = proget.createPackage(folder.getRoot(), include, exclude, caseSensitive);
+		
+		assertThat("Package is created", pkg, is(notNullValue()));
+        
+		try (ZipFile zip = new ZipFile(pkg)) {
+			assertThat(assertMessage, zip.size(), is(equalTo(expectedFileCount)));
+		}
+		
+		pkg.delete();
+	}
+	
+	@Test
 	public void uploadPackage() throws IOException {
 		PackageMetadata metadata = preparePackageFiles();
 		
@@ -166,12 +195,12 @@ public class ApiTests {
 	}
 	
 	private PackageMetadata preparePackageFiles() throws IOException {
-		File file = new File(folder.getRoot(), "sample.data");
-		
-		try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-			writer.write("This is a sample file");
-		}
-		
+		createFile(new File(folder.getRoot(), "sample.data"), "This is a sample data file");
+		createFile(new File(folder.getRoot(), "sample.txt"), "This is a sample text file");
+		createFile(new File(folder.getRoot(), "more/sample.data"), "This is a another sample data file");
+		createFile(new File(folder.getRoot(), "logs/sample.log"), "This is a sample log file");
+		createFile(new File(folder.getRoot(), "logs/sample.log.bak"), "This is a sample log file");
+				
 		PackageMetadata metadata = new PackageMetadata();
 		metadata.group = "com/inedo/proget";
 		metadata.name = "ExamplePackage";
@@ -179,6 +208,16 @@ public class ApiTests {
 		metadata.title = "Example Package";
 		metadata.description = "Example package for testing";
 		return metadata;
+	}
+	
+	private void createFile(File file, String content) throws IOException {
+		if (!file.getParentFile().exists()) {
+			file.getParentFile().mkdir();
+		}
+		
+		try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+			writer.write("This is a sample file");
+		}
 	}
 	
 }

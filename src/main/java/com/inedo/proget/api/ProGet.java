@@ -2,27 +2,18 @@ package com.inedo.proget.api;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.tools.ant.types.FileSet;
 
 import com.google.common.net.MediaType;
 import com.inedo.http.HttpEasy;
-//import java.net.InetSocketAddress;
-//import java.net.Proxy;
-//import java.util.Arrays;
-//import org.apache.http.auth.AuthScope;
-//import org.apache.http.auth.UsernamePasswordCredentials;
-//import org.apache.http.auth.NTCredentials;
-//import org.apache.http.client.CredentialsProvider;
-//import org.apache.http.client.HttpClient;
-//import org.apache.http.client.config.AuthSchemes;
-//import org.apache.http.client.config.RequestConfig;
-//import org.apache.http.impl.client.BasicCredentialsProvider;
-//import org.apache.http.impl.client.HttpClientBuilder;
-//import org.apache.http.impl.client.HttpClients;
-//import com.inedo.proget.ConnectionType;
 import com.inedo.proget.domain.Feed;
 import com.inedo.proget.domain.PackageMetadata;
 import com.inedo.proget.domain.ProGetPackage;
 import com.inedo.proget.jenkins.ProGetHelper;
+import hudson.Util;
 
 /**
  * BuildMaster json api interface 
@@ -34,16 +25,15 @@ import com.inedo.proget.jenkins.ProGetHelper;
  */
 public class ProGet {
 	private ProGetConfig config;
-//	private boolean logRequest = true;
 	
-	public ProGet(ProGetConfig config) {
-		this.config = config;
+	public ProGet(ProGetHelper helper) {
+		this.config = helper.getProGetConfig();
 		
 		HttpEasy.withDefaults()
 			.allowAllHosts()
 			.trustAllCertificates()
 			.baseUrl(config.url)
-			.withLogWriter(new ProGetHelper(config.printStream));
+			.withLogWriter(helper);
 	}
 
 	/**
@@ -55,17 +45,13 @@ public class ProGet {
 		getFeeds();
 	}
 
-	public void upload(String feedName) throws IOException {
-		
-	}
-	
 	/** Gets the details of a feed by its name */
 	public Feed getFeed(String feedName) throws IOException {
 		Feed feed = HttpEasy.request().
-				baseURI(config.url).
 				path("api/json/Feeds_GetFeed?API_Key={}&Feed_Name={}").
 				urlParameters(config.apiKey, feedName).
-				get().asJson(Feed.class);
+				get().
+				asJson(Feed.class);
 		
 		if (feed == null) {
 			throw new IOException("Feed " + feedName + " was not found");
@@ -77,10 +63,10 @@ public class ProGet {
 	/** Get all active feeds */
 	public Feed[] getFeeds() throws IOException {
 		Feed[] result = HttpEasy.request().
-				baseURI(config.url).
 				path("api/json/Feeds_GetFeeds?API_Key={}&IncludeInactive_Indicator={}").
 				urlParameters(config.apiKey, "N").
-				get().asJson(Feed[].class);
+				get().
+				asJson(Feed[].class);
 		
 		return result;
 	}
@@ -88,10 +74,10 @@ public class ProGet {
 	/** Gets the packages in a ProGet feed */
 	public ProGetPackage[] getPackageList(String feedId) throws IOException {
 		return HttpEasy.request().
-				baseURI(config.url).
 				path("api/json/ProGetPackages_GetPackages?API_Key={}&Feed_Id={}&IncludeVersions_Indicator=Y").
 				urlParameters(config.apiKey, feedId, "Y").
-				get().asJson(ProGetPackage[].class);
+				get().
+				asJson(ProGetPackage[].class);
 	}
 
 	/**
@@ -114,20 +100,53 @@ public class ProGet {
 		}
 		
 		return HttpEasy.request().
-				baseURI(config.url).
 				path(path).
 				urlParameters(feedName, groupName, packageName, version).
 				get().
 				downloadFile(toFolder);
 	}
-
+	
 	public File createPackage(File sourceFolder, PackageMetadata metadata) throws IOException {
 		return new ProGetPackageUtils().createPackage(sourceFolder, metadata);
 	}
 	
+	public File createPackage(File workFolder, String includes, String excludes, boolean caseSensitive) throws IOException {
+		Map<String, String> files = listFiles(workFolder, includes, excludes, caseSensitive);
+        
+        if (files.isEmpty()) {
+        	return null;
+        }
+        
+		return new ProGetPackageUtils().createPackage(workFolder, files, getMetadataObject());
+	}
+	
+	private PackageMetadata getMetadataObject() throws IOException {
+		PackageMetadata metadata = new PackageMetadata();
+		metadata.group = "com/inedo/proget";
+		metadata.name = "ExamplePackage";
+		metadata.version = "0.0.3";
+		metadata.title = "Example Package";
+		metadata.description = "Example package for testing";
+		return metadata;
+	}
+
+	private Map<String,String> listFiles(File basedir, String includes, String excludes, boolean caseSensitive) {
+		Map<String,String> r = new HashMap<String, String>();
+
+		FileSet fileSet = Util.createFileSet(basedir, includes, excludes);
+		fileSet.setDefaultexcludes(false);
+		fileSet.setCaseSensitive(caseSensitive);
+
+		for (String f : fileSet.getDirectoryScanner().getIncludedFiles()) {
+			f = f.replace(File.separatorChar, '/');
+			r.put(f, f);
+		}
+
+		return r;
+	}
+	
 	public void uploadPackage(String feedName, File progetPackage) throws IOException {
 		HttpEasy.request().
-				baseURI(config.url).
 				path("upack/{«feed-name»}/upload").
 				urlParameters(feedName).
 				data(progetPackage, MediaType.ZIP).

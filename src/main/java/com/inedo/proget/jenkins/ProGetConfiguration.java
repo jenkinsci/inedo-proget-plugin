@@ -1,8 +1,6 @@
 package com.inedo.proget.jenkins;
 
 import java.io.IOException;
-import java.io.PrintStream;
-
 import javax.servlet.ServletException;
 
 import jenkins.model.GlobalConfiguration;
@@ -209,7 +207,7 @@ public class ProGetConfiguration extends GlobalConfiguration {
 			config.password = password;
 			config.apiKey = apiKey;
 			
-			ProGet proget = new ProGet(config);
+			ProGet proget = new ProGet(new ProGetHelper(config));
 			
 			try {
 				proget.checkConnection();
@@ -231,12 +229,6 @@ public class ProGetConfiguration extends GlobalConfiguration {
 			config.apiKey = apiKey;
 			
     		return config;
-		}
-
-		public ProGetConfig getProGetConfig(PrintStream logger) {
-			ProGetConfig config = getProGetConfig();
-			config.printStream = logger;
-			return config;
 		}
     }
 }
