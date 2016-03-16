@@ -4,14 +4,13 @@ import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
@@ -25,14 +24,16 @@ import hudson.Util;
 
 public class ProGetPackageUtils
 {
+	private static final String UNPACK = "unpack" + File.separatorChar;
+	
 	private File sourceFolder;
 	private File zipFile;
 	private ZipOutputStream zos = null;
 		
-	public File createPackage(File workFolder, List<File> files, PackageMetadata metadata) throws IOException {		
+	public File createPackage(File baseFolder, List<String> files, PackageMetadata metadata) throws IOException {		
 		FileOutputStream fos = null;
 		
-		this.sourceFolder = workFolder;
+		this.sourceFolder = baseFolder;
 		this.zipFile = new File(sourceFolder, metadata.name.replace(" ",  "") + ".unpack");
 		
 		try {
@@ -40,7 +41,7 @@ public class ProGetPackageUtils
 			zos = new ZipOutputStream(fos);
 
 			appendMetadata(metadata);
-//			appendFiles(files, "unpack/");
+			appendFiles(files, UNPACK);
 		} finally {
 			if (zos != null) zos.closeEntry();
 			if (zos != null) zos.close(); 
@@ -61,7 +62,7 @@ public class ProGetPackageUtils
 			zos = new ZipOutputStream(fos);
 
 			appendMetadata(metadata);
-			appendFiles(sourceFolder, "unpack/");
+			appendFiles(sourceFolder, UNPACK);
 		} finally {
 			if (zos != null) zos.closeEntry();
 			if (zos != null) zos.close(); 
@@ -111,26 +112,14 @@ public class ProGetPackageUtils
 		return value !=null && !value.isEmpty();
 	}
 	
-	private void appendFiles(Map<String, String> files, String destinationFolder) {
-		for (Map.Entry<String, String> filePath : files.entrySet())	{
-			//TODO finish off
-//			filePath.getValue();
-//			
-//			ZipItem entry = generateZipEntry(node, destinationFolder);			
-//			ZipEntry ze = new ZipEntry(entry.destinationFile);
-//			byte[] buffer = new byte[1024];
-//			int len;
-//			
-//			zos.putNextEntry(ze);
-//
-//			try (FileInputStream in = new FileInputStream(new File(entry.sourceFile))) {
-//				while ((len = in.read(buffer)) > 0) {
-//					zos.write(buffer, 0, len);
-//				}
-//			}
+	private void appendFiles(List<String> files, String destinationFolder) throws IOException {
+		for (String fileName : files)	{
+			File file = new File(sourceFolder, fileName);
+			
+			appendFile(destinationFolder, file);
 		}
 	}
-	
+
 	/**
 	 * Traverse a directory and get all files,
 	 * and add the file into fileList  
@@ -145,18 +134,7 @@ public class ProGetPackageUtils
 				return;
 			}
 			
-			ZipItem entry = generateZipEntry(node, destinationFolder);			
-			ZipEntry ze = new ZipEntry(entry.destinationFile);
-			byte[] buffer = new byte[1024];
-			int len;
-			
-			zos.putNextEntry(ze);
-
-			try (FileInputStream in = new FileInputStream(new File(entry.sourceFile))) {
-				while ((len = in.read(buffer)) > 0) {
-					zos.write(buffer, 0, len);
-				}
-			}
+			appendFile(destinationFolder, node);
 		}
 
 		if(node.isDirectory()){
@@ -166,6 +144,21 @@ public class ProGetPackageUtils
 			}
 		}
 
+	}
+	
+	private void appendFile(String destinationFolder, File file) throws IOException, FileNotFoundException {
+		ZipItem entry = generateZipEntry(file, destinationFolder);			
+		ZipEntry ze = new ZipEntry(entry.destinationFile);
+		byte[] buffer = new byte[1024];
+		int len;
+		
+		zos.putNextEntry(ze);
+
+		try (FileInputStream in = new FileInputStream(file)) {
+			while ((len = in.read(buffer)) > 0) {
+				zos.write(buffer, 0, len);
+			}
+		}
 	}
 	
 	/**
@@ -179,7 +172,7 @@ public class ProGetPackageUtils
 		
 		String destFile = srcFile.substring(srcFolder.length() + 1, srcFile.length());
 				
-		return new ZipItem(srcFile, destinationFolder + destFile);
+		return new ZipItem(srcFile, (destinationFolder + destFile).replace(File.separatorChar, '/'));
 	}
 	
 	private class ZipItem {
@@ -202,8 +195,6 @@ public class ProGetPackageUtils
 	 * @throws ZipException 
 	 */
 	public static void unpackContent(File pkg) throws IOException {
-		final String UNPACK = "unpack/";
-		
 		try(ZipFile archive = new ZipFile(pkg)) {
 			File extractTo = pkg.getParentFile();
 		
@@ -212,8 +203,7 @@ public class ProGetPackageUtils
 	        while (e.hasMoreElements()) {
 	            ZipEntry entry = e.nextElement();
 	            
-	            String entryName = entry.getName();
-	            
+	            String entryName = new File(entry.getName()).getPath();
 	            if (entryName.startsWith(UNPACK) && !entryName.equals(UNPACK)) {
 	            	entryName = entryName.substring(UNPACK.length());
 	            	
@@ -245,16 +235,15 @@ public class ProGetPackageUtils
 		}
     }
 
-	public static List<File> getFileList(File baseFolder, String includes, String excludes, boolean caseSensitive) {
-		List<File> files = new ArrayList<File>();
+	public static List<String> getFileList(File baseFolder, String includes, String excludes, boolean caseSensitive) {
+		List<String> files = new ArrayList<String>();
 
 		FileSet fileSet = Util.createFileSet(baseFolder, includes, excludes);
 		fileSet.setDefaultexcludes(false);
 		fileSet.setCaseSensitive(caseSensitive);
 
 		for (String f : fileSet.getDirectoryScanner().getIncludedFiles()) {
-			//f = f.replace(File.separatorChar, '/');
-			files.add(new File(f));
+			files.add(f.replace(File.separatorChar, '/'));
 		}
 
 		return files;

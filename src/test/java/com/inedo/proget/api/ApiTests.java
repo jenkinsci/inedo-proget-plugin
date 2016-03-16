@@ -2,10 +2,6 @@ package com.inedo.proget.api;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.fail;
-
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonParser;
 import com.inedo.proget.MockServer;
 import com.inedo.proget.api.ProGet;
 import com.inedo.proget.domain.Feed;
@@ -17,11 +13,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.UnknownHostException;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipException;
-import java.util.zip.ZipFile;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;

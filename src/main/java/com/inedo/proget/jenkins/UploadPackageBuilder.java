@@ -15,8 +15,12 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
 import com.inedo.proget.api.ProGet;
+import com.inedo.proget.api.ProGetPackageUtils;
+import com.inedo.proget.domain.PackageMetadata;
+
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Uploads a universal package from ProGet.
@@ -80,13 +84,12 @@ public class UploadPackageBuilder extends Builder {
     	String includes = helper.expandVariable(this.artifacts);
     	FilePath ws = build.getWorkspace();
     	
+    	//TODO should allow custom base directory and caseSensitive
     	File baseDir = new File(ws.getRemote());
         
-        ProGet proget = new ProGet(helper);
-        
-		File pkg = proget.createPackage(baseDir, includes, excludes, caseSensitive);
-		
-		if (pkg == null) {
+    	List<String> files = ProGetPackageUtils.getFileList(baseDir, includes, excludes, false);
+          
+		if (files.isEmpty()) {
 	    	String msg = ws.validateAntFileMask(includes, FilePath.VALIDATE_ANT_FILE_MASK_BOUND);
 	    	if(msg != null) {
 	        	helper.error(msg);
@@ -97,11 +100,25 @@ public class UploadPackageBuilder extends Builder {
 	    	return false;
 		}    	
 		
-		proget.uploadPackage(feedName, pkg);
+		ProGetPackageUtils packageUtils = new ProGetPackageUtils();
+    	File pkg = packageUtils.createPackage(baseDir, files, getMetadataObject());
+		
+		new ProGet(helper).uploadPackage(feedName, pkg);
         
         return true;
 	}
 	
+	//TODO CREATE REAL METADATA
+	private PackageMetadata getMetadataObject() throws IOException {
+		PackageMetadata metadata = new PackageMetadata();
+		metadata.group = "andrew/sumner/proget";
+		metadata.name = "ExamplePackage";
+		metadata.version = "0.0.3";
+		metadata.title = "Example Package";
+		metadata.description = "Example package for testing";
+		return metadata;
+	}
+		
 	@Extension
 	// This indicates to Jenkins that this is an implementation of an extension point.
 	public static final class DescriptorImpl extends BuildStepDescriptor<Builder> {

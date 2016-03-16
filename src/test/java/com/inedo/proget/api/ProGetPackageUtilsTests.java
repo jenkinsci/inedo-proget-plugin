@@ -23,9 +23,7 @@ import org.junit.rules.TemporaryFolder;
 import com.google.common.io.Files;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
-import com.inedo.proget.domain.Feed;
 import com.inedo.proget.domain.PackageMetadata;
-import com.inedo.proget.domain.ProGetPackage;
 
 public class ProGetPackageUtilsTests {
 	@Rule
@@ -49,7 +47,7 @@ public class ProGetPackageUtilsTests {
 	}
 	
 	private void checkFilter(String assertMessage, int expectedFileCount, String include, String exclude, boolean caseSensitive) throws IOException {
-		List<File> files = ProGetPackageUtils.getFileList(folder.getRoot(), include, exclude, caseSensitive);
+		List<String> files = ProGetPackageUtils.getFileList(folder.getRoot(), include, exclude, caseSensitive);
 		
 		assertThat("Package is created", files, is(not(empty())));
 		assertThat(assertMessage, files.size(), is(equalTo(expectedFileCount)));
@@ -64,10 +62,10 @@ public class ProGetPackageUtilsTests {
 
 	@Test
 	public void createPackageFromAntIncludes() throws IOException {
-		List<File> files = ProGetPackageUtils.getFileList(folder.getRoot(), "**/*.*", "logs/", false);
+		List<String> files = ProGetPackageUtils.getFileList(folder.getRoot(), "**/*.*", "logs/", false);
 		File pkg = new ProGetPackageUtils().createPackage(folder.getRoot(), files, getMetadata());
 		
-		verifyPackage(pkg, 3);
+		verifyPackage(pkg, 4);
 	}
 	
 	@Test

@@ -2,19 +2,11 @@ package com.inedo.proget.api;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.tools.ant.types.FileSet;
-
 import com.google.common.net.MediaType;
 import com.inedo.http.HttpEasy;
 import com.inedo.proget.domain.Feed;
-import com.inedo.proget.domain.PackageMetadata;
 import com.inedo.proget.domain.ProGetPackage;
 import com.inedo.proget.jenkins.ProGetHelper;
-import hudson.Util;
 
 /**
  * BuildMaster json api interface 
@@ -105,26 +97,6 @@ public class ProGet {
 				urlParameters(feedName, groupName, packageName, version).
 				get().
 				downloadFile(toFolder);
-	}
-	
-	public File createPackage(File workFolder, String includes, String excludes, boolean caseSensitive) throws IOException {
-		List<File> files = ProGetPackageUtils.getFileList(workFolder, includes, excludes, caseSensitive);
-        
-        if (files.isEmpty()) {
-        	return null;
-        }
-        
-		return new ProGetPackageUtils().createPackage(workFolder, files, getMetadataObject());
-	}
-	
-	private PackageMetadata getMetadataObject() throws IOException {
-		PackageMetadata metadata = new PackageMetadata();
-		metadata.group = "com/inedo/proget";
-		metadata.name = "ExamplePackage";
-		metadata.version = "0.0.3";
-		metadata.title = "Example Package";
-		metadata.description = "Example package for testing";
-		return metadata;
 	}
 	
 	public void uploadPackage(String feedName, File progetPackage) throws IOException {
