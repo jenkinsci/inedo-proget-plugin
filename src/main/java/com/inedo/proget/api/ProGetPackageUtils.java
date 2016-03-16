@@ -7,14 +7,21 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
+import org.apache.tools.ant.types.FileSet;
+
 import com.inedo.proget.domain.PackageMetadata;
+
+import hudson.Util;
 
 public class ProGetPackageUtils
 {
@@ -22,7 +29,7 @@ public class ProGetPackageUtils
 	private File zipFile;
 	private ZipOutputStream zos = null;
 		
-	public File createPackage(File workFolder, Map<String, String> files, PackageMetadata metadata) throws IOException {		
+	public File createPackage(File workFolder, List<File> files, PackageMetadata metadata) throws IOException {		
 		FileOutputStream fos = null;
 		
 		this.sourceFolder = workFolder;
@@ -33,7 +40,7 @@ public class ProGetPackageUtils
 			zos = new ZipOutputStream(fos);
 
 			appendMetadata(metadata);
-			appendFiles(files, "unpack/");
+//			appendFiles(files, "unpack/");
 		} finally {
 			if (zos != null) zos.closeEntry();
 			if (zos != null) zos.close(); 
@@ -237,4 +244,19 @@ public class ProGetPackageUtils
             }
 		}
     }
+
+	public static List<File> getFileList(File baseFolder, String includes, String excludes, boolean caseSensitive) {
+		List<File> files = new ArrayList<File>();
+
+		FileSet fileSet = Util.createFileSet(baseFolder, includes, excludes);
+		fileSet.setDefaultexcludes(false);
+		fileSet.setCaseSensitive(caseSensitive);
+
+		for (String f : fileSet.getDirectoryScanner().getIncludedFiles()) {
+			//f = f.replace(File.separatorChar, '/');
+			files.add(new File(f));
+		}
+
+		return files;
+	}
 }

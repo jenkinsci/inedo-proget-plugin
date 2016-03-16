@@ -116,84 +116,16 @@ public class ApiTests {
 	}
 	
 	@Test
-	public void createPackage() throws IOException {
-		PackageMetadata metadata = preparePackageFiles();
-		
-		File pkg = proget.createPackage(folder.getRoot(), metadata);
-		
-		try (ZipFile zip = new ZipFile(pkg)) {
-	        assertThat("Package file contains 2 entries", zip.size(), is(equalTo(2)));
-	        
-	        ZipEntry ze = zip.getEntry("upack.json");
-	        assertThat("Package file contains upack.json", ze, is(notNullValue()));
-	        
-	        try (InputStream zin = zip.getInputStream(ze)) {
-		        byte[] bytes= new byte[(int)ze.getSize()];
-		        zin.read(bytes, 0, bytes.length);
-	            String json = new String( bytes, "UTF-8" );
-	            
-	            // Will throw JsonParseException if not valid json
-	            new JsonParser().parse(json);
-	        }  catch (JsonParseException e) {
-	        	fail("unpack.json is not a valid json file");
-	        }
-	        
-	        ze = zip.getEntry("unpack/sample.data");
-	        assertThat("Package file contains unpack folder", ze, is(notNullValue()));
-		}
-	}
-	
-	@Test
-	public void createPackageUsingAntIncludes() throws IOException {
-		preparePackageFiles();
-		
-		checkFilter("Everything included", 5, "**/*.*", "", false);
-		checkFilter("Log file excluded", 4, "**/*.*", "*.log", false);
-		checkFilter("Only backup file included", 1, "**/*.bak", "", false);
-		checkFilter("Only data file included", 2, "*.data", "", false);
-		checkFilter("Multiple filters", 3, "**/*.data *.txt", "", false);
-	}
-	
-	private void checkFilter(String assertMessage, int expectedFileCount, String include, String exclude, boolean caseSensitive) throws IOException {
-		File pkg = proget.createPackage(folder.getRoot(), include, exclude, caseSensitive);
-		
-		assertThat("Package is created", pkg, is(notNullValue()));
-        
-		try (ZipFile zip = new ZipFile(pkg)) {
-			assertThat(assertMessage, zip.size(), is(equalTo(expectedFileCount)));
-		}
-		
-		pkg.delete();
-	}
-	
-	@Test
 	public void uploadPackage() throws IOException {
 		PackageMetadata metadata = preparePackageFiles();
 		
-		File pkg = proget.createPackage(folder.getRoot(), metadata);
+		File pkg = new ProGetPackageUtils().createPackage(folder.getRoot(), metadata);
 		
 		proget.uploadPackage("Example", pkg);
 		
 		// Success is fact that no exception thrown...
 	}
 
-	@Test
-	public void unpackContent() throws ZipException, IOException {
-		Feed feed = proget.getFeed("Example");
-		
-		ProGetPackage pkg = proget.getPackageList(feed.Feed_Id)[0];
-		
-		File downloaded = proget.downloadPackage(feed.Feed_Name, pkg.Group_Name, pkg.Package_Name, pkg.LatestVersion_Text, folder.getRoot().getAbsolutePath());
-    	
-		int fileCount = downloaded.getParentFile().listFiles().length;
-		
-		ProGetPackageUtils.unpackContent(downloaded);
-		
-		assertThat("File have been unpacked", downloaded.getParentFile().listFiles().length, is(greaterThan(fileCount)));
-		
-		ProGetPackageUtils.unpackContent(downloaded);
-	}
-	
 	private PackageMetadata preparePackageFiles() throws IOException {
 		createFile(new File(folder.getRoot(), "sample.data"), "This is a sample data file");
 		createFile(new File(folder.getRoot(), "sample.txt"), "This is a sample text file");
@@ -219,5 +151,4 @@ public class ApiTests {
 			writer.write("This is a sample file");
 		}
 	}
-	
 }

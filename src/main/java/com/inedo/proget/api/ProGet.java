@@ -3,6 +3,7 @@ package com.inedo.proget.api;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.tools.ant.types.FileSet;
@@ -106,12 +107,8 @@ public class ProGet {
 				downloadFile(toFolder);
 	}
 	
-	public File createPackage(File sourceFolder, PackageMetadata metadata) throws IOException {
-		return new ProGetPackageUtils().createPackage(sourceFolder, metadata);
-	}
-	
 	public File createPackage(File workFolder, String includes, String excludes, boolean caseSensitive) throws IOException {
-		Map<String, String> files = listFiles(workFolder, includes, excludes, caseSensitive);
+		List<File> files = ProGetPackageUtils.getFileList(workFolder, includes, excludes, caseSensitive);
         
         if (files.isEmpty()) {
         	return null;
@@ -128,21 +125,6 @@ public class ProGet {
 		metadata.title = "Example Package";
 		metadata.description = "Example package for testing";
 		return metadata;
-	}
-
-	private Map<String,String> listFiles(File basedir, String includes, String excludes, boolean caseSensitive) {
-		Map<String,String> r = new HashMap<String, String>();
-
-		FileSet fileSet = Util.createFileSet(basedir, includes, excludes);
-		fileSet.setDefaultexcludes(false);
-		fileSet.setCaseSensitive(caseSensitive);
-
-		for (String f : fileSet.getDirectoryScanner().getIncludedFiles()) {
-			f = f.replace(File.separatorChar, '/');
-			r.put(f, f);
-		}
-
-		return r;
 	}
 	
 	public void uploadPackage(String feedName, File progetPackage) throws IOException {
