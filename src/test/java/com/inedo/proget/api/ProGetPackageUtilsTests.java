@@ -23,7 +23,6 @@ import org.junit.rules.TemporaryFolder;
 import com.google.common.io.Files;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
-import com.inedo.proget.domain.PackageMetadata;
 import com.inedo.proget.jenkins.ProGetHelper;
 import com.inedo.proget.jenkins.UploadPackageBuilder;
 
