@@ -9,8 +9,23 @@
     Creates a text field that shows the value of the "key" and "value" property.
     When submitted, it will be passed to the corresponding constructor parameter.
   -->
-	<f:entry title="Feed name" field="feedName" >
+	<j:if test="${descriptor.isConnectionError}">  
+	  	<f:block><br /><span style="color:red; font-weight: bold">Error: Unable to connect to ProGet. ${descriptor.connectionError}</span><br /><br /></f:block>
+	</j:if>
+
+	<f:entry title="Title" field="title" >
 		<f:textbox /> 
+	</f:entry>
+
+	<f:entry title="Description" field="description" >
+		<f:textbox /> 
+	</f:entry>
+	  
+	<f:entry title="Feed name" field="feedName" >
+		<j:choose>
+			<j:when test="${descriptor.isProGetAvailable}"><f:select /></j:when>
+      		<j:otherwise><f:textbox /></j:otherwise>
+		</j:choose>
 	</f:entry>
 	
 	<f:entry title="Group name" field="groupName" >

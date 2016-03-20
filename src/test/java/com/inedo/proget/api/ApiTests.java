@@ -40,7 +40,8 @@ public class ApiTests {
     public void before() throws IOException {
 		mockServer = new MockServer(MOCK_REQUESTS);
 		
-		proget = new ProGet(new ProGetHelper(mockServer.getProGetConfig()));
+		ProGetHelper.injectConfiguration(mockServer.getProGetConfig());		
+		proget = new ProGet(new ProGetHelper());
 	}
 	
 	@After
@@ -60,7 +61,7 @@ public class ApiTests {
 		String origUrl = config.url; 
 		config.url = "http://buildmaster1";
 		
-		proget = new ProGet(new ProGetHelper(config));
+		ProGetHelper.injectConfiguration(config);
 		
 		try {
 			proget.getFeeds();
@@ -80,7 +81,7 @@ public class ApiTests {
 	public void getPackageList() throws IOException  {
 		Feed feed = proget.getFeed("Example");
 		
-		ProGetPackage[] packages = proget.getPackageList(feed.Feed_Id);
+		ProGetPackage[] packages = proget.getPackages(feed.Feed_Id);
     	
         assertThat("Expect more than one package", packages.length, is(greaterThan(0)));
 	}
@@ -89,7 +90,7 @@ public class ApiTests {
 	public void downloadPackage() throws IOException  {
 		Feed feed = proget.getFeed("Example");
 		
-		ProGetPackage pkg = proget.getPackageList(feed.Feed_Id)[0];
+		ProGetPackage pkg = proget.getPackages(feed.Feed_Id)[0];
 		
 		File downloaded = proget.downloadPackage(feed.Feed_Name, pkg.Group_Name, pkg.Package_Name, pkg.LatestVersion_Text, folder.getRoot().getAbsolutePath());
 //		File downloaded = proget.downloadPackage("Example", "andrew/sumner/example", "examplepackage", "0.0.1", folder.getRoot().getAbsolutePath());
@@ -101,7 +102,7 @@ public class ApiTests {
 	public void downloadPackageLatestVersion() throws IOException  {
 		Feed feed = proget.getFeed("Example");
 		
-		ProGetPackage pkg = proget.getPackageList(feed.Feed_Id)[0];
+		ProGetPackage pkg = proget.getPackages(feed.Feed_Id)[0];
 		
 		File downloaded = proget.downloadPackage(feed.Feed_Name, pkg.Group_Name, pkg.Package_Name, "", folder.getRoot().getAbsolutePath());
     	
@@ -112,7 +113,6 @@ public class ApiTests {
 	public void uploadPackage() throws IOException {
 		preparePackageFiles();
 		
-		ProGetHelper helper = new ProGetHelper(null, null);
 		File pkg = new ProGetPackageUtils().createPackage(folder.getRoot(), getMetadata());
 		
 		proget.uploadPackage("Example", pkg);
@@ -132,7 +132,7 @@ public class ApiTests {
 		String include = "";
 		String exclude = "";
 		
-		UploadPackageBuilder settings = new UploadPackageBuilder("Example", "andrew/sumner/proget", "ExamplePackage", "0.0.3", "custom=yes\rreally=C:\\Java\\workspace\\inedo-proget-plugin\\work\\jobs\\ProGetUpload\\workspace", include);
+		UploadPackageBuilder settings = new UploadPackageBuilder("", "", "Example", "andrew/sumner/proget", "ExamplePackage", "0.0.3", "custom=yes\rreally=C:\\Java\\workspace\\inedo-proget-plugin\\work\\jobs\\ProGetUpload\\workspace", include);
 		settings.setCaseSensitive(false);
 		settings.setDefaultExcludes(false);
 		settings.setExcludes(exclude);

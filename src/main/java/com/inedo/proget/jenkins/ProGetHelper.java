@@ -19,12 +19,11 @@ import com.inedo.proget.domain.PackageMetadata;
  */
 public class ProGetHelper implements LogWriter {
 	private static final String LOG_PREFIX = "[ProGet] "; 
-	private static ProGetConfig config;
+	private static ProGetConfig config = null;
 	private final AbstractBuild<?, ?> build;
 	private final TaskListener listener;
 	
-	public ProGetHelper(ProGetConfig config) {
-		ProGetHelper.config = config;
+	public ProGetHelper() {
 		this.build = null;
 		this.listener = null;
 	}
@@ -55,7 +54,7 @@ public class ProGetHelper implements LogWriter {
 		return valid;
 	}
 
-	public ProGetConfig getProGetConfig() {
+	public static ProGetConfig getProGetConfig() {
 		if (config != null) {
 			return config;
 		}
@@ -63,7 +62,7 @@ public class ProGetHelper implements LogWriter {
 		return getSharedDescriptor().getProGetConfig();
 	}
 	
-	private ProGetConfiguration.DescriptorImpl getSharedDescriptor() {
+	private static ProGetConfiguration.DescriptorImpl getSharedDescriptor() {
 		return (ProGetConfiguration.DescriptorImpl) Jenkins.getInstance().getDescriptorOrDie(ProGetConfiguration.class);
 	}
 	
@@ -101,10 +100,8 @@ public class ProGetHelper implements LogWriter {
 	public PackageMetadata getMetadata(UploadPackageBuilder settings) {
 		PackageMetadata metadata = new PackageMetadata();
 
-		//TODO Add these two fields to GUI 
-		metadata.title = "Example Package";
-		metadata.description = "Example package for testing";
-		
+		metadata.title = settings.getTitle();
+		metadata.description = settings.getDescription();
 		metadata.group = expandVariable(settings.getGroupName());
 		metadata.packageName = expandVariable(settings.getPackageName());
 		metadata.version = expandVariable(settings.getVersion());

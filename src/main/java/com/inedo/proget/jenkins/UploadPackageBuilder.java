@@ -4,6 +4,7 @@ import hudson.Launcher;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.util.FormValidation;
+import hudson.util.ListBoxModel;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.AbstractProject;
@@ -16,13 +17,14 @@ import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 
 import com.inedo.proget.api.ProGet;
+import com.inedo.proget.api.ProGetConfig;
 import com.inedo.proget.api.ProGetPackageUtils;
+import com.inedo.proget.domain.Feed;
 import com.inedo.proget.domain.PackageMetadata;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-
 import javax.servlet.ServletException;
 
 /**
@@ -33,6 +35,8 @@ import javax.servlet.ServletException;
  * @author Andrew Sumner
  */
 public class UploadPackageBuilder extends Builder {
+	private final String title;
+	private final String description;
 	private final String feedName;
 	private final String groupName;
 	private final String packageName;
@@ -45,7 +49,9 @@ public class UploadPackageBuilder extends Builder {
 	
 	// Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
 	@DataBoundConstructor
-	public UploadPackageBuilder(String feedName, String groupName, String packageName, String version, String metadata, String artifacts) {
+	public UploadPackageBuilder(String title, String description, String feedName, String groupName, String packageName, String version, String metadata, String artifacts) {
+		this.title = title;
+		this.description = description;
 		this.feedName = feedName;
 		this.groupName = groupName;
 		this.packageName = packageName;
@@ -66,6 +72,14 @@ public class UploadPackageBuilder extends Builder {
         this.caseSensitive = caseSensitive;
     }
     
+	public String getTitle() {
+		return title;
+	}
+	
+	public String getDescription() {
+		return description;
+	}
+	
 	public String getFeedName() {
 		return feedName;
 	}
@@ -151,6 +165,10 @@ public class UploadPackageBuilder extends Builder {
 	@Extension
 	// This indicates to Jenkins that this is an implementation of an extension point.
 	public static final class DescriptorImpl extends BuildStepDescriptor<Builder> {
+		private ProGet proget = null;
+		private String connectionError = "";
+		private Boolean isProGetAvailable = null;
+		
 		public DescriptorImpl() {
 			super(UploadPackageBuilder.class);
 		}
@@ -166,6 +184,63 @@ public class UploadPackageBuilder extends Builder {
 			return "Upload ProGet Package";
 		}
 		
+		public boolean isConnectionError() {
+			getIsProGetAvailable();
+			
+			return !connectionError.isEmpty();
+		}
+		
+		public String getConnectionError() {
+			getIsProGetAvailable();
+			
+    		return connectionError;
+    	}
+		
+		/**
+    	 * Check if can connect to ProGet - if not prevent any more calls
+    	 */
+    	public boolean getIsProGetAvailable() {
+    		if (isProGetAvailable == null) {
+    			ProGetConfig config = ProGetHelper.getProGetConfig();
+    			proget = new ProGet(new ProGetHelper());;
+        		
+            	if (config.apiKey == null || config.apiKey.isEmpty()) {
+            		isProGetAvailable = false;
+            		connectionError = "";
+            	} else {
+            		try {
+                    	proget.checkConnection();
+                    	isProGetAvailable = true;
+                		connectionError = "";
+                    } catch (Exception ex) {
+                    	isProGetAvailable = false;
+                    	connectionError = ex.getClass().getName() + ": " + ex.getMessage();
+                    	
+                    	System.err.println(connectionError);
+                    }   
+            	}
+    		}
+        	
+        	return isProGetAvailable;
+    	}
+    	
+    	public ListBoxModel doFillFeedNameItems() throws IOException {
+        	ListBoxModel items = new ListBoxModel();
+        	
+        	if (!getIsProGetAvailable()) {
+        		items.add("", "");
+        		
+        		return items;
+        	}
+        	
+        	Feed[] feeds = proget.getFeeds();
+            
+        	for (Feed feed : feeds) {
+        		items.add(feed.Feed_Name);
+			}
+        	
+            return items;
+        }
 		/**
          * Performs on-the-fly validation of the file mask wildcard, when the artifacts
          * textbox or the caseSensitive checkbox are modified
@@ -180,17 +255,36 @@ public class UploadPackageBuilder extends Builder {
             
             return FilePath.validateFileMask(project.getSomeWorkspace(), value);
         }
-        
-        //TODO either go with this or dropdown (or both if api key not supplied...)
+
+        public FormValidation doCheckTitle(@QueryParameter String value) throws IOException, ServletException {
+        	return checkFieldLength(value, false);
+        }
+
         public FormValidation doCheckFeedName(@QueryParameter String value) throws IOException, ServletException {
-            if (value.length() == 0)
+        	return checkFieldLength(value, true);
+        }
+        
+        public FormValidation doCheckGroupName(@QueryParameter String value) throws IOException, ServletException {
+        	return checkFieldLength(value, true);
+        }
+        
+        public FormValidation doCheckPackageName(@QueryParameter String value) throws IOException, ServletException {
+        	return checkFieldLength(value, true);
+        }
+
+        public FormValidation doCheckVersion(@QueryParameter String value) throws IOException, ServletException {
+        	return checkFieldLength(value, true);
+        }
+
+        private FormValidation checkFieldLength(String value, Boolean required) {
+        	if (required && value.length() == 0)
                 return FormValidation.error("This setting is required");
         
-//        	groupName
-//        	packageName
-//        	version
+            if (value.length() > 50)
+                return FormValidation.error("No more than 50 characters allowed");
 
             return FormValidation.ok();
-        }
+		}
+
 	}
 }

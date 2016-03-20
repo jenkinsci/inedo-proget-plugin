@@ -31,7 +31,8 @@ version = '1.4-SNAPSHOT'
 description = 'Inedo ProGet plugin for Jenkins'
 
 ext {
-	jenkinsVersion='1.596.1'
+	jenkinsVersion='1.642.3'
+	//jenkinsVersion='1.596.1'
 }
 
 jenkinsPlugin {
@@ -62,7 +63,7 @@ dependencies {
 	//testCompile "org.jenkins-ci.main:jenkins-test-harness:$jenkinsVersion"
 	
 	// https://issues.jenkins-ci.org/browse/JENKINS-27826
-	jenkinsTest 'org.jenkins-ci.plugins:matrix-project:1.4@jar'
+	//jenkinsTest 'org.jenkins-ci.plugins:matrix-project:1.4@jar'
 	
 	compile 'org.slf4j:slf4j-api:1.7.12'
 }

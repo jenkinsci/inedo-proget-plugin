@@ -20,7 +20,7 @@ public class ProGet {
 	private ProGetConfig config;
 	
 	public ProGet(ProGetHelper helper) {
-		this.config = helper.getProGetConfig();
+		this.config = ProGetHelper.getProGetConfig();
 		
 		HttpEasy.withDefaults()
 			.allowAllHosts()
@@ -65,7 +65,7 @@ public class ProGet {
 	}
 	
 	/** Gets the packages in a ProGet feed */
-	public ProGetPackage[] getPackageList(String feedId) throws IOException {
+	public ProGetPackage[] getPackages(String feedId) throws IOException {
 		return HttpEasy.request().
 				path("api/json/ProGetPackages_GetPackages?API_Key={}&Feed_Id={}&IncludeVersions_Indicator=Y").
 				urlParameters(config.apiKey, feedId, "Y").

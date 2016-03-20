@@ -96,7 +96,10 @@ public class DownloadPluginTests {
 		DownloadPackageBuilder download = new DownloadPackageBuilder(feedName, groupName, packageName, version, downloadFolder, unpack);
 		
 		ProGetConfig config = mockServer.getProGetConfig();
+		
 		ProGetHelper.injectConfiguration(config);
+		
+		
 		
 //		JenkinsRule.WebClient webClient = j.createWebClient();
 //		HtmlPage globalConfigPage = webClient.goTo("/configure");

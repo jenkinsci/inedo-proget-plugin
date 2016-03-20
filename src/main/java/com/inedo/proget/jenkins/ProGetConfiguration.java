@@ -157,25 +157,25 @@ public class ProGetConfiguration extends GlobalConfiguration {
 //            return FormValidation.ok();
 //        }
 
-        public FormValidation doCheckUser(@QueryParameter String value, @QueryParameter String authentication) throws IOException, ServletException {
-            if (value.length() == 0 && !"none".equals(authentication))
-                return FormValidation.error("User is required");
+//        public FormValidation doCheckUser(@QueryParameter String value, @QueryParameter String authentication) throws IOException, ServletException {
+//            if (value.length() == 0 && !"none".equals(authentication))
+//                return FormValidation.error("User is required");
+//
+//            if (value.length() > 0 && "none".equals(authentication))
+//                return FormValidation.warning("Value will be ignored as no authentication method selected");
+//
+//            return FormValidation.ok();
+//        }
 
-            if (value.length() > 0 && "none".equals(authentication))
-                return FormValidation.warning("Value will be ignored as no authentication method selected");
-
-            return FormValidation.ok();
-        }
-
-        public FormValidation doCheckPassword(@QueryParameter String value, @QueryParameter String authentication) throws IOException, ServletException {
-            if (value.length() == 0 && !"none".equals(authentication))
-                return FormValidation.error("Password is required");
-
-            if (value.length() > 0 && "none".equals(authentication))
-                return FormValidation.warning("Value will be ignored as no authentication method selected");
-
-            return FormValidation.ok();
-        }
+//        public FormValidation doCheckPassword(@QueryParameter String value, @QueryParameter String authentication) throws IOException, ServletException {
+//            if (value.length() == 0 && !"none".equals(authentication))
+//                return FormValidation.error("Password is required");
+//
+//            if (value.length() > 0 && "none".equals(authentication))
+//                return FormValidation.warning("Value will be ignored as no authentication method selected");
+//
+//            return FormValidation.ok();
+//        }
 
         public ListBoxModel doFillAuthenticationItems() {
             ListBoxModel items = new ListBoxModel();
@@ -207,12 +207,15 @@ public class ProGetConfiguration extends GlobalConfiguration {
 			config.password = password;
 			config.apiKey = apiKey;
 			
-			ProGet proget = new ProGet(new ProGetHelper(config));
+			ProGetHelper.injectConfiguration(config);
+			ProGet proget = new ProGet(new ProGetHelper());
 			
 			try {
 				proget.checkConnection();
 			} catch (Exception ex) {
 				return FormValidation.error("Failed. Please check the configuration. " + ex.getClass().getName() + ": " + ex.getMessage());
+			} finally {
+				ProGetHelper.injectConfiguration(null);
 			}
 			
 			return FormValidation.ok("Success. Connection with ProGet verified.");			

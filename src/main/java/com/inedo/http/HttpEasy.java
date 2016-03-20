@@ -469,6 +469,8 @@ public class HttpEasy {
 		setProxyAuthorization(connection);
 		setAuthorization(connection);
 
+		connection.setRequestProperty("Cache-Control", "no-store, must-revalidate, no-cache, max-age=0");
+		
 		for (Map.Entry<String, Object> header : headers.entrySet()) {
 			connection.setRequestProperty(header.getKey(), String.valueOf(header.getValue()));
 		}
