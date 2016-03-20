@@ -11,6 +11,8 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
@@ -19,6 +21,7 @@ import java.util.zip.ZipOutputStream;
 import org.apache.tools.ant.types.FileSet;
 
 import com.inedo.proget.domain.PackageMetadata;
+import com.inedo.proget.jenkins.UploadPackageBuilder;
 
 import hudson.Util;
 
@@ -34,7 +37,7 @@ public class ProGetPackageUtils
 		FileOutputStream fos = null;
 		
 		this.sourceFolder = baseFolder;
-		this.zipFile = new File(sourceFolder, metadata.name.replace(" ",  "") + ".unpack");
+		this.zipFile = new File(sourceFolder, metadata.packageName.replace(" ",  "") + ".unpack");
 		
 		try {
 			fos = new FileOutputStream(zipFile);
@@ -55,7 +58,7 @@ public class ProGetPackageUtils
 		FileOutputStream fos = null;
 		
 		this.sourceFolder = sourceFolder;
-		this.zipFile = new File(sourceFolder, metadata.name.replace(" ",  "") + ".unpack");
+		this.zipFile = new File(sourceFolder, metadata.packageName.replace(" ",  "") + ".unpack");
 		
 		try {
 			fos = new FileOutputStream(zipFile);
@@ -78,7 +81,7 @@ public class ProGetPackageUtils
 		
 		sb.append("{");
 		sb.append(newLine).append("\t\"group\": \"").append(metadata.group).append("\",");
-		sb.append(newLine).append("\t\"name\": \"").append(metadata.name).append("\",");
+		sb.append(newLine).append("\t\"name\": \"").append(metadata.packageName).append("\",");
 		sb.append(newLine).append("\t\"version\": \"").append(metadata.version).append("\"");
 		
 		if (isProvided(metadata.title)) {
@@ -93,6 +96,11 @@ public class ProGetPackageUtils
 		if (isProvided(metadata.dependencies)) {
 			sb.append(",").append(newLine).append("\t\"dependencies\": \"").append(metadata.dependencies).append("\"");
 		}
+		
+		for (Entry<String, String> entry : metadata.additionalMetadata.entrySet()) {
+			sb.append(",").append(newLine).append("\t\"").append(entry.getKey()).append("\": \"").append(entry.getValue()).append("\"");
+		}
+		
 		sb.append(newLine).append("}");
 		
 		ZipEntry ze = new ZipEntry("upack.json");
@@ -235,12 +243,12 @@ public class ProGetPackageUtils
 		}
     }
 
-	public static List<String> getFileList(File baseFolder, String includes, String excludes, boolean caseSensitive) {
+	public List<String> getFileList(File baseFolder, UploadPackageBuilder settings) {
 		List<String> files = new ArrayList<String>();
 
-		FileSet fileSet = Util.createFileSet(baseFolder, includes, excludes);
-		fileSet.setDefaultexcludes(false);
-		fileSet.setCaseSensitive(caseSensitive);
+		FileSet fileSet = Util.createFileSet(baseFolder, settings.getArtifacts(), settings.getExcludes());
+		fileSet.setDefaultexcludes(settings.isDefaultExcludes());
+		fileSet.setCaseSensitive(settings.isCaseSensitive());
 
 		for (String f : fileSet.getDirectoryScanner().getIncludedFiles()) {
 			files.add(f.replace(File.separatorChar, '/'));

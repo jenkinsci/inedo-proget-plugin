@@ -127,7 +127,7 @@ public class ApiTests {
 				
 		PackageMetadata metadata = new PackageMetadata();
 		metadata.group = "com/inedo/proget";
-		metadata.name = "ExamplePackage";
+		metadata.packageName = "ExamplePackage";
 		metadata.version = "0.0.3";
 		metadata.title = "Example Package";
 		metadata.description = "Example package for testing";

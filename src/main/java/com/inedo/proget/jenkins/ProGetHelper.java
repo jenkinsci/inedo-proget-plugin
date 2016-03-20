@@ -5,8 +5,11 @@ import hudson.model.TaskListener;
 
 import jenkins.model.Jenkins;
 
+import java.util.Scanner;
+
 import com.inedo.http.LogWriter;
 import com.inedo.proget.api.ProGetConfig;
+import com.inedo.proget.domain.PackageMetadata;
 
 /**
  * Does the real work of Trigger a BuildMaster build, has been seperated out from the Builder and Publisher actions
@@ -91,5 +94,38 @@ public class ProGetHelper implements LogWriter {
 		if (listener != null) {
 			listener.error(LOG_PREFIX + message);
 		}
+	}
+	
+
+
+	public PackageMetadata getMetadata(UploadPackageBuilder settings) {
+		PackageMetadata metadata = new PackageMetadata();
+
+		//TODO Add these two fields to GUI 
+		metadata.title = "Example Package";
+		metadata.description = "Example package for testing";
+		
+		metadata.group = expandVariable(settings.getGroupName());
+		metadata.packageName = expandVariable(settings.getPackageName());
+		metadata.version = expandVariable(settings.getVersion());
+		
+		try (Scanner scanner = new Scanner(settings.getMetadata())) {
+			while (scanner.hasNextLine()){
+				String line = scanner.nextLine();
+				
+				int pos = line.indexOf("=");
+				
+				if (pos > 0) {
+					String name = line.substring(0, pos).trim();
+				    String value = line.substring(pos + 1).trim();
+				    
+				    metadata.additionalMetadata.put(name, expandVariable(value));
+			    } else {
+			    	return null;
+				}
+		    } 
+		}
+		
+		return metadata;
 	}
 }

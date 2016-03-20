@@ -9,23 +9,39 @@
     Creates a text field that shows the value of the "key" and "value" property.
     When submitted, it will be passed to the corresponding constructor parameter.
   -->
-    <f:entry title="Feed Name" field="feedName" >
-      <f:textbox /> 
-    </f:entry>
-    
-    <f:entry title="Package Name" field="packageName" >
-      <f:textbox /> 
-    </f:entry>
-        
+	<f:entry title="Feed name" field="feedName" >
+		<f:textbox /> 
+	</f:entry>
+	
+	<f:entry title="Group name" field="groupName" >
+		<f:textbox /> 
+	</f:entry>
+	
+	<f:entry title="Package name" field="packageName" >
+		<f:textbox /> 
+	</f:entry>
+	
+	<f:entry title="Version" field="version" >
+		<f:textbox /> 
+	</f:entry>
+	
 	<f:entry title="Metadata" field="metadata" >
-      <f:expandableTextbox default="false" />
-    </f:entry>
+		<f:expandableTextbox default="false" />
+	</f:entry>
+	
+	<f:entry title="Files to package" field="artifacts" >
+		<f:textbox /> 
+	</f:entry> 
     
-    <f:entry title="Files to package" field="artifacts" >
-      <f:textbox /> 
-    </f:entry> 
-    
-    <f:entry title="Excludes" field="excludes" >
-      <f:textbox /> 
-    </f:entry> 
+	<f:advanced>
+		<f:entry title="Excludes" field="excludes">
+			<f:textbox />
+		</f:entry>
+		<f:entry field="defaultExcludes" >
+			<f:checkbox title="Use default excludes" default="true"/>
+		</f:entry>
+		<f:entry field="caseSensitive" >
+			<f:checkbox title="Case sensitive" default="true"/>
+		</f:entry>
+	</f:advanced>
 </j:jelly>

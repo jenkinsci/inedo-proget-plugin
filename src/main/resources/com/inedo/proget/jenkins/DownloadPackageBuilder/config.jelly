@@ -9,15 +9,15 @@
     Creates a text field that shows the value of the "key" and "value" property.
     When submitted, it will be passed to the corresponding constructor parameter.
   -->
-    <f:entry title="Feed Name" field="feedName" >
+    <f:entry title="Feed name" field="feedName" >
       <f:textbox /> 
     </f:entry>
     
-    <f:entry title="Group Name" field="groupName" >
+    <f:entry title="Group name" field="groupName" >
       <f:textbox /> 
     </f:entry>
     
-    <f:entry title="Package Name" field="packageName" >
+    <f:entry title="Package name" field="packageName" >
       <f:textbox /> 
     </f:entry>
     
@@ -25,7 +25,7 @@
       <f:textbox /> 
     </f:entry>
     
-    <f:entry title="Download Folder" field="downloadFolder" >
+    <f:entry title="Destination folder" field="downloadFolder" >
       <f:textbox default="${descriptor.defaultFolder()}"/> 
     </f:entry> 
     

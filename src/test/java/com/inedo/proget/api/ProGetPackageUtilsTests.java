@@ -24,30 +24,48 @@ import com.google.common.io.Files;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import com.inedo.proget.domain.PackageMetadata;
+import com.inedo.proget.jenkins.ProGetHelper;
+import com.inedo.proget.jenkins.UploadPackageBuilder;
 
 public class ProGetPackageUtilsTests {
+	private ProGetHelper helper;
+	
 	@Rule
 	public TemporaryFolder folder = new TemporaryFolder();
 	
 	@Before
 	public void prepareTestFiles() throws IOException {
+		helper = new ProGetHelper(null, null);
+		
+		
 		preparePackageFiles();
 	}
 	
 	@Test
 	public void antStyleIncludes() throws IOException {
-		checkFilter("Everything included", 5, "**/*.*", "", false);
-		checkFilter("Log file excluded", 4, "**/*.*", "**/*.log", false);
-		checkFilter("Log file excluded", 4, "**/*.*", "logs/sample.log", false);
-		checkFilter("Only backup file included", 1, "**/*.bak", "", false);
-		checkFilter("Only data file included", 1, "*.data", "", false);
-		checkFilter("Multiple filters", 3, "**/*.data, *.txt", "", false);
-		checkFilter("Multiple exlcudes", 2, "**/*.*", "**/*.txt, **/*.bak, **/*.log", false);
-		checkFilter("Exlcude Folder", 2, "**/*.*", "more/, logs/", false);
+		checkFilter("Everything included", 5, "**/*.*", "");
+		checkFilter("Log file excluded", 4, "**/*.*", "**/*.log");
+		checkFilter("Log file excluded", 4, "**/*.*", "logs/sample.log");
+		checkFilter("Only backup file included", 1, "**/*.bak", "");
+		checkFilter("Only data file included", 1, "*.data", "");
+		checkFilter("Multiple filters", 3, "**/*.data, *.txt", "");
+		checkFilter("Multiple exlcudes", 2, "**/*.*", "**/*.txt, **/*.bak, **/*.log");
+		checkFilter("Exlcude Folder", 2, "**/*.*", "more/, logs/");
 	}
 	
-	private void checkFilter(String assertMessage, int expectedFileCount, String include, String exclude, boolean caseSensitive) throws IOException {
-		List<String> files = ProGetPackageUtils.getFileList(folder.getRoot(), include, exclude, caseSensitive);
+	public UploadPackageBuilder getSettings(String include, String exclude) {
+		UploadPackageBuilder settings = new UploadPackageBuilder("Example", "andrew/sumner/proget", "ExamplePackage", "0.0.3", "custom=yes\rreally=of course", include);
+		settings.setCaseSensitive(false);
+		settings.setDefaultExcludes(false);
+		settings.setExcludes(exclude);
+		
+		return settings;
+	}
+	
+	private void checkFilter(String assertMessage, int expectedFileCount, String include, String exclude) throws IOException {
+		ProGetPackageUtils utils = new ProGetPackageUtils();
+		
+		List<String> files = utils.getFileList(folder.getRoot(), getSettings(include, exclude));
 		
 		assertThat("Package is created", files, is(not(empty())));
 		assertThat(assertMessage, files.size(), is(equalTo(expectedFileCount)));
@@ -55,22 +73,29 @@ public class ProGetPackageUtilsTests {
 	
 	@Test
 	public void createPackageFromSourceFolder() throws IOException {
-		File pkg = new ProGetPackageUtils().createPackage(folder.getRoot(), getMetadata());
+		File pkg = new ProGetPackageUtils().createPackage(folder.getRoot(), helper.getMetadata(getSettings("", "")));
 		
 		verifyPackage(pkg, 6);
 	}
 
 	@Test
 	public void createPackageFromAntIncludes() throws IOException {
-		List<String> files = ProGetPackageUtils.getFileList(folder.getRoot(), "**/*.*", "logs/", false);
-		File pkg = new ProGetPackageUtils().createPackage(folder.getRoot(), files, getMetadata());
+		UploadPackageBuilder settings = new UploadPackageBuilder("Example", "andrew/sumner/proget", "ExamplePackage", "0.0.3", "custom=yes\rreally=of course", "**/*.*");
+		settings.setCaseSensitive(false);
+		settings.setDefaultExcludes(false);
+		settings.setExcludes("logs/");
+		
+		ProGetPackageUtils utils = new ProGetPackageUtils();
+		
+		List<String> files = utils.getFileList(folder.getRoot(), settings);
+		File pkg = new ProGetPackageUtils().createPackage(folder.getRoot(), files, helper.getMetadata(getSettings("", "")));
 		
 		verifyPackage(pkg, 4);
 	}
 	
 	@Test
 	public void unpackContent() throws ZipException, IOException {
-		File pkg = new ProGetPackageUtils().createPackage(folder.getRoot(), getMetadata());
+		File pkg = new ProGetPackageUtils().createPackage(folder.getRoot(), helper.getMetadata(getSettings("", "")));
 		File temp = new File(folder.getRoot(), "temp");
 		temp.mkdir();
 		
@@ -99,6 +124,8 @@ public class ProGetPackageUtilsTests {
 	            
 	            // Will throw JsonParseException if not valid json
 	            new JsonParser().parse(json);
+	            
+	            assertThat("Metadata contains custom attribute", json, containsString("custom"));
 	        }  catch (JsonParseException e) {
 	        	fail("unpack.json is not a valid json file");
 	        }
@@ -125,16 +152,4 @@ public class ProGetPackageUtilsTests {
 			writer.write("This is a sample file");
 		}
 	}
-	
-	private PackageMetadata getMetadata() {
-		PackageMetadata metadata = new PackageMetadata();
-		metadata.group = "com/inedo/proget";
-		metadata.name = "ExamplePackage";
-		metadata.version = "0.0.3";
-		metadata.title = "Example Package";
-		metadata.description = "Example package for testing";
-		return metadata;
-	}
-	
-	
 }

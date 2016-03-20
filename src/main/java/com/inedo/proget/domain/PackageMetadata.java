@@ -1,5 +1,8 @@
 package com.inedo.proget.domain;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class PackageMetadata {
 	/** A string of no more than fifty characters: 
 	 * 		numbers (0-9)
@@ -24,7 +27,7 @@ public class PackageMetadata {
 	 * Example: ABLast
 	 * Required.
 	 */
-	public String name;
+	public String packageName;
 	
 	/** 
 	 * A string consisting of three integers separated by periods (.); leading zeros are not permitted 
@@ -64,4 +67,7 @@ public class PackageMetadata {
 	 * Optional
 	 */
 	public String dependencies;
+	
+	
+	public Map<String, String> additionalMetadata = new HashMap<String, String>();
 }
