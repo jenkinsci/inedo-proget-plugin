@@ -119,7 +119,7 @@ public class ProGetHelper implements LogWriter {
 					String name = line.substring(0, pos).trim();
 				    String value = line.substring(pos + 1).trim();
 				    
-				    metadata.additionalMetadata.put(name, expandVariable(value));
+				    metadata.extendedAttributes.put(name, expandVariable(value));
 			    } else {
 			    	return null;
 				}

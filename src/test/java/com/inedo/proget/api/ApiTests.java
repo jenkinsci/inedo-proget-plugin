@@ -8,6 +8,7 @@ import com.inedo.proget.domain.Feed;
 import com.inedo.proget.domain.PackageMetadata;
 import com.inedo.proget.domain.ProGetPackage;
 import com.inedo.proget.jenkins.ProGetHelper;
+import com.inedo.proget.jenkins.UploadPackageBuilder;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -109,29 +110,35 @@ public class ApiTests {
 	
 	@Test
 	public void uploadPackage() throws IOException {
-		PackageMetadata metadata = preparePackageFiles();
+		preparePackageFiles();
 		
-		File pkg = new ProGetPackageUtils().createPackage(folder.getRoot(), metadata);
+		ProGetHelper helper = new ProGetHelper(null, null);
+		File pkg = new ProGetPackageUtils().createPackage(folder.getRoot(), getMetadata());
 		
 		proget.uploadPackage("Example", pkg);
 		
 		// Success is fact that no exception thrown...
 	}
 
-	private PackageMetadata preparePackageFiles() throws IOException {
+	private void preparePackageFiles() throws IOException {
 		createFile(new File(folder.getRoot(), "sample.data"), "This is a sample data file");
 		createFile(new File(folder.getRoot(), "sample.txt"), "This is a sample text file");
 		createFile(new File(folder.getRoot(), "more/sample.data"), "This is a another sample data file");
 		createFile(new File(folder.getRoot(), "logs/sample.log"), "This is a sample log file");
 		createFile(new File(folder.getRoot(), "logs/sample.log.bak"), "This is a sample log file");
-				
-		PackageMetadata metadata = new PackageMetadata();
-		metadata.group = "com/inedo/proget";
-		metadata.packageName = "ExamplePackage";
-		metadata.version = "0.0.3";
-		metadata.title = "Example Package";
-		metadata.description = "Example package for testing";
-		return metadata;
+	}
+	
+	public PackageMetadata getMetadata() {
+		String include = "";
+		String exclude = "";
+		
+		UploadPackageBuilder settings = new UploadPackageBuilder("Example", "andrew/sumner/proget", "ExamplePackage", "0.0.3", "custom=yes\rreally=C:\\Java\\workspace\\inedo-proget-plugin\\work\\jobs\\ProGetUpload\\workspace", include);
+		settings.setCaseSensitive(false);
+		settings.setDefaultExcludes(false);
+		settings.setExcludes(exclude);
+		
+		ProGetHelper helper = new ProGetHelper(null, null);
+		return helper.getMetadata(settings);
 	}
 	
 	private void createFile(File file, String content) throws IOException {

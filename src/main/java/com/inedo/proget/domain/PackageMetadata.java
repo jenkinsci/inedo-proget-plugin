@@ -69,5 +69,5 @@ public class PackageMetadata {
 	public String dependencies;
 	
 	
-	public Map<String, String> additionalMetadata = new HashMap<String, String>();
+	public Map<String, String> extendedAttributes = new HashMap<String, String>();
 }

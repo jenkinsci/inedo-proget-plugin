@@ -96,7 +96,7 @@ public class ProGetPackageUtils
 			sb.append(",").append(newLine).append("\t\"dependencies\": \"").append(metadata.dependencies).append("\"");
 		}
 		
-		for (Entry<String, String> entry : metadata.additionalMetadata.entrySet()) {
+		for (Entry<String, String> entry : metadata.extendedAttributes.entrySet()) {
 			sb.append(",").append(newLine).append("\t\"").append(entry.getKey()).append("\": \"").append(entry.getValue()).append("\"");
 		}
 		
