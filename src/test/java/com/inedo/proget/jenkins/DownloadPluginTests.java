@@ -120,7 +120,6 @@ public class DownloadPluginTests {
 	}
 	
 	@Test
-	@WithPlugin("DownloadPackageBuilder.hpi")
 	public void perform() throws InterruptedException, ExecutionException, IOException, SAXException {
 		
 //		//TriggerableData data = new TriggerableData(MockServer.APPLICATION_ID, releaseNumber, buildNumber);
@@ -143,7 +142,7 @@ public class DownloadPluginTests {
 		HtmlPage globalConfigPage = webClient.goTo("configure");
 		
 //		 HtmlPage p = j.createWebClient().goTo("/configure");        
-	        HtmlForm form = globalConfigPage.getFormByName("configure");        
+	        HtmlForm form = globalConfigPage.getFormByName("config");        
 	        
 	        HtmlInput url = form.getInputByName("_.url");
 	        url.setValueAttribute(config.url);
