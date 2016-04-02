@@ -11,15 +11,21 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.recipes.WithPlugin;
 import org.xml.sax.SAXException;
 
+import com.gargoylesoftware.htmlunit.html.HtmlForm;
+import com.gargoylesoftware.htmlunit.html.HtmlInput;
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.inedo.proget.MockServer;
 import com.inedo.proget.api.ProGetConfig;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
+import java.net.URLConnection;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,6 +33,7 @@ import java.util.Iterator;
 import java.util.concurrent.ExecutionException;
 
 import hudson.EnvVars;
+import hudson.Functions;
 import hudson.model.BuildListener;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
@@ -56,22 +63,54 @@ public class DownloadPluginTests {
 	public String buildNumber;
 		
 	@Rule public TemporaryFolder folder = new TemporaryFolder();
-	@Rule public JenkinsRule j = new JenkinsRule();
+	//@Rule public JenkinsRule j = new JenkinsRule();
 	
+	@Rule
+    public JenkinsRule j = new JenkinsRule() {
+        private boolean origDefaultUseCache = true;
+        
+        @Override
+        public void before() throws Throwable {
+            if(Functions.isWindows()) {
+                // To avoid JENKINS-4409.
+                // URLConnection caches handles to jar files by default,
+                // and it prevents delete temporary directories.
+                // Disable caching here.
+                // Though defaultUseCache is a static field,
+                // its setter and getter are provided as instance methods.
+                URLConnection aConnection = new File(".").toURI().toURL().openConnection();
+                origDefaultUseCache = aConnection.getDefaultUseCaches();
+                aConnection.setDefaultUseCaches(false);
+            }
+            super.before();
+        }
+        
+        @Override
+        public void after() throws Exception {
+            super.after();
+            if(Functions.isWindows()) {
+                URLConnection aConnection = new File(".").toURI().toURL().openConnection();
+                aConnection.setDefaultUseCaches(origDefaultUseCache);
+            }
+        }
+        
+    };
+
 	@Before
 	public void before() throws IOException, InterruptedException {
 		mockServer = new MockServer(false);
 		
-		build = mock(AbstractBuild.class);
-		//launcher = mock(Launcher.class);
-		listener = mock(BuildListener.class);
-		env = mock(EnvVars.class);
-		project = mock(AbstractProject.class);
+//		build = mock(AbstractBuild.class);
+//		//launcher = mock(Launcher.class);
+//		listener = mock(BuildListener.class);
+//		env = mock(EnvVars.class);
+//		project = mock(AbstractProject.class);
+//		
+//		when(build.getProject()).thenReturn(project);
+//		when(build.getEnvironment(listener)).thenReturn(env);
+//		when(env.expand(anyString())).then(returnsFirstArg());
+//		when(listener.getLogger()).thenReturn(logger);
 		
-		when(build.getProject()).thenReturn(project);
-		when(build.getEnvironment(listener)).thenReturn(env);
-		when(env.expand(anyString())).then(returnsFirstArg());
-		when(listener.getLogger()).thenReturn(logger);
 	
 	}
 	
@@ -81,54 +120,53 @@ public class DownloadPluginTests {
 	}
 	
 	@Test
+	@WithPlugin("DownloadPackageBuilder.hpi")
 	public void perform() throws InterruptedException, ExecutionException, IOException, SAXException {
 		
-		//TriggerableData data = new TriggerableData(MockServer.APPLICATION_ID, releaseNumber, buildNumber);
-		String feedName = "Example";
-		String groupName = "andrew/sumner/example";
-		String packageName = "examplepackage";
-		String version = "0.0.1";
-		String downloadFolder = folder.getRoot().getAbsolutePath();
-		boolean unpack = false;
-		
-		restLog();
-		
-		DownloadPackageBuilder download = new DownloadPackageBuilder(feedName, groupName, packageName, version, downloadFolder, unpack);
+//		//TriggerableData data = new TriggerableData(MockServer.APPLICATION_ID, releaseNumber, buildNumber);
+//		String feedName = "Example";
+//		String groupName = "andrew/sumner/example";
+//		String packageName = "examplepackage";
+//		String version = "0.0.1";
+//		String downloadFolder = folder.getRoot().getAbsolutePath();
+//		boolean unpack = false;
+//		
+//		restLog();
+//		
+//		DownloadPackageBuilder download = new DownloadPackageBuilder(feedName, groupName, packageName, version, downloadFolder, unpack);
 		
 		ProGetConfig config = mockServer.getProGetConfig();
+		//ProGetHelper.injectConfiguration(config);
 		
-		ProGetHelper.injectConfiguration(config);
+		JenkinsRule.WebClient webClient = j.createWebClient();
 		
+		HtmlPage globalConfigPage = webClient.goTo("configure");
 		
-		
-//		JenkinsRule.WebClient webClient = j.createWebClient();
-//		HtmlPage globalConfigPage = webClient.goTo("/configure");
-//		
-////		 HtmlPage p = j.createWebClient().goTo("/configure");        
-//	        HtmlForm form = globalConfigPage.getFormByName("configure");        
-//	        
-//	        HtmlInput url = form.getInputByName("_.url");
-//	        url.setValueAttribute(config.url);
-//
-//	        HtmlInput user = form.getInputByName("_.user");
-//	        user.setValueAttribute(config.user);
-//	        
-//	        HtmlInput password = form.getInputByName("_.password");
-//	        password.setValueAttribute(config.password);
-//	        
-//	        form.submit();
+//		 HtmlPage p = j.createWebClient().goTo("/configure");        
+	        HtmlForm form = globalConfigPage.getFormByName("configure");        
 	        
-		FreeStyleProject project = j.createFreeStyleProject();
-		project.getBuildersList().add(download);
-		FreeStyleBuild build = project.scheduleBuild2(0).get();
-				
-		assertThat("Result should be successful", build.getResult() , is(Result.SUCCESS));
-		
-		String log[] = extractLogLinesRemovingApiCall();
-		assertThat("Create Build step should be the last actioned performed.", log[log.length - 1], containsString("Create BuildMaster build with BuildNumber="));
-		
-		String log2 = extractLog();
-		assertThat("Create Build step should be the last actioned performed.", log2, containsString("Create BuildMaster build with BuildNumber="));
+	        HtmlInput url = form.getInputByName("_.url");
+	        url.setValueAttribute(config.url);
+
+	        HtmlInput user = form.getInputByName("_.user");
+	        user.setValueAttribute(config.user);
+	        
+	        HtmlInput password = form.getInputByName("_.password");
+	        password.setValueAttribute(config.password);
+	        
+//	        form.submit();??????????
+	        
+//		FreeStyleProject project = j.createFreeStyleProject();
+//		project.getBuildersList().add(download);
+//		FreeStyleBuild build = project.scheduleBuild2(0).get();
+//				
+//		assertThat("Result should be successful", build.getResult() , is(Result.SUCCESS));
+//		
+//		String log[] = extractLogLinesRemovingApiCall();
+//		assertThat("Create Build step should be the last actioned performed.", log[log.length - 1], containsString("Create BuildMaster build with BuildNumber="));
+//		
+//		String log2 = extractLog();
+//		assertThat("Create Build step should be the last actioned performed.", log2, containsString("Create BuildMaster build with BuildNumber="));
 	}
 		
 	// Mocking of Server

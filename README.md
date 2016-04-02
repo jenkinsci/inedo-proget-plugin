@@ -33,3 +33,8 @@ On importing the project to your IDE, the required dependencies will be download
 -------------------
 
 To spin up a Jenkins instance with this plugin installed for manual testing, run `gradlew clean server` (see "building the plugin" above). The Jenkins instance will be available on port 8080 on your localhost.
+
+## Developing Plugins
+Searching for anything Jenkins related is best done in https://maven-repository.com, my old standby http://maven.org returns nothing and https://bintray.com/bintray/jcenter won't give anything useful.
+
+Unit Testing requires the jenkins-test-harness and is exceedingly slow :-(
