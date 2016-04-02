@@ -66,35 +66,7 @@ public class DownloadPluginTests {
 	//@Rule public JenkinsRule j = new JenkinsRule();
 	
 	@Rule
-    public JenkinsRule j = new JenkinsRule() {
-        private boolean origDefaultUseCache = true;
-        
-        @Override
-        public void before() throws Throwable {
-            if(Functions.isWindows()) {
-                // To avoid JENKINS-4409.
-                // URLConnection caches handles to jar files by default,
-                // and it prevents delete temporary directories.
-                // Disable caching here.
-                // Though defaultUseCache is a static field,
-                // its setter and getter are provided as instance methods.
-                URLConnection aConnection = new File(".").toURI().toURL().openConnection();
-                origDefaultUseCache = aConnection.getDefaultUseCaches();
-                aConnection.setDefaultUseCaches(false);
-            }
-            super.before();
-        }
-        
-        @Override
-        public void after() throws Exception {
-            super.after();
-            if(Functions.isWindows()) {
-                URLConnection aConnection = new File(".").toURI().toURL().openConnection();
-                aConnection.setDefaultUseCaches(origDefaultUseCache);
-            }
-        }
-        
-    };
+    public JenkinsRule j = new JenkinsRule();
 
 	@Before
 	public void before() throws IOException, InterruptedException {
