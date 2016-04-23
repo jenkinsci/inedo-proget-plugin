@@ -75,7 +75,9 @@ public class ProGetHelper implements LogWriter {
 		String expanded = variable;
 		
 		try {
-			expanded = build.getEnvironment(listener).expand(variable);
+			if (build != null) {
+				expanded = build.getEnvironment(listener).expand(variable);
+			}
 		} catch (Exception e) {
 			info("Exception thrown expanding '" + variable + "' : " + e.getClass().getName() + " " + e.getMessage());
 		}

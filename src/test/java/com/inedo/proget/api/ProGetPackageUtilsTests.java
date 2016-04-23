@@ -34,7 +34,7 @@ public class ProGetPackageUtilsTests {
 	
 	@Before
 	public void prepareTestFiles() throws IOException {
-		helper = new ProGetHelper(null, null);
+		helper = new ProGetHelper(null, new MockTaskListener());
 		
 		
 		preparePackageFiles();

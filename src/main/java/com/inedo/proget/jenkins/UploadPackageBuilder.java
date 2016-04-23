@@ -202,7 +202,7 @@ public class UploadPackageBuilder extends Builder {
     	public boolean getIsProGetAvailable() {
     		if (isProGetAvailable == null) {
     			ProGetConfig config = ProGetHelper.getProGetConfig();
-    			proget = new ProGet(new ProGetHelper());;
+    			proget = new ProGet(new ProGetHelper());
         		
             	if (config.apiKey == null || config.apiKey.isEmpty()) {
             		isProGetAvailable = false;

@@ -41,7 +41,7 @@ public class ApiTests {
 		mockServer = new MockServer(MOCK_REQUESTS);
 		
 		ProGetHelper.injectConfiguration(mockServer.getProGetConfig());		
-		proget = new ProGet(new ProGetHelper());
+		proget = new ProGet(new ProGetHelper(null, new MockTaskListener()));
 	}
 	
 	@After
