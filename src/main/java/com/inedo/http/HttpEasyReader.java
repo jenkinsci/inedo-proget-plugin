@@ -9,35 +9,54 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.util.List;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
+import javax.xml.parsers.ParserConfigurationException;
 
-// Class to segregate reading return values
+import org.apache.http.client.HttpResponseException;
+import org.xml.sax.SAXException;
+
+/**
+ * Response reader for HTTP requests, can parse JSON and XML and download files.
+ * 
+ * @author Andrew Sumner
+ */
 public class HttpEasyReader {
-	HttpURLConnection connection;
-	JsonElement json = null;
-	String returned = null;
+	private HttpURLConnection connection;
+	private String returned = null;
 	
+	/**
+	 * Create new HttpEasyReader.
+	 * 
+	 * @param connection HttpURLConnection
+	 * @param request Request that is creating this reader
+	 * @throws HttpResponseException if request failed
+	 * @throws IOException
+	 */
 	public HttpEasyReader(HttpURLConnection connection, HttpEasy request) throws IOException {
 		this.connection = connection;
 		
 		Family resposeFamily = getResponseCodeFamily(); 
-		
-		//TODO - Automatically follow redirect as per BlueMix.java?
-		if (resposeFamily != Family.SUCCESSFUL) {
-			if (listContains(request.ignoreResponseCodes, getResponseCode())) return;
-			if (listContains(request.ignoreResponseFamily, resposeFamily)) return;
 
-			throw new IOException("Server returned HTTP response code " + connection.getResponseCode() + ": " + connection.getResponseMessage());
+		//TODO Should I automatically follow redirects?
+		if (resposeFamily != Family.SUCCESSFUL) {
+			if (listContains(request.ignoreResponseCodes, getResponseCode())) {
+				return;
+			}
+			
+			if (listContains(request.ignoreResponseFamily, resposeFamily)) {
+				return;
+			}
+
+			throw new HttpResponseException(getResponseCode(), 
+						"Server returned HTTP response code " + connection.getResponseCode() + ": " + connection.getResponseMessage() +
+						"\r\nResponse Content: " + asString(connection.getErrorStream()));
 		}
 	}
 	
+	
+
 	private <T> boolean listContains(List<T> array, T targetValue) {
-		for(T s : array){
-			if(s.equals(targetValue))
-			{
+		for (T s : array) {
+			if (s.equals(targetValue)) {
 				return true;
 			}
 		}
@@ -49,211 +68,241 @@ public class HttpEasyReader {
 	 * Returns the underlying connection object in the event that the 
 	 * exposed methods don't provide the information you are after.
 	 * 
-	 * @return
+	 * @return A {@link HttpURLConnection}
 	 */
 	public HttpURLConnection getConnection() {
 		return connection;
 	}
 	
+	/**
+	 * Gets the status code from an HTTP response message, see {@link HttpURLConnection#getResponseCode()}.
+	 * @return Response code
+	 * @throws IOException
+	 */
 	public int getResponseCode() throws IOException {
 		return connection.getResponseCode();
 	}
-	
+
+	/**
+	 * Gets the family of the status code from an HTTP response message, see {@link Family}.
+	 * @return Response family
+	 * @throws IOException
+	 */
 	public Family getResponseCodeFamily() throws IOException {
 		return Family.familyOf(connection.getResponseCode());
 	}
 	
+	/** 
+	 * @return The response as a string, makes no attempt to determine the content type
+	 *  
+	 * @throws IOException If unable to read the response
+	 */
 	public String asString() throws IOException {
-		if (returned == null) {
-			// read the output from the server
-			try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
-				StringBuilder sb = new StringBuilder();
-	
-				String line = null;
-				while ((line = reader.readLine()) != null)
-				{
-					sb.append(line + "\n");
-				}
-				
-				returned = sb.toString();
-			} finally {
-				connection.disconnect();
-			}
-		}
+		if (returned != null) {
+			return returned;
+		} 
 		
+		if (getResponseCodeFamily() == Family.SUCCESSFUL) {
+			return asString(connection.getInputStream());
+		} else {
+			return asString(connection.getErrorStream());
+		}
+	}
+	
+	private String asString(InputStream stream) throws IOException {
+		// read the output from the server
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(stream))) {
+			StringBuilder sb = new StringBuilder();
+
+			String line = null;
+			while ((line = reader.readLine()) != null) {
+				sb.append(line + "\n");
+			}
+			
+			returned = sb.toString();
+		} finally {
+			connection.disconnect();
+		}
+	
 		return returned;
 	}
 	
-	public String asPrettyString() throws IOException {
-		JsonParser parser = new JsonParser();
-		JsonElement json = parser.parse(asString());
-		
-		Gson gson = new GsonBuilder().setPrettyPrinting().create();
-		return gson.toJson(json);
+	/**
+	 * @return A JsonReader to handle a json response.
+	 * 
+	 * @throws IOException If unable to read the response
+	 */
+	public JsonReader getJsonReader() throws IOException {
+		return new JsonReader(asString());
 	}
 	
 	/**
-	 * Deserialize the returned Json string into an object of the specified class.
-	 * 
-	 * @param type
-	 * @return
-	 * @throws IOException
+	 * @return An XmlReader to handle an xml response.
+	 * @throws SAXException 
+	 * @throws ParserConfigurationException
+	 * @throws IOException If unable to read the response
 	 */
-	public <T> T asJson(Class<T> type) throws IOException {
-		return new Gson().fromJson(asString(), type);		
+	public XmlReader getXmlReader() throws ParserConfigurationException, SAXException, IOException {
+		return new XmlReader(asString());
 	}
 	
+	
+	/**
+	 * Download a file from the response.
+	 * 
+	 * @param saveDir Location to place the file, the file name is gotten from the response headers
+	 * @return File object
+	 * @throws IOException If unable to write the file
+	 */
 	public File downloadFile(String saveDir) throws IOException {
-		final int BUFFER_SIZE = 4096;
+		final int bufferSize = 4096;
 
-		String fileName = "";
-		String disposition = connection.getHeaderField("Content-Disposition");
-
-		if (disposition != null) {
-			// extracts file name from header field
-			int index = disposition.indexOf("filename=");
-			if (index > 0) {
-				fileName = disposition.substring(index + 10, disposition.length() - 1);
+		String fileName = parseDispositionFilename(connection.getHeaderField("Content-Disposition"));
+		
+		if (fileName == null) {
+			fileName = connection.getURL().getPath();
+			
+			if (connection.getURL().getQuery() != null || fileName == null || fileName.isEmpty()) {
+				throw new IOException("Unable to get fileName from either Content-Disposition header or url:" + connection.getURL());
 			}
-		} else {
-			throw new IOException("Unable to get fileName from " + connection.getURL());
 		}
+		
+		fileName = new File(fileName).getName();
 
 //		System.out.println("Content-Type = " + connection.getContentType());
 //		System.out.println("Content-Disposition = " + disposition);
 //		System.out.println("Content-Length = " + connection.getContentLength());
 //		System.out.println("fileName = " + fileName);
-	
+
 		File folder = new File(saveDir);
 		if (!folder.exists()) {
-            folder.mkdirs();
+			folder.mkdirs();
 		}
 		
-		File saveFile = new File(saveDir, fileName);;
-		InputStream inputStream = null;
-		FileOutputStream outputStream = null;
+		File saveFile = new File(saveDir, fileName);
 		
-		try {
-			// opens input stream from the HTTP connection
-			inputStream = connection.getInputStream();
-	
-			// opens an output stream to save into file
-			outputStream = new FileOutputStream(saveFile);
-	
+		try (
+			InputStream inputStream = connection.getInputStream();
+			FileOutputStream outputStream = new FileOutputStream(saveFile); 
+		) {
+			
 			int bytesRead = -1;
-			byte[] buffer = new byte[BUFFER_SIZE];
+			byte[] buffer = new byte[bufferSize];
 			while ((bytesRead = inputStream.read(buffer)) != -1) {
 				outputStream.write(buffer, 0, bytesRead);
 			}
 		} finally {
-			if (outputStream != null) outputStream.close();
-			if (inputStream != null) inputStream.close();
 			connection.disconnect();
 		}
-		
+
 		return saveFile;
-    }
-	
-	/**
-	 * Deserialize the returned Json string 
-	 * @return
-	 * @throws IOException
-	 * 
-	 * @see
-	 * https://code.google.com/p/json-simple/
-	 */
-	public JsonElement asJson() throws IOException {
-		if (json == null) {
-			json = new JsonParser().parse(asString());
-		}
-		
-		return json;
-	}
-	
-    public JsonElement jsonPath (String path) throws IOException {
-    	return jsonPath(asJson(), path);
-	} 
-    
-    private JsonElement jsonPath(JsonElement json, String path) {
-    	if (!path.contains(".")) {
-	        return json.getAsJsonObject().get(path); 
-	    } else {
-	    	JsonElement newJson;
-	        String next = path.split("[/.]")[0]; 
-	        
-	        if (next.endsWith("]")) {
-	        	int pos = next.lastIndexOf('[');
-	        	String index = next.substring(pos + 1, next.length() - 1);
-		        next = next.substring(0, pos);
-	        	
-		        newJson = json.getAsJsonObject().get(next).getAsJsonArray().get(Integer.valueOf(index));
-	        } else {
-		        newJson = json.getAsJsonObject().get(next);
-	        }
-		        
-		    String newPath = path.substring(path.indexOf(".") + 1); 
-		        
-	        return jsonPath(newJson, newPath);
-	    } 
 	}
 
+	/** 
+     * Retrieves the "filename" attribute from a content disposition line.
+     *
+     * @param dispositionString The entire "Content-disposition" string
+     * @return <code>null</code> if no filename could be found, otherwise,
+     *         returns the filename
+     * @see #parseForAttribute(String, String)
+     */
+	private String parseDispositionFilename(String dispositionString) {
+		return parseForAttribute("filename", dispositionString);
+	}
+	
+	/**
+     * Parses a string looking for a attribute-value pair, and returns the value.
+     * For example:
+     * <pre>
+     *      String parseString = "Content-Disposition: filename=\"bob\" name=\"jack\"";
+     *      MultipartIterator.parseForAttribute(parseString, "name");
+     * </pre>
+     * That will return "bob".
+     * 
+     * @param attribute The name of the attribute you're trying to get
+     * @param parseString The string to retrieve the value from
+     * @return The value of the attribute, or <code>null</code> if none could be found
+     */
+	public static String parseForAttribute(String attribute, String parseString) {
+		if (parseString == null) {
+			return null;
+		}
+
+		int nameIndex = parseString.indexOf(attribute + "=\"");
+		if (nameIndex != -1) {
+			int endQuoteIndex = parseString.indexOf("\"", nameIndex + attribute.length() + 3);
+
+			if (endQuoteIndex != -1) {
+				return parseString.substring(nameIndex + attribute.length() + 2, endQuoteIndex);
+			}
+		}
+
+		return null;
+	}
+    
+	
+
+    /**
+     * Response header field.
+     * @param name Field name
+     * @return Field value
+     */
 	public String getHeaderField(String name) {
 		return connection.getHeaderField(name);
 	}
 		
 	
 	/**
-     * An enumeration representing the class of status code. Family is used
-     * here since class is overloaded in Java.
+     * An enumeration representing the class of an http response status code.
      */
-    public enum Family {
+	public enum Family {
 
-        /**
-         * {@code 1xx} HTTP status codes.
-         */
-        INFORMATIONAL,
-        /**
-         * {@code 2xx} HTTP status codes.
-         */
-        SUCCESSFUL,
-        /**
-         * {@code 3xx} HTTP status codes.
-         */
-        REDIRECTION,
-        /**
-         * {@code 4xx} HTTP status codes.
-         */
-        CLIENT_ERROR,
-        /**
-         * {@code 5xx} HTTP status codes.
-         */
-        SERVER_ERROR,
-        /**
-         * Other, unrecognized HTTP status codes.
-         */
-        OTHER;
+		/**
+		 * {@code 1xx} HTTP status codes.
+		 */
+		INFORMATIONAL,
+		/**
+		 * {@code 2xx} HTTP status codes.
+		 */
+		SUCCESSFUL,
+		/**
+		 * {@code 3xx} HTTP status codes.
+		 */
+		REDIRECTION,
+		/**
+		 * {@code 4xx} HTTP status codes.
+		 */
+		CLIENT_ERROR,
+		/**
+		 * {@code 5xx} HTTP status codes.
+		 */
+		SERVER_ERROR,
+		/**
+		 * Other, unrecognized HTTP status codes.
+		 */
+		OTHER;
 
-        /**
-         * Get the response status family for the status code.
-         *
-         * @param statusCode response status code to get the family for.
-         * @return family of the response status code.
-         */
-        public static Family familyOf(final int statusCode) {
-            switch (statusCode / 100) {
-                case 1:
-                    return Family.INFORMATIONAL;
-                case 2:
-                    return Family.SUCCESSFUL;
-                case 3:
-                    return Family.REDIRECTION;
-                case 4:
-                    return Family.CLIENT_ERROR;
-                case 5:
-                    return Family.SERVER_ERROR;
-                default:
-                    return Family.OTHER;
-            }
-        }
-    }
+		/**
+		 * Get the response status family for the status code.
+		 *
+		 * @param statusCode response status code to get the family for.
+		 * @return family of the response status code.
+		 */
+		public static Family familyOf(final int statusCode) {
+			switch (statusCode / 100) {
+			case 1:
+				return Family.INFORMATIONAL;
+			case 2:
+				return Family.SUCCESSFUL;
+			case 3:
+				return Family.REDIRECTION;
+			case 4:
+				return Family.CLIENT_ERROR;
+			case 5:
+				return Family.SERVER_ERROR;
+			default:
+				return Family.OTHER;
+			}
+		}
+	}
 }

@@ -40,11 +40,12 @@ public class ProGet {
 
 	/** Gets the details of a feed by its name */
 	public Feed getFeed(String feedName) throws IOException {
-		Feed feed = HttpEasy.request().
-				path("api/json/Feeds_GetFeed?API_Key={}&Feed_Name={}").
-				urlParameters(config.apiKey, feedName).
-				get().
-				asJson(Feed.class);
+		Feed feed = HttpEasy.request()
+				.path("api/json/Feeds_GetFeed?API_Key={}&Feed_Name={}")
+				.urlParameters(config.apiKey, feedName)
+				.get()
+				.getJsonReader()
+				.asJson(Feed.class);
 		
 		if (feed == null) {
 			throw new IOException("Feed " + feedName + " was not found");
@@ -55,22 +56,24 @@ public class ProGet {
 
 	/** Get all active feeds */
 	public Feed[] getFeeds() throws IOException {
-		Feed[] result = HttpEasy.request().
-				path("api/json/Feeds_GetFeeds?API_Key={}&IncludeInactive_Indicator={}").
-				urlParameters(config.apiKey, "N").
-				get().
-				asJson(Feed[].class);
+		Feed[] result = HttpEasy.request()
+				.path("api/json/Feeds_GetFeeds?API_Key={}&IncludeInactive_Indicator={}")
+				.urlParameters(config.apiKey, "N")
+				.get()
+				.getJsonReader()
+				.asJson(Feed[].class);
 		
 		return result;
 	}
 	
 	/** Gets the packages in a ProGet feed */
 	public ProGetPackage[] getPackages(String feedId) throws IOException {
-		return HttpEasy.request().
-				path("api/json/ProGetPackages_GetPackages?API_Key={}&Feed_Id={}&IncludeVersions_Indicator=Y").
-				urlParameters(config.apiKey, feedId, "Y").
-				get().
-				asJson(ProGetPackage[].class);
+		return HttpEasy.request()
+				.path("api/json/ProGetPackages_GetPackages?API_Key={}&Feed_Id={}&IncludeVersions_Indicator=Y")
+				.urlParameters(config.apiKey, feedId, "Y")
+				.get()
+				.getJsonReader()
+				.asJson(ProGetPackage[].class);
 	}
 
 	/**

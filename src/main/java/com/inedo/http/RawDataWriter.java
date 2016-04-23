@@ -5,16 +5,31 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
 
 import com.google.common.net.MediaType;
 
+/**
+ * Attach a File or data to an http request. 
+ * 
+ * @author Andrew Sumner
+ */
 class RawDataWriter implements DataWriter {
 	private HttpURLConnection connection;
 	private byte[] postEndcoded = null;
 	private File uploadFile = null;
 	
+	/**
+	 * Constructor.
+	 * 
+	 * @param connection The connection
+	 * @param rawData data (File or String)
+	 * @param rawDataMediaType Type of attachment
+	 * 
+	 * @throws UnsupportedEncodingException
+	 */
 	public RawDataWriter(HttpURLConnection connection, Object rawData, MediaType rawDataMediaType) {
 		this.connection = connection;
 		
@@ -44,13 +59,13 @@ class RawDataWriter implements DataWriter {
 			OutputStream outputStream = connection.getOutputStream();
 			
 			try (FileInputStream inputStream = new FileInputStream(uploadFile)) {
-		        byte[] buffer = new byte[4096];
-		        int bytesRead = -1;
-		        while ((bytesRead = inputStream.read(buffer)) != -1) {
-		            outputStream.write(buffer, 0, bytesRead);
-		        }
-		        outputStream.flush();
-	        }
+				byte[] buffer = new byte[4096];
+				int bytesRead = -1;
+				while ((bytesRead = inputStream.read(buffer)) != -1) {
+					outputStream.write(buffer, 0, bytesRead);
+				}
+				outputStream.flush();
+			}
 		}
 	}
 	
