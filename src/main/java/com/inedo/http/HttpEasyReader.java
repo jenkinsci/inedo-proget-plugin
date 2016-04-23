@@ -45,10 +45,13 @@ public class HttpEasyReader {
 			if (listContains(request.ignoreResponseFamily, resposeFamily)) {
 				return;
 			}
-
+			
 			throw new HttpResponseException(getResponseCode(), 
-						"Server returned HTTP response code " + connection.getResponseCode() + ": " + connection.getResponseMessage() +
-						"\r\nResponse Content: " + asString(connection.getErrorStream()));
+						String.format("Server returned HTTP response code %s: %s%s%s",
+								 connection.getResponseCode(), 
+								 connection.getResponseMessage(), 
+								 (asString().isEmpty()) ? "" : " - ", 
+								 asString()));
 		}
 	}
 	
@@ -110,6 +113,8 @@ public class HttpEasyReader {
 	}
 	
 	private String asString(InputStream stream) throws IOException {
+		returned = "";
+		
 		// read the output from the server
 		try (BufferedReader reader = new BufferedReader(new InputStreamReader(stream))) {
 			StringBuilder sb = new StringBuilder();

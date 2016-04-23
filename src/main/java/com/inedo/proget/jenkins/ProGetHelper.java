@@ -7,6 +7,7 @@ import jenkins.model.Jenkins;
 
 import java.util.Scanner;
 
+import com.inedo.http.ConsoleLogWriter;
 import com.inedo.http.LogWriter;
 import com.inedo.proget.api.ProGetConfig;
 import com.inedo.proget.domain.PackageMetadata;
@@ -86,6 +87,8 @@ public class ProGetHelper implements LogWriter {
 	public void info(String message) {
 		if (listener != null) {
 			listener.getLogger().println(LOG_PREFIX + message);
+		} else {
+			System.out.println(LOG_PREFIX + message);
 		}
 	}
 
@@ -95,8 +98,6 @@ public class ProGetHelper implements LogWriter {
 		}
 	}
 	
-
-
 	public PackageMetadata getMetadata(UploadPackageBuilder settings) {
 		PackageMetadata metadata = new PackageMetadata();
 

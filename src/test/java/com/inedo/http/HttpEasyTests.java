@@ -10,11 +10,13 @@ import org.junit.Test;
 import com.inedo.http.HttpEasy;
 
 public class HttpEasyTests {
+	
 	@BeforeClass 
 	public static void setup() {
 		HttpEasy.withDefaults()
 			.allowAllHosts()
-			.trustAllCertificates();
+			.trustAllCertificates()
+			.withLogWriter(new ConsoleLogWriter());
 		
 //		if (ConfigUtils.isProxyRequired()) {
 //			RestRequest.withDefaults()

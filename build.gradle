@@ -67,7 +67,8 @@ dependencies {
 	//jenkinsTest 'org.jenkins-ci.plugins:matrix-project:1.4@jar'
 	//jenkinsTest 'org.eclipse.hudson:hudson-test-framework:3.3.3'
 	
-	compile 'org.slf4j:slf4j-api:1.7.12'
+	compile 'org.slf4j:slf4j-api:1.7.21'
+	compile 'org.slf4j:slf4j-simple:1.7.21'
 }
 
 task wrapper(type: Wrapper) {
