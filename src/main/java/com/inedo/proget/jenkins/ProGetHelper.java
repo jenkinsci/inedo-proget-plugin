@@ -7,7 +7,6 @@ import jenkins.model.Jenkins;
 
 import java.util.Scanner;
 
-import com.inedo.http.ConsoleLogWriter;
 import com.inedo.http.LogWriter;
 import com.inedo.proget.api.ProGetConfig;
 import com.inedo.proget.domain.PackageMetadata;

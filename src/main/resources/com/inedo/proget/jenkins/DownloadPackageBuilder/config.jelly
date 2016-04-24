@@ -10,26 +10,38 @@
     When submitted, it will be passed to the corresponding constructor parameter.
   -->
     <f:entry title="Feed name" field="feedName" >
-      <f:textbox /> 
+ 	  <j:choose>
+   	    <j:when test="${descriptor.isProGetAvailable}"><f:select /></j:when>
+        <j:otherwise><f:textbox /></j:otherwise>
+      </j:choose>
     </f:entry>
     
     <f:entry title="Group name" field="groupName" >
-      <f:textbox /> 
+ 	  <j:choose>
+   	    <j:when test="${descriptor.isProGetAvailable}"><f:select /></j:when>
+        <j:otherwise><f:textbox /></j:otherwise>
+      </j:choose>
     </f:entry>
     
     <f:entry title="Package name" field="packageName" >
-      <f:textbox /> 
+ 	  <j:choose>
+   	    <j:when test="${descriptor.isProGetAvailable}"><f:select /></j:when>
+        <j:otherwise><f:textbox /></j:otherwise>
+      </j:choose>
     </f:entry>
     
     <f:entry title="Version" field="version" >
-      <f:textbox /> 
+ 	  <j:choose>
+   	    <j:when test="${descriptor.isProGetAvailable}"><f:select /></j:when>
+        <j:otherwise><f:textbox /></j:otherwise>
+      </j:choose>
+    </f:entry>
+    
+    <f:entry title="Download Format" field="downloadFormat"> 
+ 	  <f:select default="pkg"/>
     </f:entry>
     
     <f:entry title="Destination folder" field="downloadFolder" >
       <f:textbox default="${descriptor.defaultFolder()}"/> 
     </f:entry> 
-    
-	<f:entry title="Unpack" field="unpack" >
-      <f:checkbox default="false" />
-    </f:entry>
 </j:jelly>

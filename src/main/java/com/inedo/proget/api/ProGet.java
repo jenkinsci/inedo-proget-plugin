@@ -6,7 +6,9 @@ import com.google.common.net.MediaType;
 import com.inedo.http.HttpEasy;
 import com.inedo.proget.domain.Feed;
 import com.inedo.proget.domain.ProGetPackage;
+import com.inedo.proget.domain.Version;
 import com.inedo.proget.jenkins.ProGetHelper;
+import com.inedo.proget.jenkins.DownloadPackageBuilder.DownloadFormat;
 
 /**
  * BuildMaster json api interface 
@@ -65,7 +67,7 @@ public class ProGet {
 		
 		return result;
 	}
-	
+		
 	/** Gets the packages in a ProGet feed */
 	public ProGetPackage[] getPackages(String feedId) throws IOException {
 		return HttpEasy.request()
@@ -76,6 +78,17 @@ public class ProGet {
 				.asJson(ProGetPackage[].class);
 	}
 
+	/** Gets the package versions in a ProGet feed */
+	public Version[] getPackageVersions(String feedId, String groupName, String packageName) throws IOException {
+		return HttpEasy.request()
+				.path("api/json/ProGetPackages_GetPackageVersions?API_Key={}&Feed_Id={}&Group_Name={}&Package_Name={}")
+				.urlParameters(config.apiKey, feedId, groupName, packageName)
+				.get()
+				.getJsonReader()
+				.asJson(Version[].class);
+	}
+	
+	
 	/**
 	 * 
 	 * @param feedName		Required
@@ -83,11 +96,13 @@ public class ProGet {
 	 * @param packageName	Required
 	 * @param version		Optional - empty string returns latest version
 	 * @param toFolder		Folder to save file to
+	 * @param downloadFormat 
 	 * @return	Reference to downloaded file
 	 * @throws IOException
 	 */
-	public File downloadPackage(String feedName, String groupName, String packageName, String version, String toFolder) throws IOException {
+	public File downloadPackage(String feedName, String groupName, String packageName, String version, String toFolder, DownloadFormat downloadFormat) throws IOException {
 		String path = "upack/{«feed-name»}/download/{«group-name»}/{«package-name»}";
+		String query = "";
 		
 		if (version == null || version.trim().isEmpty()) {
 			version = "";
@@ -95,19 +110,24 @@ public class ProGet {
 			path += "/{«package-version»}";
 		}
 		
-		return HttpEasy.request().
-				path(path).
-				urlParameters(feedName, groupName, packageName, version).
-				get().
-				downloadFile(toFolder);
+		if (downloadFormat != DownloadFormat.PACKAGE) {
+			query = "contentOnly={«zip|tgz»}";
+		}
+		
+		return HttpEasy.request()
+				.path(path)
+				.query(query)
+				.urlParameters(feedName, groupName, packageName, version, downloadFormat.getFormat())
+				.get()
+				.downloadFile(toFolder);
 	}
 	
 	public void uploadPackage(String feedName, File progetPackage) throws IOException {
-		HttpEasy.request().
-				path("upack/{«feed-name»}/upload").
-				urlParameters(feedName).
-				data(progetPackage, MediaType.ZIP).
-				authorization("Admin", "Admin").
-				post();
+		HttpEasy.request()
+				.path("upack/{«feed-name»}/upload")
+				.urlParameters(feedName)
+				.data(progetPackage, MediaType.ZIP)
+				.authorization("Admin", "Admin")
+				.post();
 	}	
 }

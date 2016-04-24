@@ -7,8 +7,10 @@ import com.inedo.proget.api.ProGet;
 import com.inedo.proget.domain.Feed;
 import com.inedo.proget.domain.PackageMetadata;
 import com.inedo.proget.domain.ProGetPackage;
+import com.inedo.proget.domain.Version;
 import com.inedo.proget.jenkins.ProGetHelper;
 import com.inedo.proget.jenkins.UploadPackageBuilder;
+import com.inedo.proget.jenkins.DownloadPackageBuilder.DownloadFormat;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -87,12 +89,21 @@ public class ApiTests {
 	}
 	
 	@Test
+	public void getPackageVersions() throws IOException  {
+		Feed feed = proget.getFeed("Example");
+		ProGetPackage pkg = proget.getPackages(feed.Feed_Id)[0];
+    	Version[] versions = proget.getPackageVersions(feed.Feed_Id, pkg.Group_Name, pkg.Package_Name);
+    	
+        assertThat("Expect at least one version", versions.length, is(greaterThan(0)));
+	}
+	
+	@Test
 	public void downloadPackage() throws IOException  {
 		Feed feed = proget.getFeed("Example");
 		
 		ProGetPackage pkg = proget.getPackages(feed.Feed_Id)[0];
 		
-		File downloaded = proget.downloadPackage(feed.Feed_Name, pkg.Group_Name, pkg.Package_Name, pkg.LatestVersion_Text, folder.getRoot().getAbsolutePath());
+		File downloaded = proget.downloadPackage(feed.Feed_Name, pkg.Group_Name, pkg.Package_Name, pkg.LatestVersion_Text, folder.getRoot().getAbsolutePath(), DownloadFormat.PACKAGE);
 //		File downloaded = proget.downloadPackage("Example", "andrew/sumner/example", "examplepackage", "0.0.1", folder.getRoot().getAbsolutePath());
     	
         assertThat("File has content", downloaded.length(), is(greaterThan((long)1000)));
@@ -104,7 +115,7 @@ public class ApiTests {
 		
 		ProGetPackage pkg = proget.getPackages(feed.Feed_Id)[0];
 		
-		File downloaded = proget.downloadPackage(feed.Feed_Name, pkg.Group_Name, pkg.Package_Name, "", folder.getRoot().getAbsolutePath());
+		File downloaded = proget.downloadPackage(feed.Feed_Name, pkg.Group_Name, pkg.Package_Name, "", folder.getRoot().getAbsolutePath(), DownloadFormat.PACKAGE);
     	
         assertThat("File has content", downloaded.length(), is(greaterThan((long)1000)));
 	}
