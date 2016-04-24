@@ -78,10 +78,10 @@ public class DownloadPackageBuilder extends Builder {
 		ProGet proget = new ProGet(helper);
 		
 		String downloadTo = helper.expandVariable(downloadFolder);
-		helper.info("Download to " + new File(downloadTo).getAbsolutePath());
+		helper.info("Download package to " + new File(downloadTo).getAbsolutePath());
 		
 		try {
-			DownloadFormat format = DownloadFormat.valueOf(downloadFormat);
+			DownloadFormat format = DownloadFormat.fromFormat(downloadFormat);
 			File downloaded = proget.downloadPackage(feedName, groupName, packageName, version, downloadTo, format);
 					
 			if (format == DownloadFormat.EXTRACT_CONTENT) {
