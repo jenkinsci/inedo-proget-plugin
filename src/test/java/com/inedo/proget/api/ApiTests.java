@@ -133,7 +133,8 @@ public class ApiTests {
 		String exclude = "";
 		
 //		UploadPackageBuilder settings = new UploadPackageBuilder("", "", "Example", "andrew/sumner/proget", "ExamplePackage", "0.0.3", "custom=yes\rreally=C:\\Java\\workspace\\inedo-proget-plugin\\work\\jobs\\ProGetUpload\\workspace", include);
-		UploadPackageBuilder settings = new UploadPackageBuilder("", "", "Example", "andrew/sumner/proget", "ExamplePackage", "0.0.3", "custom=yes\rreally=C:\\Java\\workspace\\", include);
+		//TODO Custom property with \\ in it fails, \\\\ works
+		UploadPackageBuilder settings = new UploadPackageBuilder("", "", "Example", "andrew/sumner/proget", "ExamplePackage2", "0.0.5", "custom=yes\rreally=C:\\\\Java\\\\workspace", include);
 		settings.setCaseSensitive(false);
 		settings.setDefaultExcludes(false);
 		settings.setExcludes(exclude);
