@@ -64,7 +64,7 @@ public class ApiTests {
 		ProGetHelper.injectConfiguration(config);
 		
 		try {
-			proget.getFeeds();
+			new ProGet(new ProGetHelper(null, new MockTaskListener())).getFeeds();
 		} finally {
 			mockServer.getProGetConfig().url = origUrl;
 		}
@@ -132,7 +132,8 @@ public class ApiTests {
 		String include = "";
 		String exclude = "";
 		
-		UploadPackageBuilder settings = new UploadPackageBuilder("", "", "Example", "andrew/sumner/proget", "ExamplePackage", "0.0.3", "custom=yes\rreally=C:\\Java\\workspace\\inedo-proget-plugin\\work\\jobs\\ProGetUpload\\workspace", include);
+//		UploadPackageBuilder settings = new UploadPackageBuilder("", "", "Example", "andrew/sumner/proget", "ExamplePackage", "0.0.3", "custom=yes\rreally=C:\\Java\\workspace\\inedo-proget-plugin\\work\\jobs\\ProGetUpload\\workspace", include);
+		UploadPackageBuilder settings = new UploadPackageBuilder("", "", "Example", "andrew/sumner/proget", "ExamplePackage", "0.0.3", "custom=yes\rreally=C:\\Java\\workspace\\", include);
 		settings.setCaseSensitive(false);
 		settings.setDefaultExcludes(false);
 		settings.setExcludes(exclude);

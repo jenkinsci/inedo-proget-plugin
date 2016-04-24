@@ -4,6 +4,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class PackageMetadata {
+	/** A string of no more than fifty characters: numbers (0-9), upper- and lower-case letters (a-Z), dashes (-), periods (.), and underscores (_) Required*/
+	public String packageName;
+	
+	/** 
+	 * A string consisting of three integers separated by periods (.); leading zeros are not permitted 
+	 * Example: 0.0.1
+	 * Required
+	 */
+	public String version;
+	
 	/** A string of no more than fifty characters: 
 	 * 		numbers (0-9)
 	 * 		upper- and lower-case letters (a-Z)
@@ -18,6 +28,21 @@ public class PackageMetadata {
 	public String group;
 	
 	/** 
+	 * A string of no more than fifty characters 
+	 * Optional
+	 */
+	public String title;
+
+	
+	/** 
+	 * A string of an absolute url pointing to an image to be displayed in the ProGet UI (at both 64px and 128px); 
+	 * if  package:// is used as the protocol, ProGet will search within the package and serve that image instead
+	 * Example: package://ablast.svg
+	 * Optional
+	 */
+	public String icon;
+	
+	/** 
 	 * A string of no more than fifty characters: 
 	 * 		numbers (0-9)
 	 * 		upper- and lower-case letters (a-Z)
@@ -27,28 +52,8 @@ public class PackageMetadata {
 	 * Example: ABLast
 	 * Required.
 	 */
-	public String packageName;
-	
-	/** 
-	 * A string consisting of three integers separated by periods (.); leading zeros are not permitted 
-	 * Example: 0.0.1
-	 * Required
-	 */
-	public String version;
-	
-	/** 
-	 * A string of no more than fifty characters 
-	 * Optional
-	 */
-	public String title;
-	
-	/** 
-	 * A string of an absolute url pointing to an image to be displayed in the ProGet UI (at both 64px and 128px); 
-	 * if  package:// is used as the protocol, ProGet will search within the package and serve that image instead
-	 * Example: package://ablast.svg
-	 * Optional
-	 */
-	public String icon;
+//	public String packageName;
+
 	
 	/** 
 	 * A string containing any number of charters; these will be formatted as Markdown in the ProGet UI 

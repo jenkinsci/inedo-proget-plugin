@@ -103,11 +103,11 @@ public class ProGetHelper implements LogWriter {
 	public PackageMetadata getMetadata(UploadPackageBuilder settings) {
 		PackageMetadata metadata = new PackageMetadata();
 
-		metadata.title = settings.getTitle();
-		metadata.description = settings.getDescription();
 		metadata.group = expandVariable(settings.getGroupName());
 		metadata.packageName = expandVariable(settings.getPackageName());
 		metadata.version = expandVariable(settings.getVersion());
+		metadata.title = settings.getTitle();
+		metadata.description = settings.getDescription();		
 		
 		try (Scanner scanner = new Scanner(settings.getMetadata())) {
 			while (scanner.hasNextLine()){
