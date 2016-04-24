@@ -32,8 +32,8 @@
     
     <f:entry title="Version" field="version" >
  	  <j:choose>
-   	    <j:when test="${descriptor.isProGetAvailable}"><f:select /></j:when>
-        <j:otherwise><f:textbox /></j:otherwise>
+   	    <j:when test="${descriptor.isProGetAvailable}"><f:select default="Latest"/></j:when>
+        <j:otherwise><f:textbox default="Latest"/></j:otherwise>
       </j:choose>
     </f:entry>
     
