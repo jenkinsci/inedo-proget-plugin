@@ -83,6 +83,10 @@ public class ProGetHelper implements LogWriter {
 		
 		return expanded;
 	}
+	
+	public static void injectEnvrionmentVariable(AbstractBuild<?, ?> build, String key, String value) {
+		build.addAction(new VariableInjectionAction(key, value));
+	}
 
 	@Override
 	public void info(String message) {

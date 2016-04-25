@@ -33,18 +33,18 @@ public class DownloadPackageBuilder extends Builder {
 	private final String groupName;
 	private final String packageName;
 	private final String version;
-	private final String downloadFolder;
 	private final String downloadFormat;
+	private final String downloadFolder;
 	
 	// Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
 	@DataBoundConstructor
-	public DownloadPackageBuilder(String feedName, String groupName, String packageName, String version, String downloadFolder, String downloadFormat) {
+	public DownloadPackageBuilder(String feedName, String groupName, String packageName, String version, String downloadFormat, String downloadFolder) {
 		this.feedName = feedName;
 		this.groupName = groupName;
 		this.packageName = packageName;
 		this.version = version;
-		this.downloadFolder = downloadFolder;
 		this.downloadFormat = downloadFormat;
+		this.downloadFolder = downloadFolder;
 	}
 	
 	public String getFeedName() {
@@ -61,6 +61,10 @@ public class DownloadPackageBuilder extends Builder {
 	
 	public String getVersion() {
 		return version;
+	}
+	
+	public String getDownloadFormat() {
+		return downloadFormat;
 	}
 	
 	public String getDownloadFolder() {
@@ -88,6 +92,8 @@ public class DownloadPackageBuilder extends Builder {
 				helper.info("Unpack " + downloaded.getName());
 				ProGetPackageUtils.unpackContent(downloaded);
 				downloaded.delete();
+			} else {
+				ProGetHelper.injectEnvrionmentVariable(build, "PROGET_FILE", downloaded.getName());
 			}
 		} catch (IOException e) {
 			helper.info("Error: " + e.getMessage());
@@ -268,9 +274,9 @@ public class DownloadPackageBuilder extends Builder {
 	
 	public enum DownloadFormat {
 		PACKAGE("pkg", "Package"),
-		EXTRACT_CONTENT("unpack", "Unpack Content"),
 		CONTENT_AS_ZIP("zip", "Content as ZIP"), 
-		CONTENT_AS_TGZ("tgz", "Content as TGZ");
+		CONTENT_AS_TGZ("tgz", "Content as TGZ"),
+		EXTRACT_CONTENT("unpack", "Unpack Content");
 		
 		private final String format;
 		private final String display;

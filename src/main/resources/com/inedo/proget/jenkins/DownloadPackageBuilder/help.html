@@ -1,5 +1,17 @@
 <div>
 	Downloads a universal ProGet Package to specified folder and will optionally unpack it for you.
 	
+	<p>
+	Download options are:
+	<ul>
+		<li>Package - Download ProGet universal package (ZIP file with extension of 'unpack')</li>
+		<li>Content as ZIP - Download content as ZIP file</li>
+		<li>Content as TGZ - Download content as TGZ file</li>
+		<li>Unpack Content - Extract the package content once downloaded</li>
+	</ul>
+	
+	In all cases except 'Unpack Content' the environment variable PROGET_FILE will be populated with the name of the downloaded file
+	</p>
+	
 	<p>See <a href="http://inedo.com/support/documentation/proget/reference/universal-feed-api-and-package-format" target="_blank">Inedo documentation</a>.
 </div>

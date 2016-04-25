@@ -110,7 +110,7 @@ public class ProGet {
 			path += "/{«package-version»}";
 		}
 		
-		if (downloadFormat != DownloadFormat.PACKAGE) {
+		if (downloadFormat == DownloadFormat.CONTENT_AS_ZIP || downloadFormat == DownloadFormat.CONTENT_AS_TGZ) {
 			query = "contentOnly={«zip|tgz»}";
 		}
 		

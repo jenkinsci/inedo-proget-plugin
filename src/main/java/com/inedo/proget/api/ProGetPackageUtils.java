@@ -211,35 +211,39 @@ public class ProGetPackageUtils
 	            ZipEntry entry = e.nextElement();
 	            
 	            String entryName = new File(entry.getName()).getPath();
+	            if (entryName.equals(UNPACK)) {
+	            	continue;
+	            }
+	            
 	            if (entryName.startsWith(UNPACK) && !entryName.equals(UNPACK)) {
 	            	entryName = entryName.substring(UNPACK.length());
-	            	
-		            File file = new File(extractTo, entryName);
-		            if (entry.isDirectory()) {
-		            	if (!file.exists()) {
-		            		file.mkdirs();
-		            	}
-		            } else {
-		                if (!file.getParentFile().exists()) {
-		                    file.getParentFile().mkdirs();
-		                }
+	            }
+	            
+	            File file = new File(extractTo, entryName);
+	            if (entry.isDirectory()) {
+	            	if (!file.exists()) {
+	            		file.mkdirs();
+	            	}
+	            } else {
+	                if (!file.getParentFile().exists()) {
+	                    file.getParentFile().mkdirs();
+	                }
+	
+	                InputStream in = archive.getInputStream(entry);
+	                
+	                try (BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(file))) {
+	
+		                byte[] buffer = new byte[8192];
+		                int read;
 		
-		                InputStream in = archive.getInputStream(entry);
-		                
-		                try (BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(file))) {
-		
-			                byte[] buffer = new byte[8192];
-			                int read;
-			
-			                while (-1 != (read = in.read(buffer))) {
-			                    out.write(buffer, 0, read);
-			                }
-			                in.close();
+		                while (-1 != (read = in.read(buffer))) {
+		                    out.write(buffer, 0, read);
 		                }
-		            }
+		                in.close();
+	                }
 	            }
             }
-		}
+    	}
     }
 
 	public List<String> getFileList(File baseFolder, UploadPackageBuilder settings) {

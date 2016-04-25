@@ -38,7 +38,7 @@
     </f:entry>
     
     <f:entry title="Download format" field="downloadFormat"> 
- 	  <f:select default="pkg"/>
+ 	  <f:select />
     </f:entry>
     
     <f:entry title="Destination folder" field="downloadFolder" >
