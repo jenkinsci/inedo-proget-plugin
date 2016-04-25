@@ -209,7 +209,7 @@ public class UploadPackageBuilder extends Builder {
             		connectionError = "";
             	} else {
             		try {
-                    	proget.checkConnection();
+                    	proget.canConnect();
                     	isProGetAvailable = true;
                 		connectionError = "";
                     } catch (Exception ex) {

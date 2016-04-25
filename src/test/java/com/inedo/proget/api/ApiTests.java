@@ -54,7 +54,7 @@ public class ApiTests {
 	@Test
 	public void checkConnection() throws IOException {
 		// An exception will be thrown if fails
-		proget.checkConnection();
+		proget.canConnect();
 	}
 	
 	@Test(expected=UnknownHostException.class)

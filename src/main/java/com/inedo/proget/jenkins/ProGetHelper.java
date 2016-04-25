@@ -40,18 +40,20 @@ public class ProGetHelper implements LogWriter {
 		config = value;
 	}
 	
-	public boolean validateProGetConfig() {
+	public boolean isProGetRequiredFieldsConfigured() {
 		if (config != null) {
 			return true;
 		}
 		
-		boolean valid = getSharedDescriptor().validatePluginConfiguration();
-		
-		if (!valid) {
-			info("Please configure ProGet Plugin global settings");
+		return getSharedDescriptor().isRequiredFieldsConfigured();
+	}
+
+	public boolean isProGetApiKeyFieldConfigured() {
+		if (config != null) {
+			return true;
 		}
 		
-		return valid;
+		return getSharedDescriptor().isApiKeyConfigured();
 	}
 
 	public static ProGetConfig getProGetConfig() {

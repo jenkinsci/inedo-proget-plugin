@@ -12,7 +12,6 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
 import com.inedo.proget.api.ProGet;
-import com.inedo.proget.api.ProGetConfig;
 import com.inedo.proget.api.ProGetPackageUtils;
 import com.inedo.proget.domain.Feed;
 import com.inedo.proget.domain.ProGetPackage;
@@ -75,7 +74,9 @@ public class DownloadPackageBuilder extends Builder {
 	public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws IOException {
 		ProGetHelper helper = new ProGetHelper(build, listener);
 		
-		if (!helper.validateProGetConfig()) {
+		if (!helper.isProGetRequiredFieldsConfigured()) {
+			helper.info("Please configure ProGet Plugin global settings");
+				
 			return false;
 		}
 		
@@ -109,6 +110,7 @@ public class DownloadPackageBuilder extends Builder {
 	public static final class DescriptorImpl extends BuildStepDescriptor<Builder> {
 		private ProGet proget = null;
 		private String connectionError = "";
+		private String connectionWarning = "";
 		private Boolean isProGetAvailable = null;
 		
 		public DescriptorImpl() {
@@ -129,8 +131,7 @@ public class DownloadPackageBuilder extends Builder {
 		public String getDisplayName() {
 			return "Download ProGet Package";
 		}
-		
-		
+	
 		public boolean isConnectionError() {
 			getIsProGetAvailable();
 			
@@ -138,36 +139,53 @@ public class DownloadPackageBuilder extends Builder {
 		}
 		
 		public String getConnectionError() {
+    		return connectionError;
+    	}
+		
+		public boolean isConnectionWarning() {
 			getIsProGetAvailable();
 			
-    		return connectionError;
+			return !connectionWarning.isEmpty();
+		}
+		
+		public String getConnectionWarning() {
+			return connectionWarning;
     	}
 		
 		/**
     	 * Check if can connect to ProGet - if not prevent any more calls
     	 */
     	public boolean getIsProGetAvailable() {
-    		if (isProGetAvailable == null) {
-    			ProGetConfig config = ProGetHelper.getProGetConfig();
-    			proget = new ProGet(new ProGetHelper());
-        		
-            	if (config.apiKey == null || config.apiKey.isEmpty()) {
-            		isProGetAvailable = false;
-            		connectionError = "";
-            	} else {
-            		try {
-                    	proget.checkConnection();
-                    	isProGetAvailable = true;
-                		connectionError = "";
-                    } catch (Exception ex) {
-                    	isProGetAvailable = false;
-                    	connectionError = ex.getClass().getName() + ": " + ex.getMessage();
-                    	
-                    	System.err.println(connectionError);
-                    }   
-            	}
+    		if (isProGetAvailable != null) {
+    			return isProGetAvailable;
     		}
-        	
+    		
+			ProGetHelper helper = new ProGetHelper();
+			
+			if (!helper.isProGetRequiredFieldsConfigured()) {
+				connectionError = "Please configure ProGet Plugin global settings";
+				isProGetAvailable = false;
+				return false;
+			}
+			
+			proget = new ProGet(null);
+
+			try {
+            	proget.canConnect();
+			} catch (Exception ex) {
+            	connectionError = "Unable to connect to Proget, please check the global settings: " + ex.getClass().getName() + " - " + ex.getMessage();
+            	isProGetAvailable = false;
+            	return false;
+            }   
+
+			if (!helper.isProGetApiKeyFieldConfigured()) {
+				connectionWarning = "The ApiKey has not been configured in global settings, some features have been disabled.";
+				isProGetAvailable = false;
+			} else {
+	    		connectionError = "";
+	        	isProGetAvailable = true;
+			}
+
         	return isProGetAvailable;
     	}
     	

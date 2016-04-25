@@ -116,15 +116,22 @@ public class ProGetConfiguration extends GlobalConfiguration {
             return apiKey;
         }
         
-        public boolean validatePluginConfiguration() {
-        	if( url == null || apiKey == null ||
-    			url.isEmpty() || apiKey.isEmpty() ) {
+        public boolean isRequiredFieldsConfigured() {
+        	if( url == null || url.isEmpty()) {
     			return false;
     		}
         	
     		return true;
         }
-        
+
+        public boolean isApiKeyConfigured() {
+        	if( apiKey == null || apiKey.isEmpty() ) {
+    			return false;
+    		}
+        	
+    		return true;
+        }
+
         /**
          * Performs on-the-fly validation of the form field 'url'.
          *
@@ -209,11 +216,11 @@ public class ProGetConfiguration extends GlobalConfiguration {
 			
 			ProGetHelper.injectConfiguration(config);
 			ProGet proget = new ProGet(new ProGetHelper());
-			
+
 			try {
-				proget.checkConnection();
+				proget.canConnect();
 			} catch (Exception ex) {
-				return FormValidation.error("Failed. Please check the configuration. " + ex.getClass().getName() + ": " + ex.getMessage());
+            	return FormValidation.error("Failed. Please check the configuration: " + ex.getClass().getName() + " - " + ex.getMessage());
 			} finally {
 				ProGetHelper.injectConfiguration(null);
 			}

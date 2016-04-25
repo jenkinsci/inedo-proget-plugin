@@ -1,47 +1,45 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
-  <!--
-    This jelly script is used for per-project configuration.
-    See global.jelly for a general discussion about jelly script.
-  -->
-
-  <!--
-    Creates a text field that shows the value of the "key" and "value" property.
-    When submitted, it will be passed to the corresponding constructor parameter.
-  -->
-    <f:entry title="Feed name" field="feedName" >
- 	  <j:choose>
-   	    <j:when test="${descriptor.isProGetAvailable}"><f:select /></j:when>
-        <j:otherwise><f:textbox /></j:otherwise>
-      </j:choose>
-    </f:entry>
+  <j:if test="${descriptor.isConnectionError()}"> 
+    <f:block><p style="color:red; font-weight: bold">${descriptor.connectionError}</p></f:block>
+  </j:if>
+  <j:if test="${descriptor.isConnectionWarning()}">  
+    <f:block><p style="color:orange; font-weight: bold">${descriptor.getConnectionWarning()}</p></f:block>
+  </j:if>
     
-    <f:entry title="Group name" field="groupName" >
- 	  <j:choose>
-   	    <j:when test="${descriptor.isProGetAvailable}"><f:select /></j:when>
-        <j:otherwise><f:textbox /></j:otherwise>
-      </j:choose>
-    </f:entry>
+  <f:entry title="Feed name" field="feedName" >
+    <j:choose>
+      <j:when test="${descriptor.isProGetAvailable}"><f:select /></j:when>
+      <j:otherwise><f:textbox /></j:otherwise>
+    </j:choose>
+  </f:entry>
     
-    <f:entry title="Package name" field="packageName" >
- 	  <j:choose>
-   	    <j:when test="${descriptor.isProGetAvailable}"><f:select /></j:when>
-        <j:otherwise><f:textbox /></j:otherwise>
-      </j:choose>
-    </f:entry>
+  <f:entry title="Group name" field="groupName" >
+    <j:choose>
+      <j:when test="${descriptor.isProGetAvailable}"><f:select /></j:when>
+      <j:otherwise><f:textbox /></j:otherwise>
+    </j:choose>
+  </f:entry>
     
-    <f:entry title="Version" field="version" >
- 	  <j:choose>
-   	    <j:when test="${descriptor.isProGetAvailable}"><f:select default="Latest"/></j:when>
-        <j:otherwise><f:textbox default="Latest"/></j:otherwise>
-      </j:choose>
-    </f:entry>
+  <f:entry title="Package name" field="packageName" >
+    <j:choose>
+      <j:when test="${descriptor.isProGetAvailable}"><f:select /></j:when>
+      <j:otherwise><f:textbox /></j:otherwise>
+    </j:choose>
+  </f:entry>
     
-    <f:entry title="Download format" field="downloadFormat"> 
- 	  <f:select />
-    </f:entry>
+  <f:entry title="Version" field="version" >
+    <j:choose>
+      <j:when test="${descriptor.isProGetAvailable}"><f:select default="Latest"/></j:when>
+      <j:otherwise><f:textbox default="Latest"/></j:otherwise>
+    </j:choose>
+  </f:entry>
     
-    <f:entry title="Destination folder" field="downloadFolder" >
-      <f:textbox default="${descriptor.defaultFolder()}"/> 
-    </f:entry> 
+  <f:entry title="Download format" field="downloadFormat"> 
+    <f:select />
+  </f:entry>
+    
+  <f:entry title="Destination folder" field="downloadFolder" >
+    <f:textbox default="${descriptor.defaultFolder()}"/> 
+  </f:entry> 
 </j:jelly>

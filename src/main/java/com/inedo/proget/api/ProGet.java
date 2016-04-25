@@ -2,6 +2,10 @@ package com.inedo.proget.api;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.URL;
+
 import com.google.common.net.MediaType;
 import com.inedo.http.HttpEasy;
 import com.inedo.proget.domain.Feed;
@@ -32,12 +36,15 @@ public class ProGet {
 	}
 
 	/**
-	 * Ensure can call BuildMaster api. An exception will be thrown if cannot.
+	 * Ensure can ping ProGet.  If we need to get assurance that it is running we could call a URL using HEAD method.
 	 * 
-	 * @throws IOException
+	 * @throws IOException If cannot connect
 	 */
-	public void checkConnection() throws IOException {
-		getFeeds();
+	public void canConnect() throws IOException {
+		try (Socket socket = new Socket()) {
+			URL url = new URL(config.url);
+	        socket.connect(new InetSocketAddress(url.getHost(), url.getPort()));
+	    }
 	}
 
 	/** Gets the details of a feed by its name */
@@ -127,7 +134,7 @@ public class ProGet {
 				.path("upack/{«feed-name»}/upload")
 				.urlParameters(feedName)
 				.data(progetPackage, MediaType.ZIP)
-				.authorization("Admin", "Admin")
+				.authorization(config.user, config.password)
 				.post();
 	}	
 }
