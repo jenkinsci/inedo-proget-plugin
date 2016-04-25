@@ -4,16 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class PackageMetadata {
-	/** A string of no more than fifty characters: numbers (0-9), upper- and lower-case letters (a-Z), dashes (-), periods (.), and underscores (_) Required*/
-	public String packageName;
-	
-	/** 
-	 * A string consisting of three integers separated by periods (.); leading zeros are not permitted 
-	 * Example: 0.0.1
-	 * Required
-	 */
-	public String version;
-	
 	/** A string of no more than fifty characters: 
 	 * 		numbers (0-9)
 	 * 		upper- and lower-case letters (a-Z)
@@ -26,6 +16,25 @@ public class PackageMetadata {
 	 * Required. 
 	 */
 	public String group;
+	
+	/** 
+	 * A string of no more than fifty characters: 
+	 * 		numbers (0-9)
+	 * 		upper- and lower-case letters (a-Z)
+	 * 		dashes (-)
+	 * 		periods (.)
+	 * 		and underscores (_)
+	 * Example: ABLast
+	 * Required.
+	 */
+	public String packageName;
+	
+	/** 
+	 * A string consisting of three integers separated by periods (.); leading zeros are not permitted 
+	 * Example: 0.0.1
+	 * Required
+	 */
+	public String version;
 	
 	/** 
 	 * A string of no more than fifty characters 
@@ -41,19 +50,6 @@ public class PackageMetadata {
 	 * Optional
 	 */
 	public String icon;
-	
-	/** 
-	 * A string of no more than fifty characters: 
-	 * 		numbers (0-9)
-	 * 		upper- and lower-case letters (a-Z)
-	 * 		dashes (-)
-	 * 		periods (.)
-	 * 		and underscores (_)
-	 * Example: ABLast
-	 * Required.
-	 */
-//	public String packageName;
-
 	
 	/** 
 	 * A string containing any number of charters; these will be formatted as Markdown in the ProGet UI 
