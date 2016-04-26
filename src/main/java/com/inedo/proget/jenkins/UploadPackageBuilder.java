@@ -39,28 +39,27 @@ import javax.servlet.ServletException;
  * @author Andrew Sumner
  */
 public class UploadPackageBuilder extends Builder {
-	private final String title;
-	private final String description;
 	private final String feedName;
 	private final String groupName;
 	private final String packageName;
 	private final String version;
-	private final String metadata;
 	private final String artifacts;
 	private String excludes;
 	private boolean defaultExcludes;
 	private boolean caseSensitive;
+	private String title;
+	private String description;
+	private String icon;
+	private String metadata;
+	private String dependencies;
 	
 	// Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
 	@DataBoundConstructor
-	public UploadPackageBuilder(String title, String description, String feedName, String groupName, String packageName, String version, String metadata, String artifacts) {
-		this.title = title;
-		this.description = description;
+	public UploadPackageBuilder(String feedName, String groupName, String packageName, String version, String artifacts) {
 		this.feedName = feedName;
 		this.groupName = groupName;
 		this.packageName = packageName;
 		this.version = version;
-		this.metadata = metadata;
 		this.artifacts = artifacts;
 	}
 
@@ -76,12 +75,24 @@ public class UploadPackageBuilder extends Builder {
         this.caseSensitive = caseSensitive;
     }
     
-	public String getTitle() {
-		return title;
+    @DataBoundSetter public void setTitle(String title) {
+		this.title = title;
 	}
-	
-	public String getDescription() {
-		return description;
+
+    @DataBoundSetter public void setDescription(String description) {
+		this.description = description;
+	}
+
+    @DataBoundSetter public void setIcon(String icon) {
+		this.icon = icon;
+	}
+
+    @DataBoundSetter public void setMetadata(String metadata) {
+		this.metadata = metadata;
+	}
+
+    @DataBoundSetter public void setDependencies(String dependencies) {
+		this.dependencies = dependencies;
 	}
 	
 	public String getFeedName() {
@@ -100,10 +111,6 @@ public class UploadPackageBuilder extends Builder {
 		return version;
 	}
 	
-	public String getMetadata() {
-		return metadata;
-	}
-	
 	public String getArtifacts() {
 		return artifacts;
 	}
@@ -120,6 +127,25 @@ public class UploadPackageBuilder extends Builder {
         return caseSensitive;
     }
 
+	public String getTitle() {
+		return title;
+	}
+	
+	public String getDescription() {
+		return description;
+	}
+
+	public String getIcon() {
+		return icon;
+	}
+
+	public String getMetadata() {
+		return metadata;
+	}
+	
+	public String getDependencies() {
+		return dependencies;
+	}
 	
 	@Override
 	public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException {
@@ -135,7 +161,7 @@ public class UploadPackageBuilder extends Builder {
     	String includes = helper.expandVariable(this.artifacts);
     	FilePath ws = build.getWorkspace();
     	
-    	//TODO allow custom base directory rather than default to workspace?
+    	//base directory is workspace
     	File baseDir = new File(ws.getRemote());
         
     	ProGetPackageUtils packageUtils = new ProGetPackageUtils();
@@ -312,6 +338,9 @@ public class UploadPackageBuilder extends Builder {
             return items;
         }
     	
+    	private static final boolean REQUIRED = true;
+    	private static final boolean OPTIONAL = false;
+    	
 		/**
          * Performs on-the-fly validation of the file mask wildcard, when the artifacts
          * textbox or the caseSensitive checkbox are modified
@@ -327,24 +356,24 @@ public class UploadPackageBuilder extends Builder {
             return FilePath.validateFileMask(project.getSomeWorkspace(), value);
         }
 
-        public FormValidation doCheckTitle(@QueryParameter String value) throws IOException, ServletException {
-        	return checkFieldLength(value, false);
-        }
-
         public FormValidation doCheckFeedName(@QueryParameter String value) throws IOException, ServletException {
-        	return checkFieldLength(value, true);
+        	return checkFieldLength(value, REQUIRED);
         }
         
         public FormValidation doCheckGroupName(@QueryParameter String value) throws IOException, ServletException {
-        	return checkFieldLength(value, true);
+        	return checkFieldLength(value, REQUIRED);
         }
         
         public FormValidation doCheckPackageName(@QueryParameter String value) throws IOException, ServletException {
-        	return checkFieldLength(value, true);
+        	return checkFieldLength(value, REQUIRED);
         }
 
         public FormValidation doCheckVersion(@QueryParameter String value) throws IOException, ServletException {
-        	return checkFieldLength(value, true);
+        	return checkFieldLength(value, REQUIRED);
+        }
+
+        public FormValidation doCheckTitle(@QueryParameter String value) throws IOException, ServletException {
+        	return checkFieldLength(value, OPTIONAL);
         }
 
         private FormValidation checkFieldLength(String value, Boolean required) {
@@ -357,5 +386,45 @@ public class UploadPackageBuilder extends Builder {
             return FormValidation.ok();
 		}
 
+//TODO Raise with developer list, is it possible to get workspace from configuration page to test getFileList()?
+//        /**
+//         *  ProGet connection test
+//         */
+//		public FormValidation doTestFindFiles(
+//			@QueryParameter("artifacts") final String artifacts,
+//			@QueryParameter("excludes") final String excludes,
+//			@QueryParameter("defaultExcludes") final String defaultExcludes,
+//			@QueryParameter("caseSensitive") final String caseSensitive) throws IOException, ServletException {
+//	
+//			
+//			
+//	    	FilePath ws = build.getWorkspace();
+//	    	
+//	    	//base directory is workspace
+//	    	File baseDir = new File(ws.getRemote());
+//	        
+//	    	ProGetPackageUtils packageUtils = new ProGetPackageUtils();
+//	    	
+//	    	List<String> files = packageUtils.getFileList(baseDir, this);
+//	          
+//			if (files.isEmpty()) {
+//		    	String msg = ws.validateAntFileMask(includes, FilePath.VALIDATE_ANT_FILE_MASK_BOUND);
+//		    	if(msg != null) {
+//		        	helper.error(msg);
+//		        	return false;
+//		        }
+//		    	
+//		    	helper.error("No files found matching Files to package setting");
+//		    	return false;
+//			} 
+//
+//			try {
+//				pkg.getFileList(baseFolder, settings)
+//			} catch (Exception ex) {
+//            	return FormValidation.error("Failed. Please check the configuration: " + ex.getClass().getName() + " - " + ex.getMessage());
+//			}
+//			
+//			return FormValidation.ok("Success. Connection with ProGet verified.");			
+//		}
 	}
 }

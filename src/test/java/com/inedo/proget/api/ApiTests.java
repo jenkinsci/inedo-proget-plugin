@@ -140,15 +140,21 @@ public class ApiTests {
 	}
 	
 	public PackageMetadata getMetadata() {
-		String include = "";
-		String exclude = "";
+		UploadPackageBuilder settings = new UploadPackageBuilder("Example", "andrew/sumner/proget", "ExamplePackage2", "0.0.5", "");
 		
-//		UploadPackageBuilder settings = new UploadPackageBuilder("", "", "Example", "andrew/sumner/proget", "ExamplePackage", "0.0.3", "custom=yes\rreally=C:\\Java\\workspace\\inedo-proget-plugin\\work\\jobs\\ProGetUpload\\workspace", include);
-		//TODO Custom property with \\ in it fails, \\\\ works
-		UploadPackageBuilder settings = new UploadPackageBuilder("", "", "Example", "andrew/sumner/proget", "ExamplePackage2", "0.0.5", "custom=yes\rreally=C:\\\\Java\\\\workspace", include);
 		settings.setCaseSensitive(false);
 		settings.setDefaultExcludes(false);
-		settings.setExcludes(exclude);
+		settings.setExcludes("");
+		
+		settings.setTitle("");
+		settings.setDescription("");
+		settings.setIcon("");
+		settings.setMetadata("custom=yes\rreally=C:\\\\Java\\\\workspace");
+		
+		//TODO Metadata property with \\ in it fails, \\\\ works
+		//settings.setMetadata("custom=yes\rreally=C:\\Java\\workspace\\inedo-proget-plugin\\work\\jobs\\ProGetUpload\\workspace");
+		
+		settings.setDependencies("");
 		
 		ProGetHelper helper = new ProGetHelper(null, null);
 		return helper.getMetadata(settings);

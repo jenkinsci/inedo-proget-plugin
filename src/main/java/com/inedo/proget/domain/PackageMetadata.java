@@ -1,6 +1,8 @@
 package com.inedo.proget.domain;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class PackageMetadata {
@@ -67,8 +69,8 @@ public class PackageMetadata {
 	 * Example: [ "initrode/vendors-common:ast-common:2.0.0" ]
 	 * Optional
 	 */
-	public String dependencies;
+	public List<String> dependencies = new ArrayList<String>();
 	
-	
+	/** Custom metadata key/value pairs */
 	public Map<String, String> extendedAttributes = new HashMap<String, String>();
 }

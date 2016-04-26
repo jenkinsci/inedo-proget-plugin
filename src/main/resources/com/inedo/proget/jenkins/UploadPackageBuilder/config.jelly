@@ -70,7 +70,9 @@
 		</f:entry>
 	</f:advanced>
 	
+	<!-- Not developed yet
 	<f:validateButton
        title="${%Test 'Files to package'}" progress="${%Testing...}"
        method="testFindFiles" with="artifacts,excludes,defaultExcludes,caseSensitive" />
+    -->
 </j:jelly>

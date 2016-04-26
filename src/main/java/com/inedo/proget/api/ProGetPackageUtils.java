@@ -92,8 +92,19 @@ public class ProGetPackageUtils
 		if (isProvided(metadata.description)) {
 			sb.append(",").append(newLine).append("\t\"description\": \"").append(metadata.description).append("\"");
 		}
-		if (isProvided(metadata.dependencies)) {
-			sb.append(",").append(newLine).append("\t\"dependencies\": \"").append(metadata.dependencies).append("\"");
+	
+		if (metadata.dependencies.size() > 0) {
+			sb.append(",").append(newLine).append("\t\"dependencies\": [");
+			
+			for (int i = 0; i < metadata.dependencies.size(); i++) {
+				if (i > 0) {
+					sb.append(",");
+				}
+				
+				sb.append(" \"").append(metadata.dependencies.get(i)).append("\"");
+			}
+			
+			sb.append(" ]");
 		}
 		
 		for (Entry<String, String> entry : metadata.extendedAttributes.entrySet()) {
@@ -246,6 +257,7 @@ public class ProGetPackageUtils
     	}
     }
 
+	//TODO trim leading directories as per help text!!!!!!!!!!!!!!!!
 	public List<String> getFileList(File baseFolder, UploadPackageBuilder settings) {
 		List<String> files = new ArrayList<String>();
 

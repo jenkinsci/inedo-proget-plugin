@@ -53,10 +53,16 @@ public class ProGetPackageUtilsTests {
 	}
 	
 	public UploadPackageBuilder getSettings(String include, String exclude) {
-		UploadPackageBuilder settings = new UploadPackageBuilder("", "", "Example", "andrew/sumner/proget", "ExamplePackage", "0.0.3", "custom=yes\rreally=of course", include);
+		UploadPackageBuilder settings = new UploadPackageBuilder("Example", "andrew/sumner/proget", "ExamplePackage", "0.0.3", include);
 		settings.setCaseSensitive(false);
 		settings.setDefaultExcludes(false);
 		settings.setExcludes(exclude);
+		
+		settings.setTitle("");
+		settings.setDescription("");
+		settings.setIcon("");
+		settings.setMetadata("custom=yes\rreally=of course");
+		settings.setDependencies("");
 		
 		return settings;
 	}
@@ -79,11 +85,17 @@ public class ProGetPackageUtilsTests {
 
 	@Test
 	public void createPackageFromAntIncludes() throws IOException {
-		UploadPackageBuilder settings = new UploadPackageBuilder("", "", "Example", "andrew/sumner/proget", "ExamplePackage", "0.0.3", "custom=yes\rreally=of course", "**/*.*");
+		UploadPackageBuilder settings = new UploadPackageBuilder("Example", "andrew/sumner/proget", "ExamplePackage", "0.0.3", "**/*.*");
 		settings.setCaseSensitive(false);
 		settings.setDefaultExcludes(false);
 		settings.setExcludes("logs/");
 		
+		settings.setTitle("");
+		settings.setDescription("");
+		settings.setIcon("");
+		settings.setMetadata("");
+		settings.setDependencies("");
+
 		ProGetPackageUtils utils = new ProGetPackageUtils();
 		
 		List<String> files = utils.getFileList(folder.getRoot(), settings);

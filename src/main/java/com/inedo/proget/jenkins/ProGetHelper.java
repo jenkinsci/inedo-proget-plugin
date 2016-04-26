@@ -112,11 +112,16 @@ public class ProGetHelper implements LogWriter {
 		metadata.packageName = expandVariable(settings.getPackageName());
 		metadata.version = expandVariable(settings.getVersion());
 		metadata.title = settings.getTitle();
-		metadata.description = settings.getDescription();		
-		
+		metadata.description = settings.getDescription();
+		metadata.icon = settings.getIcon();
+				
 		try (Scanner scanner = new Scanner(settings.getMetadata())) {
 			while (scanner.hasNextLine()){
-				String line = scanner.nextLine();
+				String line = scanner.nextLine().trim();
+				
+				if (line.isEmpty()) {
+					continue;
+				}
 				
 				int pos = line.indexOf("=");
 				
@@ -127,6 +132,16 @@ public class ProGetHelper implements LogWriter {
 				    metadata.extendedAttributes.put(name, expandVariable(value));
 			    } else {
 			    	return null;
+				}
+		    } 
+		}
+		
+		try (Scanner scanner = new Scanner(settings.getDependencies())) {
+			while (scanner.hasNextLine()){
+				String dependency = scanner.nextLine().trim();
+				
+				if (!dependency.isEmpty()) {
+				    metadata.dependencies.add(dependency);
 				}
 		    } 
 		}
