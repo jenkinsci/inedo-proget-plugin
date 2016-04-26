@@ -3,6 +3,7 @@ package com.inedo.proget.jenkins;
 import hudson.Launcher;
 import hudson.Extension;
 import hudson.FilePath;
+import hudson.util.ComboBoxModel;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import hudson.model.AbstractBuild;
@@ -17,14 +18,17 @@ import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 
 import com.inedo.proget.api.ProGet;
-import com.inedo.proget.api.ProGetConfig;
 import com.inedo.proget.api.ProGetPackageUtils;
 import com.inedo.proget.domain.Feed;
 import com.inedo.proget.domain.PackageMetadata;
+import com.inedo.proget.domain.ProGetPackage;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+
 import javax.servlet.ServletException;
 
 /**
@@ -167,6 +171,7 @@ public class UploadPackageBuilder extends Builder {
 	public static final class DescriptorImpl extends BuildStepDescriptor<Builder> {
 		private ProGet proget = null;
 		private String connectionError = "";
+		private String connectionWarning = "";
 		private Boolean isProGetAvailable = null;
 		
 		public DescriptorImpl() {
@@ -181,7 +186,7 @@ public class UploadPackageBuilder extends Builder {
 
 		@Override
 		public String getDisplayName() {
-			return "Upload ProGet Package";
+			return "ProGet Package Upload";
 		}
 		
 		public boolean isConnectionError() {
@@ -191,56 +196,122 @@ public class UploadPackageBuilder extends Builder {
 		}
 		
 		public String getConnectionError() {
+    		return connectionError;
+    	}
+		
+		public boolean isConnectionWarning() {
 			getIsProGetAvailable();
 			
-    		return connectionError;
+			return !connectionWarning.isEmpty();
+		}
+		
+		public String getConnectionWarning() {
+			return connectionWarning;
     	}
 		
 		/**
     	 * Check if can connect to ProGet - if not prevent any more calls
     	 */
     	public boolean getIsProGetAvailable() {
-    		if (isProGetAvailable == null) {
-    			ProGetConfig config = ProGetHelper.getProGetConfig();
-    			proget = new ProGet(new ProGetHelper());
-        		
-            	if (config.apiKey == null || config.apiKey.isEmpty()) {
-            		isProGetAvailable = false;
-            		connectionError = "";
-            	} else {
-            		try {
-                    	proget.canConnect();
-                    	isProGetAvailable = true;
-                		connectionError = "";
-                    } catch (Exception ex) {
-                    	isProGetAvailable = false;
-                    	connectionError = ex.getClass().getName() + ": " + ex.getMessage();
-                    	
-                    	System.err.println(connectionError);
-                    }   
-            	}
+    		if (isProGetAvailable != null) {
+    			return isProGetAvailable;
     		}
-        	
+    		
+			ProGetHelper helper = new ProGetHelper();
+			
+			if (!helper.isProGetRequiredFieldsConfigured(true)) {
+				connectionError = "Please configure ProGet Plugin global settings";
+				isProGetAvailable = false;
+				return false;
+			}
+			
+			proget = new ProGet(null);
+
+			try {
+            	proget.canConnect();
+			} catch (Exception ex) {
+            	connectionError = "Unable to connect to Proget, please check the global settings: " + ex.getClass().getName() + " - " + ex.getMessage();
+            	isProGetAvailable = false;
+            	return false;
+            }   
+
+			if (!helper.isProGetApiKeyFieldConfigured()) {
+				connectionWarning = "The ApiKey has not been configured in global settings, some features have been disabled.";
+				isProGetAvailable = false;
+			} else {
+	    		connectionError = "";
+	        	isProGetAvailable = true;
+			}
+
         	return isProGetAvailable;
     	}
     	
     	public ListBoxModel doFillFeedNameItems() throws IOException {
-        	ListBoxModel items = new ListBoxModel();
-        	
         	if (!getIsProGetAvailable()) {
-        		items.add("", "");
-        		
-        		return items;
+        		return null;
         	}
         	
+        	Set<String> set = new TreeSet<String>();
+        	ListBoxModel items = new ListBoxModel();
         	Feed[] feeds = proget.getFeeds();
             
         	for (Feed feed : feeds) {
-        		items.add(feed.Feed_Name);
+        		set.add(feed.Feed_Name);
+			}
+        	
+        	for (String value : set) {
+        		items.add(value);
 			}
         	
             return items;
         }
+    	
+    	public ComboBoxModel doFillGroupNameItems(@QueryParameter String feedName) throws IOException {
+        	if (!getIsProGetAvailable()) {
+        		return null;
+        	}
+        	
+        	Set<String> set = new TreeSet<String>();
+        	ComboBoxModel items = new ComboBoxModel();
+        	Feed feed = proget.getFeed(feedName);
+    		ProGetPackage[] packages = proget.getPackages(feed.Feed_Id);
+    		
+        	for (ProGetPackage pkg : packages) {
+        		set.add(pkg.Group_Name);
+			}
+        	
+        	items.add("");
+        	for (String value : set) {
+        		items.add(value);
+			}
+        	
+            return items;
+        }
+    	
+    	public ComboBoxModel doFillPackageNameItems(@QueryParameter String feedName, @QueryParameter String groupName) throws IOException {
+        	if (!getIsProGetAvailable()) {
+        		return null;
+        	}
+        	
+        	Set<String> set = new TreeSet<String>();
+        	ComboBoxModel items = new ComboBoxModel();
+        	Feed feed = proget.getFeed(feedName);
+    		ProGetPackage[] packages = proget.getPackages(feed.Feed_Id);
+    		
+        	for (ProGetPackage pkg : packages) {
+        		if (pkg.Group_Name.equals(groupName)) {
+        			set.add(pkg.Package_Name);
+        		}
+			}
+        	
+        	items.add("");
+        	for (String value : set) {
+        		items.add(value);
+			}
+        	
+            return items;
+        }
+    	
 		/**
          * Performs on-the-fly validation of the file mask wildcard, when the artifacts
          * textbox or the caseSensitive checkbox are modified

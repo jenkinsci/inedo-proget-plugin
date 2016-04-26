@@ -40,12 +40,12 @@ public class ProGetHelper implements LogWriter {
 		config = value;
 	}
 	
-	public boolean isProGetRequiredFieldsConfigured() {
+	public boolean isProGetRequiredFieldsConfigured(boolean includeUsername) {
 		if (config != null) {
 			return true;
 		}
 		
-		return getSharedDescriptor().isRequiredFieldsConfigured();
+		return getSharedDescriptor().isRequiredFieldsConfigured(includeUsername);
 	}
 
 	public boolean isProGetApiKeyFieldConfigured() {

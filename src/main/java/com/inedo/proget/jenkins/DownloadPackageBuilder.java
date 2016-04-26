@@ -74,7 +74,7 @@ public class DownloadPackageBuilder extends Builder {
 	public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws IOException {
 		ProGetHelper helper = new ProGetHelper(build, listener);
 		
-		if (!helper.isProGetRequiredFieldsConfigured()) {
+		if (!helper.isProGetRequiredFieldsConfigured(false)) {
 			helper.info("Please configure ProGet Plugin global settings");
 				
 			return false;
@@ -129,7 +129,7 @@ public class DownloadPackageBuilder extends Builder {
 
 		@Override
 		public String getDisplayName() {
-			return "Download ProGet Package";
+			return "ProGet Package Download";
 		}
 	
 		public boolean isConnectionError() {
@@ -162,7 +162,7 @@ public class DownloadPackageBuilder extends Builder {
     		
 			ProGetHelper helper = new ProGetHelper();
 			
-			if (!helper.isProGetRequiredFieldsConfigured()) {
+			if (!helper.isProGetRequiredFieldsConfigured(false)) {
 				connectionError = "Please configure ProGet Plugin global settings";
 				isProGetAvailable = false;
 				return false;

@@ -116,10 +116,20 @@ public class ProGetConfiguration extends GlobalConfiguration {
             return apiKey;
         }
         
-        public boolean isRequiredFieldsConfigured() {
-        	if( url == null || url.isEmpty()) {
+        public boolean isRequiredFieldsConfigured(boolean includeUsername) {
+        	if( url == null || url.trim().isEmpty()) {
     			return false;
     		}
+        	
+        	if (includeUsername) {
+        		if( user == null || user.trim().isEmpty()) {
+        			return false;
+        		}
+        		
+        		if( password == null || Secret.toString(password).trim().isEmpty()) {
+        			return false;
+        		}
+        	}
         	
     		return true;
         }
