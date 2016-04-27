@@ -32,7 +32,7 @@ public class ProGetPackageUtils
 	private File zipFile;
 	private ZipOutputStream zos = null;
 		
-	public File createPackage(File baseFolder, List<String> files, PackageMetadata metadata) throws IOException {		
+	public File createPackage(File baseFolder, List<ZipItem> files, PackageMetadata metadata) throws IOException {		
 		FileOutputStream fos = null;
 		
 		this.sourceFolder = baseFolder;
@@ -44,27 +44,6 @@ public class ProGetPackageUtils
 
 			appendMetadata(metadata);
 			appendFiles(files, UNPACK);
-		} finally {
-			if (zos != null) zos.closeEntry();
-			if (zos != null) zos.close(); 
-			if (fos != null) fos.close();
-		}
-		
-		return zipFile;
-	}
-
-	public File createPackage(File sourceFolder, PackageMetadata metadata) throws IOException {		
-		FileOutputStream fos = null;
-		
-		this.sourceFolder = sourceFolder;
-		this.zipFile = new File(sourceFolder, metadata.packageName.replace(" ",  "") + ".unpack");
-		
-		try {
-			fos = new FileOutputStream(zipFile);
-			zos = new ZipOutputStream(fos);
-
-			appendMetadata(metadata);
-			appendFiles(sourceFolder, UNPACK);
 		} finally {
 			if (zos != null) zos.closeEntry();
 			if (zos != null) zos.close(); 
@@ -130,43 +109,17 @@ public class ProGetPackageUtils
 		return value !=null && !value.isEmpty();
 	}
 	
-	private void appendFiles(List<String> files, String destinationFolder) throws IOException {
-		for (String fileName : files)	{
-			File file = new File(sourceFolder, fileName);
+	private void appendFiles(List<ZipItem> files, String destinationFolder) throws IOException {
+		for (ZipItem entry : files)	{
+			File source = new File(sourceFolder, entry.getSourceFile());
+			String destination = destinationFolder + entry.getDestinationFile();
 			
-			appendFile(destinationFolder, file);
+			appendFile(source, destination);
 		}
 	}
 
-	/**
-	 * Traverse a directory and get all files,
-	 * and add the file into fileList  
-	 * @param node file or directory
-	 * @throws IOException 
-	 */
-	private void appendFiles(File node, String destinationFolder) throws IOException {
-
-		//add file only
-		if(node.isFile()) {
-			if (node.equals(zipFile)) {
-				return;
-			}
-			
-			appendFile(destinationFolder, node);
-		}
-
-		if(node.isDirectory()){
-			String[] subNote = node.list();
-			for(String filename : subNote){
-				appendFiles(new File(node, filename), destinationFolder);
-			}
-		}
-
-	}
-	
-	private void appendFile(String destinationFolder, File file) throws IOException, FileNotFoundException {
-		ZipItem entry = generateZipEntry(file, destinationFolder);			
-		ZipEntry ze = new ZipEntry(entry.destinationFile);
+	private void appendFile(File file, String destination) throws IOException, FileNotFoundException {
+		ZipEntry ze = new ZipEntry(destination);
 		byte[] buffer = new byte[1024];
 		int len;
 		
@@ -179,30 +132,6 @@ public class ProGetPackageUtils
 		}
 	}
 	
-	/**
-	 * Format the file path for zip
-	 * @param file file path
-	 * @return Formatted file path
-	 */
-	private ZipItem generateZipEntry(File file, String destinationFolder) {
-		String srcFile = file.getAbsolutePath();
-		String srcFolder = sourceFolder.getAbsolutePath();
-		
-		String destFile = srcFile.substring(srcFolder.length() + 1, srcFile.length());
-				
-		return new ZipItem(srcFile, (destinationFolder + destFile).replace(File.separatorChar, '/'));
-	}
-	
-	private class ZipItem {
-		final String sourceFile;
-		final String destinationFile;
-		
-		ZipItem(String sourceFile, String destinationFile) {
-			this.sourceFile = sourceFile;
-			this.destinationFile = destinationFile;
-		}
-	}
-
 	/**
 	 * Unzips the content of the unpack folder in the package to the same folder as the package is located in
 	 * 
@@ -257,18 +186,76 @@ public class ProGetPackageUtils
     	}
     }
 
-	//TODO trim leading directories as per help text!!!!!!!!!!!!!!!!
-	public List<String> getFileList(File baseFolder, UploadPackageBuilder settings) {
-		List<String> files = new ArrayList<String>();
+	public List<ZipItem> getFileList(File baseFolder, UploadPackageBuilder settings) {
+		List<ZipItem> files = new ArrayList<ZipItem>();
 
-		FileSet fileSet = Util.createFileSet(baseFolder, settings.getArtifacts(), settings.getExcludes());
+		FileSet fileSet = Util.createFileSet(baseFolder, removeTrimFolderMarker(settings.getArtifacts()), settings.getExcludes());
 		fileSet.setDefaultexcludes(settings.isDefaultExcludes());
 		fileSet.setCaseSensitive(settings.isCaseSensitive());
 
 		for (String f : fileSet.getDirectoryScanner().getIncludedFiles()) {
-			files.add(f.replace(File.separatorChar, '/'));
+			//TODO required? f.replace(File.separatorChar, '/')
+			files.add(new ZipItem(f));
 		}
 
+		String[] includes = settings.getArtifacts().split(",");
+		for (String prefix : includes) {
+			prefix = prefix.trim();
+			
+			if (!prefix.startsWith("[")) {
+				continue;
+			}
+			
+			int index = prefix.indexOf("]");
+			if (index < 0) {
+				continue;
+			}
+			
+			prefix = prefix.substring(1, index);
+			prefix = prefix.replace("/", File.separator);
+			
+			if (!prefix.endsWith(File.separator)) {
+				prefix += File.separator;
+			}
+				
+			for (ZipItem file : files) {
+				if (file.getSourceFile().startsWith(prefix)) {
+					file.setDesinationFile(file.getSourceFile().substring(prefix.length()));
+				}
+			}
+		}
+		
 		return files;
+	}
+
+	private String removeTrimFolderMarker(String pattern) {
+		return pattern.replace("[", "").replace("]", "");
+	}
+	
+	public class ZipItem {
+		private final String sourceFile;
+		private String destinationFile;
+		
+		ZipItem(String sourceFile) {
+			this.sourceFile = sourceFile;
+			this.destinationFile = sourceFile;
+		}
+		
+		ZipItem(String sourceFile, String destinationFile) {
+			this.sourceFile = sourceFile;
+			this.destinationFile = destinationFile;
+		}
+
+		public String getSourceFile() {
+			return sourceFile;
+		}
+		
+		public String getDestinationFile() {
+			return destinationFile;
+		}
+		
+		public void setDesinationFile(String value) {
+			this.destinationFile = value;
+		}
 	}
 }

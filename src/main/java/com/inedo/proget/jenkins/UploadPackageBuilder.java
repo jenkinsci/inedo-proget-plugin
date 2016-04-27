@@ -19,6 +19,7 @@ import org.kohsuke.stapler.QueryParameter;
 
 import com.inedo.proget.api.ProGet;
 import com.inedo.proget.api.ProGetPackageUtils;
+import com.inedo.proget.api.ProGetPackageUtils.ZipItem;
 import com.inedo.proget.domain.Feed;
 import com.inedo.proget.domain.PackageMetadata;
 import com.inedo.proget.domain.ProGetPackage;
@@ -166,7 +167,7 @@ public class UploadPackageBuilder extends Builder {
         
     	ProGetPackageUtils packageUtils = new ProGetPackageUtils();
     	
-    	List<String> files = packageUtils.getFileList(baseDir, this);
+    	List<ZipItem> files = packageUtils.getFileList(baseDir, this);
           
 		if (files.isEmpty()) {
 	    	String msg = ws.validateAntFileMask(includes, FilePath.VALIDATE_ANT_FILE_MASK_BOUND);

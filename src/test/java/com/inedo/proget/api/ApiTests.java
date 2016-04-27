@@ -4,6 +4,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import com.inedo.proget.MockServer;
 import com.inedo.proget.api.ProGet;
+import com.inedo.proget.api.ProGetPackageUtils.ZipItem;
 import com.inedo.proget.domain.Feed;
 import com.inedo.proget.domain.PackageMetadata;
 import com.inedo.proget.domain.ProGetPackage;
@@ -14,9 +15,15 @@ import com.inedo.proget.jenkins.DownloadPackageBuilder.DownloadFormat;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.UnknownHostException;
+import java.util.List;
+
+import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -106,7 +113,7 @@ public class ApiTests {
 		File downloaded = proget.downloadPackage(feed.Feed_Name, pkg.Group_Name, pkg.Package_Name, pkg.LatestVersion_Text, folder.getRoot().getAbsolutePath(), DownloadFormat.PACKAGE);
 //		File downloaded = proget.downloadPackage("Example", "andrew/sumner/example", "examplepackage", "0.0.1", folder.getRoot().getAbsolutePath());
     	
-        assertThat("File has content", downloaded.length(), is(greaterThan((long)1000)));
+        assertThat("File has content", downloaded.length(), is(greaterThan((long)400)));
 	}
 	
 	@Test
@@ -124,7 +131,11 @@ public class ApiTests {
 	public void uploadPackage() throws IOException {
 		preparePackageFiles();
 		
-		File pkg = new ProGetPackageUtils().createPackage(folder.getRoot(), getMetadata());
+		ProGetPackageUtils packageUtils = new ProGetPackageUtils();
+		UploadPackageBuilder builder = getExampleBuilder("**/*.*", "");
+		List<ZipItem> files = packageUtils.getFileList(folder.getRoot(), builder);
+		
+		File pkg = packageUtils.createPackage(folder.getRoot(), files, getMetadata(builder));
 		
 		proget.uploadPackage("Example", pkg);
 		
@@ -137,25 +148,28 @@ public class ApiTests {
 		createFile(new File(folder.getRoot(), "more/sample.data"), "This is a another sample data file");
 		createFile(new File(folder.getRoot(), "logs/sample.log"), "This is a sample log file");
 		createFile(new File(folder.getRoot(), "logs/sample.log.bak"), "This is a sample log file");
+		
+		InputStream in = this.getClass().getResourceAsStream("1UP.ico");
+		OutputStream out = new FileOutputStream(new File(folder.getRoot(), "1UP.ico"));
+		IOUtils.copy(in, out);
 	}
 	
-	public PackageMetadata getMetadata() {
-		UploadPackageBuilder settings = new UploadPackageBuilder("Example", "andrew/sumner/proget", "ExamplePackage2", "0.0.5", "");
-		
+	private UploadPackageBuilder getExampleBuilder(String include, String exclude) {
+		UploadPackageBuilder settings = new UploadPackageBuilder("Example", "andrew/sumner/proget", "ExamplePackage", "0.0.3", include);
 		settings.setCaseSensitive(false);
 		settings.setDefaultExcludes(false);
-		settings.setExcludes("");
+		settings.setExcludes(exclude);
 		
-		settings.setTitle("");
-		settings.setDescription("");
-		settings.setIcon("");
-		settings.setMetadata("custom=yes\rreally=C:\\\\Java\\\\workspace");
+		settings.setTitle("Example Title");
+		settings.setDescription("This contains [example](http://example.net) files specific to test suite");
+		settings.setIcon("package://1UP.ico");
+		settings.setMetadata("custom=yes\rreally=of course");
+		settings.setDependencies("my.dependency:one\rmy.dependency:two");
 		
-		//TODO Metadata property with \\ in it fails, \\\\ works
-		//settings.setMetadata("custom=yes\rreally=C:\\Java\\workspace\\inedo-proget-plugin\\work\\jobs\\ProGetUpload\\workspace");
-		
-		settings.setDependencies("");
-		
+		return settings;
+	}
+	
+	public PackageMetadata getMetadata(UploadPackageBuilder settings) {
 		ProGetHelper helper = new ProGetHelper(null, null);
 		return helper.getMetadata(settings);
 	}

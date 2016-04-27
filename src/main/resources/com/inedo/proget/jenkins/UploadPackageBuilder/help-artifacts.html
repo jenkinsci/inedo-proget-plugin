@@ -6,7 +6,25 @@
 		<li>Will fail the build if no files are found</li>
 	</ul>
 	
-	<p>Leading folder names will be not be added to the package, e.g. specifying 'build/**/*.*, bin/**/*.*' will add
-	any the contents including sub folders from the build and bin folders but not include the build and bin folders.
-	Excluded folders must be named in full e.g. b*/**/*.* will not exclude the build and bin folders.</p>
+	<p>
+	<b>Removing Unwanted Folders</b><br />
+	Top level folders can be excluded from the package using a custom addition to the Ant fileset - wrapping unwanted folder names in square brackets ([ ]):
+	
+	<ul>
+		<li>filter must start with '['</li>
+		<li>wildcards are not supported</li>
+		<li>filter can span a several folders</li>
+		<li>invalid filters are ignored</li>
+		<li>can be used with multiple filesets</li>
+	</ul>
+	
+	Examples:
+	<ul>
+		<li>"<i>[build]/sample/one.txt</i>" would add the folder and file "sample/one.txt" to the package</li>
+		<li>"<i>[build/sample]/two.txt</i>" would add the file "one.txt" to the package</li>
+		<li>"<i>build/[sample]/three.txt</i>" would be ignored</li> 
+		<li>"<i>[**]/four.txt</i>" would be ignored</li>
+		<li>"<i>[one]/one.txt, [two]/two.txt</i>" would add one.txt and two.txt to the package</li>
+	</ul>
+	</p>
 </div>
