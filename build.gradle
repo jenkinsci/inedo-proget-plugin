@@ -27,8 +27,9 @@ sourceCompatibility = 1.7
 targetCompatibility = 1.7
 
 group = 'com.inedo.proget'
-version = '1.4-SNAPSHOT'
-description = 'Inedo ProGet plugin for Jenkins'
+version = '0.1-SNAPSHOT'
+shortName = 'inedo-proget'
+description = 'Inedo ProGet Plugin'
 
 ext {
 	jenkinsVersion='1.642.3'
