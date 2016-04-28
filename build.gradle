@@ -11,16 +11,10 @@
  *
  */
 
-buildscript {
-    repositories {
-		jcenter()		
-    }
-    dependencies {
-        classpath 'org.jenkins-ci.tools:gradle-jpi-plugin:0.12.2'
-    }
+plugins {
+  id 'org.jenkins-ci.jpi' version '0.17.0'
 }
 
-apply plugin: 'org.jenkins-ci.jpi'
 apply plugin: 'java'
 
 sourceCompatibility = 1.7
@@ -28,17 +22,15 @@ targetCompatibility = 1.7
 
 group = 'com.inedo.proget'
 version = '0.1-SNAPSHOT'
-shortName = 'inedo-proget'
 description = 'Inedo ProGet Plugin'
 
 ext {
 	jenkinsVersion='1.642.3'
-	//jenkinsVersion='1.596.1'
 }
 
 jenkinsPlugin {
     coreVersion = "$jenkinsVersion"
-    displayName = 'Inedo ProGet plugin for Jenkins.'
+    displayName = 'Inedo ProGet Plugin.'
     url = 'http://wiki.jenkins-ci.org/display/JENKINS/Inedo+ProGet+Plugin'
     gitHubUrl = 'https://github.com/jenkinsci/inedo-proget-plugin'
     developers {
