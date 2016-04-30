@@ -1,4 +1,4 @@
-package com.inedo;
+package com.inedo.utils;
 
 import com.inedo.proget.api.ProGetConfig;
 

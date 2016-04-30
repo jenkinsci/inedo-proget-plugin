@@ -8,6 +8,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.inedo.http.HttpEasy;
+import com.inedo.utils.ConsoleLogWriter;
 
 public class HttpEasyTests {
 	

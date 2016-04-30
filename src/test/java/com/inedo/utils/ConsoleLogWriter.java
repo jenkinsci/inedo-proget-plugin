@@ -1,4 +1,6 @@
-package com.inedo.http;
+package com.inedo.utils;
+
+import com.inedo.http.LogWriter;
 
 public class ConsoleLogWriter implements LogWriter {
 

@@ -3,8 +3,6 @@ package com.inedo.proget.api;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
-import com.inedo.TestConfig;
-import com.inedo.proget.MockServer;
 import com.inedo.proget.api.ProGet;
 import com.inedo.proget.api.ProGetPackageUtils.ZipItem;
 import com.inedo.proget.domain.Feed;
@@ -14,6 +12,8 @@ import com.inedo.proget.domain.Version;
 import com.inedo.proget.jenkins.ProGetHelper;
 import com.inedo.proget.jenkins.UploadPackageBuilder;
 import com.inedo.proget.jenkins.DownloadPackageBuilder.DownloadFormat;
+import com.inedo.utils.MockServer;
+import com.inedo.utils.TestConfig;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -36,7 +36,7 @@ import org.junit.rules.TemporaryFolder;
  * 
  * @author Andrew Sumner
  */
-public class ApiTests {
+public class ProGetTests {
 	private static MockServer mockServer = null;
 	private ProGet proget;
 		

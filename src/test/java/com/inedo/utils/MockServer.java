@@ -1,4 +1,4 @@
-package com.inedo.proget;
+package com.inedo.utils;
 
 import java.io.IOException;
 import java.net.InetAddress;
