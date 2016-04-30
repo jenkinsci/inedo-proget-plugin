@@ -62,11 +62,11 @@
 		</f:entry> 
     
 		<f:entry title="Metadata" field="metadata" >
-			<f:expandableTextbox default="false" />
+			<f:expandableTextbox />
 		</f:entry>
 		
     	<f:entry title="Dependencies" field="dependencies" >
-			<f:expandableTextbox default="false" />
+			<f:expandableTextbox />
 		</f:entry>
 	</f:advanced>
 	

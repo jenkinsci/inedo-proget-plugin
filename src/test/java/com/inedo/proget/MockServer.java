@@ -22,38 +22,22 @@ import com.inedo.proget.domain.Feed;
  * @author Andrew Sumner
  */
 public class MockServer {
-	private ProGetConfig config;
-	
-	// Required for mocking via test server
 	private HttpServer server = null;
 	private HttpRequestHandler handler;
-	
-	public MockServer(boolean mockRequests) throws IOException {
+	private ProGetConfig config;
+
+	public MockServer() throws IOException {
+		handler = new HttpHandler();
+		server = ServerBootstrap.bootstrap()
+					.setLocalAddress(InetAddress.getLocalHost())
+					.setListenerPort(0)	// Any free port
+					.registerHandler("*", handler)
+					.create();
+
+		server.start();
+
 		config = new ProGetConfig();
-		config.url = "http://localhost:81";
-		
-		if (mockRequests) {
-//			config.authentication = "none";
-			
-			handler = new HttpHandler();
-			
-			
-			server = ServerBootstrap.bootstrap()
-						.setLocalAddress(InetAddress.getLocalHost())
-						.setListenerPort(0)	// Any free port
-						.registerHandler("*", handler)
-						.create();
-		    
-		    server.start();
-		    
-		    config.url = "http://" + server.getInetAddress().getHostName() + ":" + server.getLocalPort();
-		} else {
-			config.apiKey = "1";
-			//TODO pull user and password from config file
-			//TODO test with Domain user
-			config.user = "Admin";
-			config.password = "Admin";
-		}
+		config.url = "http://" + server.getInetAddress().getHostName() + ":" + server.getLocalPort();
 	}
 	
 	public ProGetConfig getProGetConfig() {
@@ -61,7 +45,9 @@ public class MockServer {
 	}
 	
 	public void stop() {
-		if (server!= null) server.stop();
+		if (server!= null) {
+			server.stop();
+		}
 	}
 	
 	// Handler for the test server that returns responses based on the requests.

@@ -33,13 +33,13 @@ import com.inedo.proget.jenkins.UploadPackageBuilder;
 public class ProGetPackageUtilsTests {
 	private ProGetHelper helper;
 	private ProGetPackageUtils packageUtils = new ProGetPackageUtils();
-	
+
 	@Rule
 	public TemporaryFolder folder = new TemporaryFolder();
 	
 	@Before
 	public void prepareTestFiles() throws IOException {
-		helper = new ProGetHelper(null, new MockTaskListener());
+		helper = new ProGetHelper();
 		
 		preparePackageFiles();
 	}

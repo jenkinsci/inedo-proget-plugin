@@ -2,6 +2,8 @@ package com.inedo.proget.api;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
+
+import com.inedo.TestConfig;
 import com.inedo.proget.MockServer;
 import com.inedo.proget.api.ProGet;
 import com.inedo.proget.api.ProGetPackageUtils.ZipItem;
@@ -24,10 +26,7 @@ import java.net.UnknownHostException;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.rules.TemporaryFolder;
 
 /**
@@ -38,24 +37,38 @@ import org.junit.rules.TemporaryFolder;
  * @author Andrew Sumner
  */
 public class ApiTests {
-	private final boolean MOCK_REQUESTS = false;	// Set this value to false to run against a live BuildMaster installation 
-	private MockServer mockServer;
+	private static MockServer mockServer = null;
 	private ProGet proget;
 		
 	@Rule
 	public TemporaryFolder folder = new TemporaryFolder();
 	
-	@Before
-    public void before() throws IOException {
-		mockServer = new MockServer(MOCK_REQUESTS);
-		
-		ProGetHelper.injectConfiguration(mockServer.getProGetConfig());		
-		proget = new ProGet(new ProGetHelper(null, new MockTaskListener()));
+	@BeforeClass
+    public static void beforeClass() throws IOException {
+		ProGetConfig config;
+
+		if (TestConfig.useMockServer()) {
+			mockServer = new MockServer();
+			config = mockServer.getProGetConfig();
+		} else {
+			config = TestConfig.getProGetConfig();
+		}
+
+		ProGetHelper.injectConfiguration(config);
 	}
-	
-	@After
-	public void tearDown() throws Exception {
-		mockServer.stop();
+
+	@Before
+	public void before() {
+		proget = new ProGet(new ProGetHelper());
+	}
+
+	@AfterClass
+	public static void tearDown() throws Exception {
+		if (mockServer != null) {
+			mockServer.stop();
+		}
+
+		ProGetHelper.injectConfiguration(null);
 	}
 
 	@Test
@@ -66,16 +79,17 @@ public class ApiTests {
 	
 	@Test(expected=UnknownHostException.class)
 	public void getWithIncorrectHost() throws IOException {
-		ProGetConfig config = mockServer.getProGetConfig();
+		ProGetConfig config = ProGetHelper.getProGetConfig();
 		String origUrl = config.url; 
-		config.url = "http://buildmaster1";
-		
+		config.url = "http://rubbish_host";
+
 		ProGetHelper.injectConfiguration(config);
 		
 		try {
-			new ProGet(new ProGetHelper(null, new MockTaskListener())).getFeeds();
+			new ProGet(new ProGetHelper()).getFeeds();
 		} finally {
-			mockServer.getProGetConfig().url = origUrl;
+			config.url = origUrl;
+			ProGetHelper.injectConfiguration(config);
 		}
 	}
 	
