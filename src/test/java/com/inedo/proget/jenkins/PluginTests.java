@@ -1,6 +1,6 @@
 package com.inedo.proget.jenkins;
 //------------------------------------------------------------------------
-// TODO This is a nearly there, just need to get it passing
+// TODO Haven't done the upload plugin yet
 //------------------------------------------------------------------------
 
 import com.inedo.utils.TestConfig;
