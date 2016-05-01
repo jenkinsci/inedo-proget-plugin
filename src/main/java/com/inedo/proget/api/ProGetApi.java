@@ -8,11 +8,11 @@ import java.net.URL;
 
 import com.google.common.net.MediaType;
 import com.inedo.http.HttpEasy;
+import com.inedo.http.LogWriter;
 import com.inedo.proget.domain.Feed;
 import com.inedo.proget.domain.ProGetPackage;
 import com.inedo.proget.domain.Version;
 import com.inedo.proget.jenkins.GlobalConfig;
-import com.inedo.proget.jenkins.ProGetHelper;
 import com.inedo.proget.jenkins.DownloadPackageBuilder.DownloadFormat;
 
 /**
@@ -26,14 +26,26 @@ import com.inedo.proget.jenkins.DownloadPackageBuilder.DownloadFormat;
 public class ProGetApi {
 	private ProGetConfig config;
 	
-	public ProGetApi(ProGetHelper helper) {
-		this.config = GlobalConfig.getProGetConfig();
+	public ProGetApi() {
+		this(GlobalConfig.getProGetConfig(), null);
+	}
+	
+	public ProGetApi(ProGetConfig config) {
+		this(GlobalConfig.getProGetConfig(), null);
+	}
+	
+	public ProGetApi(LogWriter logWriter) {
+		this(GlobalConfig.getProGetConfig(), logWriter);
+	}
+	
+	private ProGetApi(ProGetConfig config, LogWriter logWriter) {
+		this.config = config;
 		
 		HttpEasy.withDefaults()
 			.allowAllHosts()
 			.trustAllCertificates()
 			.baseUrl(config.url)
-			.withLogWriter(helper);
+			.withLogWriter(logWriter);
 	}
 
 	/**

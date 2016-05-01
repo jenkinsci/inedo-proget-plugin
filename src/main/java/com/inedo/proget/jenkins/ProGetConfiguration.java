@@ -224,15 +224,12 @@ public class ProGetConfiguration extends GlobalConfiguration {
 			config.password = password;
 			config.apiKey = apiKey;
 			
-			GlobalConfig.injectConfiguration(config);
-			ProGetApi proget = new ProGetApi(new ProGetHelper());
+			ProGetApi proget = new ProGetApi(config);
 
 			try {
 				proget.canConnect();
 			} catch (Exception ex) {
             	return FormValidation.error("Failed. Please check the configuration: " + ex.getClass().getName() + " - " + ex.getMessage());
-			} finally {
-				GlobalConfig.injectConfiguration(null);
 			}
 			
 			return FormValidation.ok("Success. Connection with ProGet verified.");			

@@ -166,7 +166,7 @@ public class DownloadPackageBuilder extends Builder {
 				return false;
 			}
 			
-			proget = new ProGetApi(null);
+			proget = new ProGetApi();
 
 			try {
             	proget.canConnect();

@@ -60,7 +60,7 @@ public class ProGetApiTests {
 
 	@Before
 	public void before() {
-		proget = new ProGetApi(new ProGetHelper());
+		proget = new ProGetApi();
 	}
 
 	@AfterClass
@@ -84,13 +84,10 @@ public class ProGetApiTests {
 		String origUrl = config.url; 
 		config.url = "http://rubbish_host";
 
-		GlobalConfig.injectConfiguration(config);
-		
 		try {
-			new ProGetApi(new ProGetHelper()).getFeeds();
+			new ProGetApi(config).getFeeds();
 		} finally {
 			config.url = origUrl;
-			GlobalConfig.injectConfiguration(config);
 		}
 	}
 	
