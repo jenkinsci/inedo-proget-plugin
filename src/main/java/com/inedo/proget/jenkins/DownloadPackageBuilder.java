@@ -72,7 +72,7 @@ public class DownloadPackageBuilder extends Builder {
 	
 	@Override
 	public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws IOException {
-		ProGetHelper helper = new ProGetHelper(build, listener);
+		JenkinsHelper helper = new JenkinsHelper(build, listener);
 		
 		if (!GlobalConfig.isProGetRequiredFieldsConfigured(false)) {
 			helper.info("Please configure ProGet Plugin global settings");
@@ -94,7 +94,7 @@ public class DownloadPackageBuilder extends Builder {
 				ProGetPackager.unpackContent(downloaded);
 				downloaded.delete();
 			} else {
-				ProGetHelper.injectEnvrionmentVariable(build, "PROGET_FILE", downloaded.getName());
+				helper.injectEnvrionmentVariable("PROGET_FILE", downloaded.getName());
 			}
 		} catch (IOException e) {
 			helper.info("Error: " + e.getMessage());

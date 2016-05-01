@@ -27,6 +27,7 @@ import com.inedo.proget.domain.ProGetPackage;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -150,7 +151,7 @@ public class UploadPackageBuilder extends Builder {
 	
 	@Override
 	public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException {
-		ProGetHelper helper = new ProGetHelper(build, listener);
+		JenkinsHelper helper = new JenkinsHelper(build, listener);
 		
 		if(artifacts.length()==0) {
 			helper.error("Files to package not set");
@@ -180,7 +181,7 @@ public class UploadPackageBuilder extends Builder {
 	    	return false;
 		} 
 		
-		PackageMetadata metadata = helper.getMetadata(this);
+		PackageMetadata metadata = buildMetadata(helper);
 		if (metadata == null) {
 			helper.error("Metadata is incorrectly formatted");
 			return false;
@@ -191,6 +192,50 @@ public class UploadPackageBuilder extends Builder {
 		new ProGetApi(helper).uploadPackage(feedName, pkg);
         
         return true;
+	}
+	
+	public PackageMetadata buildMetadata(JenkinsHelper helper) {
+		PackageMetadata metadata = new PackageMetadata();
+
+		metadata.group = helper.expandVariable(getGroupName());
+		metadata.packageName = helper.expandVariable(getPackageName());
+		metadata.version = helper.expandVariable(getVersion());
+		metadata.title = getTitle();
+		metadata.description = getDescription();
+		metadata.icon = getIcon();
+				
+		try (Scanner scanner = new Scanner(getMetadata())) {
+			while (scanner.hasNextLine()){
+				String line = scanner.nextLine().trim();
+				
+				if (line.isEmpty()) {
+					continue;
+				}
+				
+				int pos = line.indexOf("=");
+				
+				if (pos > 0) {
+					String name = line.substring(0, pos).trim();
+				    String value = line.substring(pos + 1).trim();
+				    
+				    metadata.extendedAttributes.put(name, helper.expandVariable(value));
+			    } else {
+			    	return null;
+				}
+		    } 
+		}
+		
+		try (Scanner scanner = new Scanner(getDependencies())) {
+			while (scanner.hasNextLine()){
+				String dependency = scanner.nextLine().trim();
+				
+				if (!dependency.isEmpty()) {
+				    metadata.dependencies.add(dependency);
+				}
+		    } 
+		}
+		
+		return metadata;
 	}
 	
 	@Extension

@@ -10,7 +10,7 @@ import com.inedo.proget.domain.PackageMetadata;
 import com.inedo.proget.domain.ProGetPackage;
 import com.inedo.proget.domain.Version;
 import com.inedo.proget.jenkins.GlobalConfig;
-import com.inedo.proget.jenkins.ProGetHelper;
+import com.inedo.proget.jenkins.JenkinsHelper;
 import com.inedo.proget.jenkins.UploadPackageBuilder;
 import com.inedo.proget.jenkins.DownloadPackageBuilder.DownloadFormat;
 import com.inedo.utils.MockServer;
@@ -143,11 +143,12 @@ public class ProGetApiTests {
 	public void uploadPackage() throws IOException {
 		preparePackageFiles();
 		
+		JenkinsHelper helper = new JenkinsHelper();
 		ProGetPackager packageUtils = new ProGetPackager();
 		UploadPackageBuilder builder = getExampleBuilder("**/*.*", "");
 		List<ZipItem> files = packageUtils.getFileList(folder.getRoot(), builder);
 		
-		File pkg = packageUtils.createPackage(folder.getRoot(), files, getMetadata(builder));
+		File pkg = packageUtils.createPackage(folder.getRoot(), files, builder.buildMetadata(helper));
 		
 		proget.uploadPackage("Example", pkg);
 		
@@ -179,11 +180,6 @@ public class ProGetApiTests {
 		settings.setDependencies("my.dependency:one\rmy.dependency:two");
 		
 		return settings;
-	}
-	
-	public PackageMetadata getMetadata(UploadPackageBuilder settings) {
-		ProGetHelper helper = new ProGetHelper(null, null);
-		return helper.getMetadata(settings);
 	}
 	
 	private void createFile(File file, String content) throws IOException {

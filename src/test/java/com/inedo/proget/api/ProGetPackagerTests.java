@@ -24,11 +24,11 @@ import com.google.common.io.Files;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import com.inedo.proget.api.ProGetPackager.ZipItem;
-import com.inedo.proget.jenkins.ProGetHelper;
+import com.inedo.proget.jenkins.JenkinsHelper;
 import com.inedo.proget.jenkins.UploadPackageBuilder;
 
 public class ProGetPackagerTests {
-	private ProGetHelper helper;
+	private JenkinsHelper helper;
 	private ProGetPackager packageUtils = new ProGetPackager();
 
 	@Rule
@@ -36,7 +36,7 @@ public class ProGetPackagerTests {
 	
 	@Before
 	public void prepareTestFiles() throws IOException {
-		helper = new ProGetHelper();
+		helper = new JenkinsHelper();
 		
 		preparePackageFiles();
 	}
@@ -68,7 +68,7 @@ public class ProGetPackagerTests {
 		UploadPackageBuilder builder = getExampleBuilder("[bin]/**/*.*", "bin/logs/");
 		List<ZipItem> files = packageUtils.getFileList(folder.getRoot(), builder);
 		
-		File pkg = packageUtils.createPackage(folder.getRoot(), files, helper.getMetadata(builder));
+		File pkg = packageUtils.createPackage(folder.getRoot(), files, builder.buildMetadata(helper));
 		
 		verifyPackage(pkg, 4);
 	}
@@ -78,7 +78,7 @@ public class ProGetPackagerTests {
 		UploadPackageBuilder builder = getExampleBuilder("bin/**/*.*", "logs/");
 		List<ZipItem> files = packageUtils.getFileList(folder.getRoot(), builder);
 		
-		File pkg = packageUtils.createPackage(folder.getRoot(), files, helper.getMetadata(builder));
+		File pkg = packageUtils.createPackage(folder.getRoot(), files, builder.buildMetadata(helper));
 		
 		File temp = new File(folder.getRoot(), "temp");
 		temp.mkdir();
