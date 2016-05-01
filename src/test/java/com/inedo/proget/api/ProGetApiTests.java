@@ -6,7 +6,6 @@ import static org.hamcrest.Matchers.*;
 import com.inedo.proget.api.ProGetApi;
 import com.inedo.proget.api.ProGetPackager.ZipItem;
 import com.inedo.proget.domain.Feed;
-import com.inedo.proget.domain.PackageMetadata;
 import com.inedo.proget.domain.ProGetPackage;
 import com.inedo.proget.domain.Version;
 import com.inedo.proget.jenkins.GlobalConfig;

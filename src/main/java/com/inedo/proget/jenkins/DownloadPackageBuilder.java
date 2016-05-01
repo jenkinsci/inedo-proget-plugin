@@ -73,31 +73,32 @@ public class DownloadPackageBuilder extends Builder {
 	@Override
 	public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws IOException {
 		JenkinsHelper helper = new JenkinsHelper(build, listener);
+		JenkinsLogWriter logWriter = helper.getLogWriter();
 		
 		if (!GlobalConfig.isProGetRequiredFieldsConfigured(false)) {
-			helper.info("Please configure ProGet Plugin global settings");
+			logWriter.info("Please configure ProGet Plugin global settings");
 				
 			return false;
 		}
 		
-		ProGetApi proget = new ProGetApi(helper);
+		ProGetApi proget = new ProGetApi(logWriter);
 		
 		String downloadTo = helper.expandVariable(downloadFolder);
-		helper.info("Download package to " + new File(downloadTo).getAbsolutePath());
+		logWriter.info("Download package to " + new File(downloadTo).getAbsolutePath());
 		
 		try {
 			DownloadFormat format = DownloadFormat.fromFormat(downloadFormat);
 			File downloaded = proget.downloadPackage(feedName, groupName, packageName, version, downloadTo, format);
 					
 			if (format == DownloadFormat.EXTRACT_CONTENT) {
-				helper.info("Unpack " + downloaded.getName());
+				logWriter.info("Unpack " + downloaded.getName());
 				ProGetPackager.unpackContent(downloaded);
 				downloaded.delete();
 			} else {
 				helper.injectEnvrionmentVariable("PROGET_FILE", downloaded.getName());
 			}
 		} catch (IOException e) {
-			helper.info("Error: " + e.getMessage());
+			logWriter.info("Error: " + e.getMessage());
 			return false;
 		}
 		

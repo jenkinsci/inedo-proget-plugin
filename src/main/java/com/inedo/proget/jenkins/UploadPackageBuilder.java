@@ -152,13 +152,14 @@ public class UploadPackageBuilder extends Builder {
 	@Override
 	public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException {
 		JenkinsHelper helper = new JenkinsHelper(build, listener);
+		JenkinsLogWriter logWriter = helper.getLogWriter();
 		
 		if(artifacts.length()==0) {
-			helper.error("Files to package not set");
+			logWriter.error("Files to package not set");
             return false;
         }
 		
-		helper.info("Packaging Artifacts");
+		logWriter.info("Packaging Artifacts");
         
     	String includes = helper.expandVariable(this.artifacts);
     	FilePath ws = build.getWorkspace();
@@ -173,23 +174,23 @@ public class UploadPackageBuilder extends Builder {
 		if (files.isEmpty()) {
 	    	String msg = ws.validateAntFileMask(includes, FilePath.VALIDATE_ANT_FILE_MASK_BOUND);
 	    	if(msg != null) {
-	        	helper.error(msg);
+	    		logWriter.error(msg);
 	        	return false;
 	        }
 	    	
-	    	helper.error("No files found matching Files to package setting");
+	    	logWriter.error("No files found matching Files to package setting");
 	    	return false;
 		} 
 		
 		PackageMetadata metadata = buildMetadata(helper);
 		if (metadata == null) {
-			helper.error("Metadata is incorrectly formatted");
+			logWriter.error("Metadata is incorrectly formatted");
 			return false;
 		}
 		
     	File pkg = packageUtils.createPackage(baseDir, files, metadata);
 		
-		new ProGetApi(helper).uploadPackage(feedName, pkg);
+		new ProGetApi(logWriter).uploadPackage(feedName, pkg);
         
         return true;
 	}

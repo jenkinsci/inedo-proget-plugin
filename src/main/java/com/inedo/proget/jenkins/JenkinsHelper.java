@@ -3,22 +3,19 @@ package com.inedo.proget.jenkins;
 import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
 
-import java.util.Scanner;
-
-import com.inedo.http.LogWriter;
-import com.inedo.proget.domain.PackageMetadata;
-
 /**
- * Does the real work of Trigger a BuildMaster build, has been seperated out from the Builder and Publisher actions
- * so that the code can be shared between them. 
+ * Common Jenkins tasks. 
  * 
  * @author Andrew Sumner
  */
-public class JenkinsHelper implements LogWriter {
-	private static final String LOG_PREFIX = "[ProGet] "; 
+public class JenkinsHelper {
 	private final AbstractBuild<?, ?> build;
 	private final TaskListener listener;
+	private JenkinsLogWriter logWriter = null;
 	
+	/**
+	 * For unit tests as they don't have access to the build or listener
+	 */
 	public JenkinsHelper() {
 		this.build = null;
 		this.listener = null;
@@ -43,7 +40,7 @@ public class JenkinsHelper implements LogWriter {
 		try {
 			expanded = build.getEnvironment(listener).expand(variable);
 		} catch (Exception e) {
-			info("Exception thrown expanding '" + variable + "' : " + e.getClass().getName() + " " + e.getMessage());
+			getLogWriter().info("Exception thrown expanding '" + variable + "' : " + e.getClass().getName() + " " + e.getMessage());
 		}
 		
 		return expanded;
@@ -56,19 +53,12 @@ public class JenkinsHelper implements LogWriter {
 		
 		build.addAction(new VariableInjectionAction(key, value));
 	}
-
-	@Override
-	public void info(String message) {
-		if (listener != null) {
-			listener.getLogger().println(LOG_PREFIX + message);
-		} else {
-			System.out.println(LOG_PREFIX + message);
+	
+	public JenkinsLogWriter getLogWriter() {
+		if (logWriter == null) {
+			logWriter = new JenkinsLogWriter(listener);	
 		}
-	}
-
-	public void error(String message) {
-		if (listener != null) {
-			listener.error(LOG_PREFIX + message);
-		}
+		
+		return logWriter;
 	}
 }
