@@ -8,13 +8,6 @@ public class JenkinsLogWriter implements LogWriter {
 	private static final String LOG_PREFIX = "[ProGet] "; 
 	private final TaskListener listener;
 	
-	/**
-	 * For unit tests as they don't have access to the build or listener
-	 */
-//	public JenkinsLogWriter() {
-//		this.listener = null;
-//	}
-	
 	public JenkinsLogWriter(TaskListener listener) {
 		this.listener = listener;
 	}
