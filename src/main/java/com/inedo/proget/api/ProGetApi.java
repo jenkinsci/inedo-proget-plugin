@@ -13,6 +13,7 @@ import com.inedo.proget.domain.Feed;
 import com.inedo.proget.domain.ProGetPackage;
 import com.inedo.proget.domain.Version;
 import com.inedo.proget.jenkins.GlobalConfig;
+import com.inedo.proget.jenkins.JenkinsLogWriter;
 import com.inedo.proget.jenkins.DownloadPackageBuilder.DownloadFormat;
 
 /**
@@ -27,11 +28,11 @@ public class ProGetApi {
 	private ProGetConfig config;
 	
 	public ProGetApi() {
-		this(GlobalConfig.getProGetConfig(), null);
+		this(GlobalConfig.getProGetConfig(), new JenkinsLogWriter(null));
 	}
 	
 	public ProGetApi(ProGetConfig config) {
-		this(GlobalConfig.getProGetConfig(), null);
+		this(config, new JenkinsLogWriter(null));
 	}
 	
 	public ProGetApi(LogWriter logWriter) {
