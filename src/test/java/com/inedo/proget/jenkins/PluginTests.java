@@ -45,7 +45,7 @@ public class PluginTests {
         }
 
         // TODO Look at using Mockito to get global configuration rather than injecting it
-        ProGetHelper.injectConfiguration(config);
+        GlobalConfig.injectConfiguration(config);
 	}
 
 	@After
@@ -54,7 +54,7 @@ public class PluginTests {
             mockServer.stop();
         }
 
-        ProGetHelper.injectConfiguration(null);
+        GlobalConfig.injectConfiguration(null);
 	}
 
 	@Test

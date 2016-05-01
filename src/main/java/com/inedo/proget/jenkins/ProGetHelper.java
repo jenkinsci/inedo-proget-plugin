@@ -3,12 +3,9 @@ package com.inedo.proget.jenkins;
 import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
 
-import jenkins.model.Jenkins;
-
 import java.util.Scanner;
 
 import com.inedo.http.LogWriter;
-import com.inedo.proget.api.ProGetConfig;
 import com.inedo.proget.domain.PackageMetadata;
 
 /**
@@ -19,7 +16,6 @@ import com.inedo.proget.domain.PackageMetadata;
  */
 public class ProGetHelper implements LogWriter {
 	private static final String LOG_PREFIX = "[ProGet] "; 
-	private static ProGetConfig config = null;
 	private final AbstractBuild<?, ?> build;
 	private final TaskListener listener;
 	
@@ -33,41 +29,6 @@ public class ProGetHelper implements LogWriter {
 		this.listener = listener;
 	}
 
-	/**
-	 * TODO: As I haven't been able to successfully mock a static class this is my work around for testing purposes
-	 */
-	public static void injectConfiguration(ProGetConfig value) {
-		config = value;
-	}
-	
-	public boolean isProGetRequiredFieldsConfigured(boolean includeUsername) {
-		if (config != null) {
-			return true;
-		}
-		
-		return getSharedDescriptor().isRequiredFieldsConfigured(includeUsername);
-	}
-
-	public boolean isProGetApiKeyFieldConfigured() {
-		if (config != null) {
-			return true;
-		}
-		
-		return getSharedDescriptor().isApiKeyConfigured();
-	}
-
-	public static ProGetConfig getProGetConfig() {
-		if (config != null) {
-			return config;
-		}
-		
-		return getSharedDescriptor().getProGetConfig();
-	}
-	
-	private static ProGetConfiguration.DescriptorImpl getSharedDescriptor() {
-		return (ProGetConfiguration.DescriptorImpl) Jenkins.getInstance().getDescriptorOrDie(ProGetConfiguration.class);
-	}
-	
 	public String expandVariable(String variable) {
 		if (variable == null || variable.isEmpty()) {
 			return variable;

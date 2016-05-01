@@ -244,9 +244,7 @@ public class UploadPackageBuilder extends Builder {
     			return isProGetAvailable;
     		}
     		
-			ProGetHelper helper = new ProGetHelper();
-			
-			if (!helper.isProGetRequiredFieldsConfigured(true)) {
+			if (!GlobalConfig.isProGetRequiredFieldsConfigured(true)) {
 				connectionError = "Please configure ProGet Plugin global settings";
 				isProGetAvailable = false;
 				return false;
@@ -262,7 +260,7 @@ public class UploadPackageBuilder extends Builder {
             	return false;
             }   
 
-			if (!helper.isProGetApiKeyFieldConfigured()) {
+			if (!GlobalConfig.isProGetApiKeyFieldConfigured()) {
 				connectionWarning = "The ApiKey has not been configured in global settings, some features have been disabled.";
 				isProGetAvailable = false;
 			} else {

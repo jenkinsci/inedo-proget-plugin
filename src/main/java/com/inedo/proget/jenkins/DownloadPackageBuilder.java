@@ -74,7 +74,7 @@ public class DownloadPackageBuilder extends Builder {
 	public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws IOException {
 		ProGetHelper helper = new ProGetHelper(build, listener);
 		
-		if (!helper.isProGetRequiredFieldsConfigured(false)) {
+		if (!GlobalConfig.isProGetRequiredFieldsConfigured(false)) {
 			helper.info("Please configure ProGet Plugin global settings");
 				
 			return false;
@@ -160,9 +160,7 @@ public class DownloadPackageBuilder extends Builder {
     			return isProGetAvailable;
     		}
     		
-			ProGetHelper helper = new ProGetHelper();
-			
-			if (!helper.isProGetRequiredFieldsConfigured(false)) {
+			if (!GlobalConfig.isProGetRequiredFieldsConfigured(false)) {
 				connectionError = "Please configure ProGet Plugin global settings";
 				isProGetAvailable = false;
 				return false;
@@ -178,7 +176,7 @@ public class DownloadPackageBuilder extends Builder {
             	return false;
             }   
 
-			if (!helper.isProGetApiKeyFieldConfigured()) {
+			if (!GlobalConfig.isProGetApiKeyFieldConfigured()) {
 				connectionWarning = "The ApiKey has not been configured in global settings, some features have been disabled.";
 				isProGetAvailable = false;
 			} else {

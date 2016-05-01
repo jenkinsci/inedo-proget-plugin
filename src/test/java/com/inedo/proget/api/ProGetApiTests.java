@@ -9,6 +9,7 @@ import com.inedo.proget.domain.Feed;
 import com.inedo.proget.domain.PackageMetadata;
 import com.inedo.proget.domain.ProGetPackage;
 import com.inedo.proget.domain.Version;
+import com.inedo.proget.jenkins.GlobalConfig;
 import com.inedo.proget.jenkins.ProGetHelper;
 import com.inedo.proget.jenkins.UploadPackageBuilder;
 import com.inedo.proget.jenkins.DownloadPackageBuilder.DownloadFormat;
@@ -54,7 +55,7 @@ public class ProGetApiTests {
 			config = TestConfig.getProGetConfig();
 		}
 
-		ProGetHelper.injectConfiguration(config);
+		GlobalConfig.injectConfiguration(config);
 	}
 
 	@Before
@@ -68,7 +69,7 @@ public class ProGetApiTests {
 			mockServer.stop();
 		}
 
-		ProGetHelper.injectConfiguration(null);
+		GlobalConfig.injectConfiguration(null);
 	}
 
 	@Test
@@ -79,17 +80,17 @@ public class ProGetApiTests {
 	
 	@Test(expected=UnknownHostException.class)
 	public void getWithIncorrectHost() throws IOException {
-		ProGetConfig config = ProGetHelper.getProGetConfig();
+		ProGetConfig config = GlobalConfig.getProGetConfig();
 		String origUrl = config.url; 
 		config.url = "http://rubbish_host";
 
-		ProGetHelper.injectConfiguration(config);
+		GlobalConfig.injectConfiguration(config);
 		
 		try {
 			new ProGetApi(new ProGetHelper()).getFeeds();
 		} finally {
 			config.url = origUrl;
-			ProGetHelper.injectConfiguration(config);
+			GlobalConfig.injectConfiguration(config);
 		}
 	}
 	

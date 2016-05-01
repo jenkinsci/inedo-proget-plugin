@@ -11,6 +11,7 @@ import com.inedo.http.HttpEasy;
 import com.inedo.proget.domain.Feed;
 import com.inedo.proget.domain.ProGetPackage;
 import com.inedo.proget.domain.Version;
+import com.inedo.proget.jenkins.GlobalConfig;
 import com.inedo.proget.jenkins.ProGetHelper;
 import com.inedo.proget.jenkins.DownloadPackageBuilder.DownloadFormat;
 
@@ -26,7 +27,7 @@ public class ProGetApi {
 	private ProGetConfig config;
 	
 	public ProGetApi(ProGetHelper helper) {
-		this.config = ProGetHelper.getProGetConfig();
+		this.config = GlobalConfig.getProGetConfig();
 		
 		HttpEasy.withDefaults()
 			.allowAllHosts()
