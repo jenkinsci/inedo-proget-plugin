@@ -17,9 +17,9 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 
-import com.inedo.proget.api.ProGet;
-import com.inedo.proget.api.ProGetPackageUtils;
-import com.inedo.proget.api.ProGetPackageUtils.ZipItem;
+import com.inedo.proget.api.ProGetApi;
+import com.inedo.proget.api.ProGetPackager;
+import com.inedo.proget.api.ProGetPackager.ZipItem;
 import com.inedo.proget.domain.Feed;
 import com.inedo.proget.domain.PackageMetadata;
 import com.inedo.proget.domain.ProGetPackage;
@@ -165,7 +165,7 @@ public class UploadPackageBuilder extends Builder {
     	//base directory is workspace
     	File baseDir = new File(ws.getRemote());
         
-    	ProGetPackageUtils packageUtils = new ProGetPackageUtils();
+    	ProGetPackager packageUtils = new ProGetPackager();
     	
     	List<ZipItem> files = packageUtils.getFileList(baseDir, this);
           
@@ -188,7 +188,7 @@ public class UploadPackageBuilder extends Builder {
 		
     	File pkg = packageUtils.createPackage(baseDir, files, metadata);
 		
-		new ProGet(helper).uploadPackage(feedName, pkg);
+		new ProGetApi(helper).uploadPackage(feedName, pkg);
         
         return true;
 	}
@@ -196,7 +196,7 @@ public class UploadPackageBuilder extends Builder {
 	@Extension
 	// This indicates to Jenkins that this is an implementation of an extension point.
 	public static final class DescriptorImpl extends BuildStepDescriptor<Builder> {
-		private ProGet proget = null;
+		private ProGetApi proget = null;
 		private String connectionError = "";
 		private String connectionWarning = "";
 		private Boolean isProGetAvailable = null;
@@ -252,7 +252,7 @@ public class UploadPackageBuilder extends Builder {
 				return false;
 			}
 			
-			proget = new ProGet(null);
+			proget = new ProGetApi(null);
 
 			try {
             	proget.canConnect();

@@ -26,13 +26,13 @@ import org.junit.rules.TemporaryFolder;
 import com.google.common.io.Files;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
-import com.inedo.proget.api.ProGetPackageUtils.ZipItem;
+import com.inedo.proget.api.ProGetPackager.ZipItem;
 import com.inedo.proget.jenkins.ProGetHelper;
 import com.inedo.proget.jenkins.UploadPackageBuilder;
 
-public class ProGetPackageUtilsTests {
+public class ProGetPackagerTests {
 	private ProGetHelper helper;
-	private ProGetPackageUtils packageUtils = new ProGetPackageUtils();
+	private ProGetPackager packageUtils = new ProGetPackager();
 
 	@Rule
 	public TemporaryFolder folder = new TemporaryFolder();
@@ -92,7 +92,7 @@ public class ProGetPackageUtilsTests {
 		
 		int fileCount = pkg.getParentFile().listFiles().length;
 		
-		ProGetPackageUtils.unpackContent(pkg);
+		ProGetPackager.unpackContent(pkg);
 		
 		assertThat("File have been unpacked", pkg.getParentFile().listFiles().length, is(greaterThan(fileCount)));
 	}

@@ -22,10 +22,10 @@ import com.inedo.proget.jenkins.DownloadPackageBuilder.DownloadFormat;
  * 
  * @author Andrew Sumner
  */
-public class ProGet {
+public class ProGetApi {
 	private ProGetConfig config;
 	
-	public ProGet(ProGetHelper helper) {
+	public ProGetApi(ProGetHelper helper) {
 		this.config = ProGetHelper.getProGetConfig();
 		
 		HttpEasy.withDefaults()

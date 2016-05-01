@@ -9,7 +9,7 @@ import net.sf.json.JSONObject;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
-import com.inedo.proget.api.ProGet;
+import com.inedo.proget.api.ProGetApi;
 import com.inedo.proget.api.ProGetConfig;
 
 import hudson.Extension;
@@ -225,7 +225,7 @@ public class ProGetConfiguration extends GlobalConfiguration {
 			config.apiKey = apiKey;
 			
 			ProGetHelper.injectConfiguration(config);
-			ProGet proget = new ProGet(new ProGetHelper());
+			ProGetApi proget = new ProGetApi(new ProGetHelper());
 
 			try {
 				proget.canConnect();

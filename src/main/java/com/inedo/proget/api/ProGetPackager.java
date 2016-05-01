@@ -24,7 +24,7 @@ import com.inedo.proget.jenkins.UploadPackageBuilder;
 
 import hudson.Util;
 
-public class ProGetPackageUtils
+public class ProGetPackager
 {
 	private static final String UNPACK = "unpack" + File.separatorChar;
 	

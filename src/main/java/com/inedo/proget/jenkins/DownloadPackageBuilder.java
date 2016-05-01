@@ -11,8 +11,8 @@ import hudson.tasks.BuildStepDescriptor;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
-import com.inedo.proget.api.ProGet;
-import com.inedo.proget.api.ProGetPackageUtils;
+import com.inedo.proget.api.ProGetApi;
+import com.inedo.proget.api.ProGetPackager;
 import com.inedo.proget.domain.Feed;
 import com.inedo.proget.domain.ProGetPackage;
 import com.inedo.proget.domain.Version;
@@ -80,7 +80,7 @@ public class DownloadPackageBuilder extends Builder {
 			return false;
 		}
 		
-		ProGet proget = new ProGet(helper);
+		ProGetApi proget = new ProGetApi(helper);
 		
 		String downloadTo = helper.expandVariable(downloadFolder);
 		helper.info("Download package to " + new File(downloadTo).getAbsolutePath());
@@ -91,7 +91,7 @@ public class DownloadPackageBuilder extends Builder {
 					
 			if (format == DownloadFormat.EXTRACT_CONTENT) {
 				helper.info("Unpack " + downloaded.getName());
-				ProGetPackageUtils.unpackContent(downloaded);
+				ProGetPackager.unpackContent(downloaded);
 				downloaded.delete();
 			} else {
 				ProGetHelper.injectEnvrionmentVariable(build, "PROGET_FILE", downloaded.getName());
@@ -108,7 +108,7 @@ public class DownloadPackageBuilder extends Builder {
 	// This indicates to Jenkins that this is an implementation of an extension
 	// point.
 	public static final class DescriptorImpl extends BuildStepDescriptor<Builder> {
-		private ProGet proget = null;
+		private ProGetApi proget = null;
 		private String connectionError = "";
 		private String connectionWarning = "";
 		private Boolean isProGetAvailable = null;
@@ -168,7 +168,7 @@ public class DownloadPackageBuilder extends Builder {
 				return false;
 			}
 			
-			proget = new ProGet(null);
+			proget = new ProGetApi(null);
 
 			try {
             	proget.canConnect();

@@ -3,8 +3,8 @@ package com.inedo.proget.api;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
-import com.inedo.proget.api.ProGet;
-import com.inedo.proget.api.ProGetPackageUtils.ZipItem;
+import com.inedo.proget.api.ProGetApi;
+import com.inedo.proget.api.ProGetPackager.ZipItem;
 import com.inedo.proget.domain.Feed;
 import com.inedo.proget.domain.PackageMetadata;
 import com.inedo.proget.domain.ProGetPackage;
@@ -36,9 +36,9 @@ import org.junit.rules.TemporaryFolder;
  * 
  * @author Andrew Sumner
  */
-public class ProGetTests {
+public class ProGetApiTests {
 	private static MockServer mockServer = null;
-	private ProGet proget;
+	private ProGetApi proget;
 		
 	@Rule
 	public TemporaryFolder folder = new TemporaryFolder();
@@ -59,7 +59,7 @@ public class ProGetTests {
 
 	@Before
 	public void before() {
-		proget = new ProGet(new ProGetHelper());
+		proget = new ProGetApi(new ProGetHelper());
 	}
 
 	@AfterClass
@@ -86,7 +86,7 @@ public class ProGetTests {
 		ProGetHelper.injectConfiguration(config);
 		
 		try {
-			new ProGet(new ProGetHelper()).getFeeds();
+			new ProGetApi(new ProGetHelper()).getFeeds();
 		} finally {
 			config.url = origUrl;
 			ProGetHelper.injectConfiguration(config);
@@ -145,7 +145,7 @@ public class ProGetTests {
 	public void uploadPackage() throws IOException {
 		preparePackageFiles();
 		
-		ProGetPackageUtils packageUtils = new ProGetPackageUtils();
+		ProGetPackager packageUtils = new ProGetPackager();
 		UploadPackageBuilder builder = getExampleBuilder("**/*.*", "");
 		List<ZipItem> files = packageUtils.getFileList(folder.getRoot(), builder);
 		
