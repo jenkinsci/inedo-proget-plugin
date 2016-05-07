@@ -26,12 +26,25 @@ import hudson.Util;
 
 public class ProGetPackager
 {
-	private static final String PACKAGE = "package" + File.separatorChar;
+	public static final String WINDOWS_SEPARATOR = "\\";
+	public static final String UNIX_SEPARATOR = "/";
 	
+	private static final String PACKAGE = "package";
+	private final String fileSeparatorChar;
 	private File sourceFolder;
 	private File zipFile;
 	private ZipOutputStream zos = null;
 		
+	public ProGetPackager() {
+		// Generally '/' is regarded as most robust character file separator character to use
+		// but '\' is also valid
+		this.fileSeparatorChar = UNIX_SEPARATOR;
+	}
+	
+	public ProGetPackager(String fileSeparatorChar) {
+		this.fileSeparatorChar = fileSeparatorChar;
+	}
+	
 	public File createPackage(File baseFolder, List<ZipItem> files, PackageMetadata metadata) throws IOException {		
 		FileOutputStream fos = null;
 		
@@ -43,7 +56,7 @@ public class ProGetPackager
 			zos = new ZipOutputStream(fos);
 
 			appendMetadata(metadata);
-			appendFiles(files, PACKAGE);
+			appendFiles(files, PACKAGE + fileSeparatorChar);
 		} finally {
 			if (zos != null) zos.closeEntry();
 			if (zos != null) zos.close(); 
@@ -151,12 +164,12 @@ public class ProGetPackager
 	            ZipEntry entry = e.nextElement();
 	            
 	            String entryName = new File(entry.getName()).getPath();
-	            if (entryName.equals(PACKAGE)) {
+	            if (entryName.equals(PACKAGE + WINDOWS_SEPARATOR) || entryName.equals(PACKAGE + UNIX_SEPARATOR)) {
 	            	continue;
 	            }
 	            
-	            if (entryName.startsWith(PACKAGE) && !entryName.equals(PACKAGE)) {
-	            	entryName = entryName.substring(PACKAGE.length());
+	            if (entryName.startsWith(PACKAGE + WINDOWS_SEPARATOR) || entryName.startsWith(PACKAGE + UNIX_SEPARATOR)) {
+	            	entryName = entryName.substring(PACKAGE.length() + 1);
 	            }
 	            
 	            File file = new File(extractTo, entryName);
@@ -194,7 +207,6 @@ public class ProGetPackager
 		fileSet.setCaseSensitive(settings.isCaseSensitive());
 
 		for (String f : fileSet.getDirectoryScanner().getIncludedFiles()) {
-			//TODO required? f.replace(File.separatorChar, '/')
 			files.add(new ZipItem(f));
 		}
 
@@ -212,7 +224,7 @@ public class ProGetPackager
 			}
 			
 			prefix = prefix.substring(1, index);
-			prefix = prefix.replace("/", File.separator);
+			prefix = prefix.replace(UNIX_SEPARATOR, File.separator);
 			
 			if (!prefix.endsWith(File.separator)) {
 				prefix += File.separator;
@@ -222,6 +234,12 @@ public class ProGetPackager
 				if (file.getSourceFile().startsWith(prefix)) {
 					file.setDesinationFile(file.getSourceFile().substring(prefix.length()));
 				}
+			}
+		}
+
+		if (!File.separator.equals(fileSeparatorChar)) {
+			for (ZipItem file : files) {
+				file.setDesinationFile(file.getDestinationFile().replace(File.separator, fileSeparatorChar));
 			}
 		}
 		

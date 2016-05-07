@@ -60,7 +60,7 @@ public class ProGetPackagerTests {
 		
 		assertThat("Expected file was found", files.size(), is(equalTo(1)));
 		assertThat("Expected file was found", files.get(0).getSourceFile(), is(equalTo("bin/logs/sample.log".replace("/", File.separator))));
-		assertThat("Desintation file has removed bin folder", files.get(0).getDestinationFile(), is(equalTo("logs/sample.log".replace("/", File.separator))));
+		assertThat("Desintation file has removed bin folder", files.get(0).getDestinationFile(), is(equalTo("logs/sample.log")));
 	}
 	
 	@Test
@@ -74,7 +74,30 @@ public class ProGetPackagerTests {
 	}
 	
 	@Test
-	public void unpackContent() throws ZipException, IOException {
+	public void unpackContentForwaredSlash() throws ZipException, IOException {
+		UploadPackageBuilder builder = getExampleBuilder("bin/**/*.*", "logs/");
+		List<ZipItem> files = packageUtils.getFileList(folder.getRoot(), builder);
+		
+		File pkg = packageUtils.createPackage(folder.getRoot(), files, builder.buildMetadata(helper));
+		
+		File temp = new File(folder.getRoot(), "temp");
+		temp.mkdir();
+		
+		temp = new File(temp, pkg.getName());
+		Files.move(pkg, temp);
+		pkg = temp;
+		
+		int fileCount = pkg.getParentFile().listFiles().length;
+		
+		ProGetPackager.unpackContent(pkg);
+		
+		assertThat("File have been unpacked", pkg.getParentFile().listFiles().length, is(greaterThan(fileCount)));
+	}
+	
+	@Test
+	public void unpackContentBackSlash() throws IOException {
+		ProGetPackager packageUtils = new ProGetPackager(ProGetPackager.WINDOWS_SEPARATOR);
+		
 		UploadPackageBuilder builder = getExampleBuilder("bin/**/*.*", "logs/");
 		List<ZipItem> files = packageUtils.getFileList(folder.getRoot(), builder);
 		
@@ -114,8 +137,8 @@ public class ProGetPackagerTests {
 	        	fail("unpack.json is not a valid json file");
 	        }
 	        
-	        ze = zip.getEntry("unpack" + File.separator + "sample.data");
-	        assertThat("Package file contains unpack folder", ze, is(notNullValue()));
+	        ze = zip.getEntry("package/sample.data");
+	        assertThat("Package file contains package folder", ze, is(notNullValue()));
 		}
 	}
 	
