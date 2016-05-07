@@ -2,7 +2,6 @@ package com.inedo.proget.api;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-
 import com.inedo.proget.api.ProGetApi;
 import com.inedo.proget.api.ProGetPackager.ZipItem;
 import com.inedo.proget.domain.Feed;
@@ -24,6 +23,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.UnknownHostException;
 import java.util.List;
+import java.util.zip.ZipFile;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.*;
@@ -75,6 +75,14 @@ public class ProGetApiTests {
 	public void checkConnection() throws IOException {
 		// An exception will be thrown if fails
 		proget.canConnect();
+	}
+
+
+	@Test 
+	public void checkVersion() throws IOException {
+		String version = proget.getVersion();
+		
+		assertThat("Version is returned", version, startsWith("ProGet"));
 	}
 	
 	@Test(expected=UnknownHostException.class)
@@ -128,6 +136,19 @@ public class ProGetApiTests {
 	}
 	
 	@Test
+	public void downloadContentAsZip() throws IOException  {
+		Feed feed = proget.getFeed("Example");
+		
+		ProGetPackage pkg = proget.getPackages(feed.Feed_Id)[0];
+		
+		File downloaded = proget.downloadPackage(feed.Feed_Name, pkg.Group_Name, pkg.Package_Name, pkg.LatestVersion_Text, folder.getRoot().getAbsolutePath(), DownloadFormat.CONTENT_AS_ZIP);
+    	
+		try (ZipFile zip = new ZipFile(downloaded)) {
+	        assertThat("Package file has content", zip.size(), is(greaterThan(0)));
+		}
+	}
+	
+	@Test
 	public void downloadPackageLatestVersion() throws IOException  {
 		Feed feed = proget.getFeed("Example");
 		
@@ -153,7 +174,7 @@ public class ProGetApiTests {
 		
 		// Success is fact that no exception thrown...
 	}
-
+	
 	private void preparePackageFiles() throws IOException {
 		createFile(new File(folder.getRoot(), "sample.data"), "This is a sample data file");
 		createFile(new File(folder.getRoot(), "sample.txt"), "This is a sample text file");
@@ -175,7 +196,7 @@ public class ProGetApiTests {
 		settings.setTitle("Example Title");
 		settings.setDescription("This contains [example](http://example.net) files specific to test suite");
 		settings.setIcon("package://1UP.ico");
-		settings.setMetadata("custom=yes\rreally=of course");
+		settings.setMetadata("custom=yes\rreally=of course\rfile=C:\\this\\is\\a\\folder\\path");
 		settings.setDependencies("my.dependency:one\rmy.dependency:two");
 		
 		return settings;

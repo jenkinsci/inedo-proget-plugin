@@ -217,7 +217,7 @@ public class UploadPackageBuilder extends Builder {
 				
 				if (pos > 0) {
 					String name = line.substring(0, pos).trim();
-				    String value = line.substring(pos + 1).trim();
+				    String value = line.substring(pos + 1).trim().replace("\\", "\\\\");
 				    
 				    metadata.extendedAttributes.put(name, helper.expandVariable(value));
 			    } else {

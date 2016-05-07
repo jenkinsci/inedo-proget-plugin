@@ -114,6 +114,10 @@ public class HttpEasyReader {
 	
 	private String asString(InputStream stream) throws IOException {
 		returned = "";
+
+		if (stream == null) {
+			return returned;
+		}
 		
 		// read the output from the server
 		try (BufferedReader reader = new BufferedReader(new InputStreamReader(stream))) {

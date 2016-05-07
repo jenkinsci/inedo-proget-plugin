@@ -26,7 +26,7 @@ import hudson.Util;
 
 public class ProGetPackager
 {
-	private static final String UNPACK = "unpack" + File.separatorChar;
+	private static final String PACKAGE = "package" + File.separatorChar;
 	
 	private File sourceFolder;
 	private File zipFile;
@@ -43,7 +43,7 @@ public class ProGetPackager
 			zos = new ZipOutputStream(fos);
 
 			appendMetadata(metadata);
-			appendFiles(files, UNPACK);
+			appendFiles(files, PACKAGE);
 		} finally {
 			if (zos != null) zos.closeEntry();
 			if (zos != null) zos.close(); 
@@ -151,12 +151,12 @@ public class ProGetPackager
 	            ZipEntry entry = e.nextElement();
 	            
 	            String entryName = new File(entry.getName()).getPath();
-	            if (entryName.equals(UNPACK)) {
+	            if (entryName.equals(PACKAGE)) {
 	            	continue;
 	            }
 	            
-	            if (entryName.startsWith(UNPACK) && !entryName.equals(UNPACK)) {
-	            	entryName = entryName.substring(UNPACK.length());
+	            if (entryName.startsWith(PACKAGE) && !entryName.equals(PACKAGE)) {
+	            	entryName = entryName.substring(PACKAGE.length());
 	            }
 	            
 	            File file = new File(extractTo, entryName);

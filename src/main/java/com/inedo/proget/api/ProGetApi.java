@@ -50,16 +50,52 @@ public class ProGetApi {
 	}
 
 	/**
-	 * Ensure can ping ProGet.  If we need to get assurance that it is running we could call a URL using HEAD method.
+	 * Check that can connect to ProGet, and check the apiKey if configured.
 	 * 
 	 * @throws IOException If cannot connect
 	 */
 	public void canConnect() throws IOException {
+		if (config.apiKey == null || config.apiKey.isEmpty()) {
+			String version = getVersion();
+			
+			if (!version.startsWith("ProGet")) {
+				throw new IOException("URL does not point at ProGet");
+			}
+		} else {
+			getFeeds();
+		}
+	}
+
+	/**
+	 * Ensure can ping an endpointGet.
+	 * 
+	 * @throws IOException If cannot connect
+	 */
+	public void ping() throws IOException {
 		try (Socket socket = new Socket()) {
 			URL url = new URL(config.url);
 	        socket.connect(new InetSocketAddress(url.getHost(), url.getPort()));
-	    }
+		}
 	}
+	
+	public String getVersion() throws IOException {
+		return HttpEasy.request()
+				.path("api/version")
+				.get()
+				.asString();
+	}
+
+	/** Get all active feeds */
+	public Feed[] getFeeds() throws IOException {
+		Feed[] result = HttpEasy.request()
+				.path("api/json/Feeds_GetFeeds?API_Key={}&IncludeInactive_Indicator={}")
+				.urlParameters(config.apiKey, "N")
+				.get()
+				.getJsonReader()
+				.asJson(Feed[].class);
+		
+		return result;
+	}	
 
 	/** Gets the details of a feed by its name */
 	public Feed getFeed(String feedName) throws IOException {
@@ -75,18 +111,6 @@ public class ProGetApi {
 		}
 		
 		return feed;
-	}
-
-	/** Get all active feeds */
-	public Feed[] getFeeds() throws IOException {
-		Feed[] result = HttpEasy.request()
-				.path("api/json/Feeds_GetFeeds?API_Key={}&IncludeInactive_Indicator={}")
-				.urlParameters(config.apiKey, "N")
-				.get()
-				.getJsonReader()
-				.asJson(Feed[].class);
-		
-		return result;
 	}
 		
 	/** Gets the packages in a ProGet feed */
@@ -125,14 +149,17 @@ public class ProGetApi {
 		String path = "upack/{«feed-name»}/download/{«group-name»}/{«package-name»}";
 		String query = "";
 		
-		if (version == null || version.trim().isEmpty()) {
-			version = "";
+		if (version == null || version.trim().isEmpty() || version.equalsIgnoreCase("latest")) {
+			query = "latest";
 		} else {
 			path += "/{«package-version»}";
 		}
 		
 		if (downloadFormat == DownloadFormat.CONTENT_AS_ZIP || downloadFormat == DownloadFormat.CONTENT_AS_TGZ) {
-			query = "contentOnly={«zip|tgz»}";
+			if (!query.isEmpty()) {
+				query += "&";
+			}
+			query += "contentOnly={«zip|tgz»}";
 		}
 		
 		return HttpEasy.request()
@@ -150,5 +177,5 @@ public class ProGetApi {
 				.data(progetPackage, MediaType.ZIP)
 				.authorization(config.user, config.password)
 				.post();
-	}	
+	}
 }
