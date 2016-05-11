@@ -1,8 +1,8 @@
-[![Build Status](https://jenkins.ci.cloudbees.com/job/plugins/job/inedo-buildmaster-plugin/badge/icon)](https://jenkins.ci.cloudbees.com/job/plugins/job/inedo-buildmaster-plugin/)
+[![Build Status](https://jenkins.ci.cloudbees.com/job/plugins/job/inedo-proget-plugin/badge/icon)](https://jenkins.ci.cloudbees.com/job/plugins/job/inedo-proget-plugin/)
 
-This plugin allows Jenkins to request version information and trigger a build on an application in [Inedo BuildMaster](http://inedo.com/buildmaster) as part of a Jenkins build process.
+This plugin allows Jenkins to request version information and trigger a build on an application in [Inedo ProGet](http://inedo.com/proget) as part of a Jenkins build process.
 
-See the [Wiki page](http://wiki.jenkins-ci.org/display/JENKINS/Inedo+BuildMaster+Plugin) for more details.
+See the [Wiki page](http://wiki.jenkins-ci.org/display/JENKINS/Inedo+ProGet+Plugin) for more details.
 
 ## Building The Plugin
 -------------------
@@ -19,8 +19,6 @@ From the command line, `cd` to the folder containing a copy of this project, and
   
   `gradlew clean jpi` on Windows.
   
-  `gradlew -Dhttp.proxyHost=yourProxy -Dhttp.proxyPort=yourPort -Dhttp.proxyUser=yourUsername -Dhttp.proxyPassword=yourPassword -Dhttps.proxyHost=yourProxy -Dhttps.proxyPort=yourPort -Dhttps.proxyUser=yourUsername -Dhttps.proxyPassword=yourPassword clean jpi` from behind a proxy.It is vital that any tasks come after the proxy configuration. 
-
 This will download the required dependencies, clean the existing project, recompile all source code and build the jpi file required by jenkins. 
 
 IDE
@@ -33,8 +31,3 @@ On importing the project to your IDE, the required dependencies will be download
 -------------------
 
 To spin up a Jenkins instance with this plugin installed for manual testing, run `gradlew clean server` (see "building the plugin" above). The Jenkins instance will be available on port 8080 on your localhost.
-
-## Developing Plugins
-Searching for anything Jenkins related is best done in https://maven-repository.com, my old standby http://maven.org returns nothing and https://bintray.com/bintray/jcenter won't give anything useful.
-
-Unit Testing requires the jenkins-test-harness and is exceedingly slow :-(
