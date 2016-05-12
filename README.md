@@ -1,6 +1,8 @@
 [![Build Status](https://jenkins.ci.cloudbees.com/job/plugins/job/inedo-proget-plugin/badge/icon)](https://jenkins.ci.cloudbees.com/job/plugins/job/inedo-proget-plugin/)
 
-This plugin allows Jenkins to request version information and trigger a build on an application in [Inedo ProGet](http://inedo.com/proget) as part of a Jenkins build process.
+This plugin integrates [Inedo ProGet](http://inedo.com/proget) with Jenkins allowing Jenkins jobs to create and upload, or download and extract, universal packages.
+
+It requires ProGet version 4.0.12 or higher to work correctly.
 
 See the [Wiki page](http://wiki.jenkins-ci.org/display/JENKINS/Inedo+ProGet+Plugin) for more details.
 
