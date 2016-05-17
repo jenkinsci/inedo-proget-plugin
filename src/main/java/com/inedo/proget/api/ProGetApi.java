@@ -146,20 +146,20 @@ public class ProGetApi {
 	 * @throws IOException
 	 */
 	public File downloadPackage(String feedName, String groupName, String packageName, String version, String toFolder, DownloadFormat downloadFormat) throws IOException {
-		String path = "upack/{«feed-name»}/download/{«group-name»}/{«package-name»}";
+		String path = "upack/{feed-name}/download/{group-name}/{package-name}";
 		String query = "";
 		
 		if (version == null || version.trim().isEmpty() || version.equalsIgnoreCase("latest")) {
 			query = "latest";
 		} else {
-			path += "/{«package-version»}";
+			path += "/{package-version}";
 		}
 		
 		if (downloadFormat == DownloadFormat.CONTENT_AS_ZIP || downloadFormat == DownloadFormat.CONTENT_AS_TGZ) {
 			if (!query.isEmpty()) {
 				query += "&";
 			}
-			query += "contentOnly={«zip|tgz»}";
+			query += "contentOnly={zip|tgz}";
 		}
 		
 		return HttpEasy.request()
@@ -172,7 +172,7 @@ public class ProGetApi {
 	
 	public void uploadPackage(String feedName, File progetPackage) throws IOException {
 		HttpEasy.request()
-				.path("upack/{«feed-name»}/upload")
+				.path("upack/{feed-name}/upload")
 				.urlParameters(feedName)
 				.data(progetPackage, MediaType.ZIP)
 				.authorization(config.user, config.password)

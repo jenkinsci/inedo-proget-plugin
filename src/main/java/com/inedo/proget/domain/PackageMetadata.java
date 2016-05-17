@@ -62,8 +62,8 @@ public class PackageMetadata {
 	
 	/**
 	 * 	An array of strings, each consisting of a package identification string; this string is formatted as follows:
-	 *	«group»:«package-name»
-	 *  «group»:«package-name»:«version»
+	 *	group:package-name
+	 *  group:package-name:version
 	 * When the version is not specified, the latest is used.
 	 * 
 	 * Example: [ "initrode/vendors-common:ast-common:2.0.0" ]
