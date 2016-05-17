@@ -88,17 +88,22 @@ public class MockServer {
 				response.setStatusCode(HttpStatus.SC_OK);
 				break;
 				
+			case "/upack/Default/download/andrew/sumner/example/examplepackage":
 			case "/upack/Default/download/andrew/sumner/example/examplepackage/0.0.1":
 				try {
 					File file = new File("src/test/resources/com/inedo/proget/api/example-0.0.1.upack");
 					FileEntity body = new FileEntity(file, ContentType.DEFAULT_BINARY);
 	                response.setHeader("Content-Type", "application/force-download");
-	                response.setHeader("Content-Disposition","attachment; filename=example-0.0.1.upack");
+	                response.setHeader("Content-Disposition","attachment; filename=\"example-0.0.1.upack\"");
 	                response.setEntity(body);
 				} catch (Exception e) {
 					System.err.println(e);
 				}
                 
+				break;
+				
+			case "/api/version":
+				response.setEntity(new StringEntity("ProGet vs ?"));
 				break;
 				
 			default:
