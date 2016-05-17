@@ -10,12 +10,13 @@ import java.net.URL;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
+import javax.xml.bind.DatatypeConverter;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -588,7 +589,7 @@ public class HttpEasy {
 			return;
 		}
 		
-		authString = "Basic " + Base64.getEncoder().encodeToString(authString.getBytes());
+		authString = "Basic " + DatatypeConverter.printBase64Binary(authString.getBytes());
 		connection.setRequestProperty("Authorization", authString);
 	}
 
@@ -602,7 +603,7 @@ public class HttpEasy {
 		}
 
 		String usernameAndPassword = proxyUser + ":" + proxyPassword;
-		String proxyAuthString = "Basic " + Base64.getEncoder().encodeToString(usernameAndPassword.getBytes());
+		String proxyAuthString = "Basic " + DatatypeConverter.printBase64Binary(usernameAndPassword.getBytes());
 		connection.setRequestProperty("Proxy-Authorization", proxyAuthString);
 	}
 
