@@ -88,8 +88,9 @@ public class MockServer {
 				response.setStatusCode(HttpStatus.SC_OK);
 				break;
 				
-			case "/upack/Default/download/andrew/sumner/example/examplepackage":
-			case "/upack/Default/download/andrew/sumner/example/examplepackage/0.0.1":
+			case "/upack/Default/download/andrew/sumner/example/examplepackage":		// Latest version 
+			case "/upack/Default/download/andrew/sumner/example/examplepackage/0.0.1":	// Specific version
+			case "/upack/Example/download/andrew/sumner/proget/ExamplePackage/0.0.3": 	// Plugin Test 
 				try {
 					File file = new File("src/test/resources/com/inedo/proget/api/example-0.0.1.upack");
 					FileEntity body = new FileEntity(file, ContentType.DEFAULT_BINARY);
