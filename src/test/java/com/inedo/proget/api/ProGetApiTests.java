@@ -166,7 +166,7 @@ public class ProGetApiTests {
 		JenkinsHelper helper = new JenkinsHelper();
 		ProGetPackager packageUtils = new ProGetPackager();
 		UploadPackageBuilder builder = getExampleBuilder("**/*.*", "");
-		List<ZipItem> files = packageUtils.getFileList(folder.getRoot(), builder);
+		List<ZipItem> files = packageUtils.getFileList(folder.getRoot(), builder.getArtifacts(), builder.getExcludes(), builder.isDefaultExcludes(), builder.isCaseSensitive());
 		
 		File pkg = packageUtils.createPackage(folder.getRoot(), files, builder.buildMetadata(helper));
 		

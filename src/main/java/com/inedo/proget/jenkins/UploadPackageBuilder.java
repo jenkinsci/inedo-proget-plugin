@@ -159,9 +159,11 @@ public class UploadPackageBuilder extends Builder {
             return false;
         }
 		
+		String include = helper.expandVariable(this.artifacts);
+		String exclude = helper.expandVariable(this.excludes);
+		
 		logWriter.info("Packaging Artifacts");
         
-    	String includes = helper.expandVariable(this.artifacts);
     	FilePath ws = build.getWorkspace();
     	
     	//base directory is workspace
@@ -169,16 +171,16 @@ public class UploadPackageBuilder extends Builder {
         
     	ProGetPackager packageUtils = new ProGetPackager();
     	
-    	List<ZipItem> files = packageUtils.getFileList(baseDir, this);
+    	List<ZipItem> files = packageUtils.getFileList(baseDir, include, exclude, defaultExcludes, caseSensitive);
           
 		if (files.isEmpty()) {
-	    	String msg = ws.validateAntFileMask(includes, FilePath.VALIDATE_ANT_FILE_MASK_BOUND);
+	    	String msg = ws.validateAntFileMask(include, FilePath.VALIDATE_ANT_FILE_MASK_BOUND);
 	    	if(msg != null) {
 	    		logWriter.error(msg);
 	        	return false;
 	        }
 	    	
-	    	logWriter.error("No files found matching Files to package setting");
+	    	logWriter.error("No files found matching Files to package setting '" + include + "'");
 	    	return false;
 		} 
 		
@@ -205,35 +207,39 @@ public class UploadPackageBuilder extends Builder {
 		metadata.description = getDescription();
 		metadata.icon = getIcon();
 				
-		try (Scanner scanner = new Scanner(getMetadata())) {
-			while (scanner.hasNextLine()){
-				String line = scanner.nextLine().trim();
-				
-				if (line.isEmpty()) {
-					continue;
-				}
-				
-				int pos = line.indexOf("=");
-				
-				if (pos > 0) {
-					String name = line.substring(0, pos).trim();
-				    String value = line.substring(pos + 1).trim().replace("\\", "\\\\");
-				    
-				    metadata.extendedAttributes.put(name, helper.expandVariable(value));
-			    } else {
-			    	return null;
-				}
-		    } 
+		if (getMetadata() != null) {
+			try (Scanner scanner = new Scanner(getMetadata())) {
+				while (scanner.hasNextLine()){
+					String line = scanner.nextLine().trim();
+					
+					if (line.isEmpty()) {
+						continue;
+					}
+					
+					int pos = line.indexOf("=");
+					
+					if (pos > 0) {
+						String name = line.substring(0, pos).trim();
+					    String value = line.substring(pos + 1).trim().replace("\\", "\\\\");
+					    
+					    metadata.extendedAttributes.put(name, helper.expandVariable(value));
+				    } else {
+				    	return null;
+					}
+			    } 
+			}
 		}
 		
-		try (Scanner scanner = new Scanner(getDependencies())) {
-			while (scanner.hasNextLine()){
-				String dependency = scanner.nextLine().trim();
-				
-				if (!dependency.isEmpty()) {
-				    metadata.dependencies.add(dependency);
-				}
-		    } 
+		if (getDependencies() != null) {
+			try (Scanner scanner = new Scanner(getDependencies())) {
+				while (scanner.hasNextLine()){
+					String dependency = scanner.nextLine().trim();
+					
+					if (!dependency.isEmpty()) {
+					    metadata.dependencies.add(dependency);
+					}
+			    } 
+			}
 		}
 		
 		return metadata;
@@ -414,7 +420,19 @@ public class UploadPackageBuilder extends Builder {
         }
 
         public FormValidation doCheckVersion(@QueryParameter String value) throws IOException, ServletException {
-        	return checkFieldLength(value, REQUIRED);
+        	int countDots = 0;
+        	
+        	int pos = value.indexOf(".");
+        	while (pos > -1) {
+        		countDots ++;
+        		pos = value.indexOf(".", pos + 1);
+        	}
+        	
+        	if (countDots != 2) {
+       			return FormValidation.error("Version must be in a three-part dot format eg 0.0.0");
+        	}
+        	
+            return FormValidation.ok();
         }
 
         public FormValidation doCheckTitle(@QueryParameter String value) throws IOException, ServletException {

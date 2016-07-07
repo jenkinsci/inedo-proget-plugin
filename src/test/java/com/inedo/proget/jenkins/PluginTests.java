@@ -101,6 +101,36 @@ public class PluginTests {
         assertThat("PROGET_FILE variable points to existing file", new File(downloadFolder, progetFile.fileName).exists(), is(true));
 	}
 
+
+	@Test
+	public void performUpload() throws Exception {
+        String feedName = "Example";
+        String groupName = "andrew/sumner/proget";
+        String packageName = "ExamplePackage";
+        String version = "0.0.${BUILD_NUMBER}";
+        String artifact = "XX.${BUILD_NUMBER}.TXT";
+        
+        FreeStyleProject project = j.createFreeStyleProject();
+
+        // TODO This belongs in upload rather than download
+        project.getBuildersList().add(new TestBuilder() {
+            @Override
+            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+            	
+                build.getWorkspace().child("XX." + build.number + ".TXT").write("hello", "UTF-8");
+                return true;
+            }
+        });
+
+        project.getBuildersList().add(new UploadPackageBuilder(feedName, groupName, packageName, version, artifact));
+
+        FreeStyleBuild build = project.scheduleBuild2(0).get();
+
+        assertThat("Result is successful", build.getResult() , is(Result.SUCCESS));
+
+        String log = FileUtils.readFileToString(build.getLogFile());
+        assertThat("Has logged ProGet actions", log, containsString("[ProGet]"));
+	}
 	
 	public void setEnvironmentVariables() throws IOException {
 	    EnvironmentVariablesNodeProperty prop = new EnvironmentVariablesNodeProperty();

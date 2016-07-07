@@ -20,7 +20,6 @@ import java.util.zip.ZipOutputStream;
 import org.apache.tools.ant.types.FileSet;
 
 import com.inedo.proget.domain.PackageMetadata;
-import com.inedo.proget.jenkins.UploadPackageBuilder;
 
 import hudson.Util;
 
@@ -199,18 +198,18 @@ public class ProGetPackager
     	}
     }
 
-	public List<ZipItem> getFileList(File baseFolder, UploadPackageBuilder settings) {
+	public List<ZipItem> getFileList(File baseFolder, String artifacts, String excludes, boolean isDefaultExcludes, boolean isCaseSensitive) {
 		List<ZipItem> files = new ArrayList<ZipItem>();
 
-		FileSet fileSet = Util.createFileSet(baseFolder, removeTrimFolderMarker(settings.getArtifacts()), settings.getExcludes());
-		fileSet.setDefaultexcludes(settings.isDefaultExcludes());
-		fileSet.setCaseSensitive(settings.isCaseSensitive());
+		FileSet fileSet = Util.createFileSet(baseFolder, removeTrimFolderMarker(artifacts), excludes);
+		fileSet.setDefaultexcludes(isDefaultExcludes);
+		fileSet.setCaseSensitive(isCaseSensitive);
 
 		for (String f : fileSet.getDirectoryScanner().getIncludedFiles()) {
 			files.add(new ZipItem(f));
 		}
 
-		String[] includes = settings.getArtifacts().split(",");
+		String[] includes = artifacts.split(",");
 		for (String prefix : includes) {
 			prefix = prefix.trim();
 			

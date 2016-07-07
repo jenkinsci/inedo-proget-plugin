@@ -56,7 +56,7 @@ public class ProGetPackagerTests {
 	@Test
 	public void consolidateFolders() {
 		UploadPackageBuilder builder = getExampleBuilder("[bin]/logs/*.log", "");
-		List<ZipItem> files = packageUtils.getFileList(folder.getRoot(), builder);
+		List<ZipItem> files = packageUtils.getFileList(folder.getRoot(), builder.getArtifacts(), builder.getExcludes(), builder.isDefaultExcludes(), builder.isCaseSensitive());
 		
 		assertThat("Expected file was found", files.size(), is(equalTo(1)));
 		assertThat("Expected file was found", files.get(0).getSourceFile(), is(equalTo("bin/logs/sample.log".replace("/", File.separator))));
@@ -66,7 +66,7 @@ public class ProGetPackagerTests {
 	@Test
 	public void createPackageFromAntIncludes() throws IOException {
 		UploadPackageBuilder builder = getExampleBuilder("[bin]/**/*.*", "bin/logs/");
-		List<ZipItem> files = packageUtils.getFileList(folder.getRoot(), builder);
+		List<ZipItem> files = packageUtils.getFileList(folder.getRoot(), builder.getArtifacts(), builder.getExcludes(), builder.isDefaultExcludes(), builder.isCaseSensitive());
 		
 		File pkg = packageUtils.createPackage(folder.getRoot(), files, builder.buildMetadata(helper));
 		
@@ -76,7 +76,7 @@ public class ProGetPackagerTests {
 	@Test
 	public void unpackContentForwaredSlash() throws ZipException, IOException {
 		UploadPackageBuilder builder = getExampleBuilder("bin/**/*.*", "logs/");
-		List<ZipItem> files = packageUtils.getFileList(folder.getRoot(), builder);
+		List<ZipItem> files = packageUtils.getFileList(folder.getRoot(), builder.getArtifacts(), builder.getExcludes(), builder.isDefaultExcludes(), builder.isCaseSensitive());
 		
 		File pkg = packageUtils.createPackage(folder.getRoot(), files, builder.buildMetadata(helper));
 		
@@ -99,7 +99,7 @@ public class ProGetPackagerTests {
 		ProGetPackager packageUtils = new ProGetPackager(ProGetPackager.WINDOWS_SEPARATOR);
 		
 		UploadPackageBuilder builder = getExampleBuilder("bin/**/*.*", "logs/");
-		List<ZipItem> files = packageUtils.getFileList(folder.getRoot(), builder);
+		List<ZipItem> files = packageUtils.getFileList(folder.getRoot(), builder.getArtifacts(), builder.getExcludes(), builder.isDefaultExcludes(), builder.isCaseSensitive());
 		
 		File pkg = packageUtils.createPackage(folder.getRoot(), files, builder.buildMetadata(helper));
 		
@@ -160,7 +160,7 @@ public class ProGetPackagerTests {
 	private void checkFilter(String assertMessage, int expectedFileCount, String include, String exclude) throws IOException {
 		UploadPackageBuilder builder = getExampleBuilder(include, exclude);
 		
-		List<ZipItem> files = packageUtils.getFileList(folder.getRoot(), builder);
+		List<ZipItem> files = packageUtils.getFileList(folder.getRoot(), builder.getArtifacts(), builder.getExcludes(), builder.isDefaultExcludes(), builder.isCaseSensitive());
 		
 		assertThat("Package is created", files, is(not(empty())));
 		assertThat(assertMessage, files.size(), is(equalTo(expectedFileCount)));
