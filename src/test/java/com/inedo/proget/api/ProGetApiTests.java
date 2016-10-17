@@ -85,13 +85,14 @@ public class ProGetApiTests {
 	@Test(expected=UnknownHostException.class)
 	public void getWithIncorrectHost() throws IOException {
 		ProGetConfig config = GlobalConfig.getProGetConfig();
-		String origUrl = config.url; 
+		String origUrl = config.url;
 		config.url = "http://rubbish_host";
 
 		try {
 			new ProGetApi(config).getFeeds();
 		} finally {
 			config.url = origUrl;
+			proget = new ProGetApi(config);
 		}
 	}
 	
