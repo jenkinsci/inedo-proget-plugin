@@ -38,7 +38,7 @@ import org.junit.rules.TemporaryFolder;
  */
 public class ProGetApiTests {
 	private static MockServer mockServer = null;
-	private ProGetApi proget;
+	private static ProGetApi proget;
 		
 	@Rule
 	public TemporaryFolder folder = new TemporaryFolder();
@@ -55,13 +55,10 @@ public class ProGetApiTests {
 		}
 
 		GlobalConfig.injectConfiguration(config);
-	}
-
-	@Before
-	public void before() {
+		
 		proget = new ProGetApi();
 	}
-
+	
 	@AfterClass
 	public static void tearDown() throws Exception {
 		if (mockServer != null) {
