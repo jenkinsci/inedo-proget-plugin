@@ -4,10 +4,13 @@ import hudson.Launcher;
 import hudson.Extension;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
+import hudson.remoting.Callable;
 import hudson.model.AbstractProject;
 import hudson.tasks.Builder;
 import hudson.util.ListBoxModel;
 import hudson.tasks.BuildStepDescriptor;
+
+import org.jenkinsci.remoting.RoleChecker;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
@@ -71,9 +74,9 @@ public class DownloadPackageBuilder extends Builder {
 	}
 	
 	@Override
-	public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws IOException {
-		JenkinsHelper helper = new JenkinsHelper(build, listener);
-		JenkinsLogWriter logWriter = helper.getLogWriter();
+	public boolean perform(final AbstractBuild<?, ?> build, final Launcher launcher, final BuildListener listener) throws IOException, InterruptedException {
+		final JenkinsHelper helper = new JenkinsHelper(build, listener);
+		final JenkinsLogWriter logWriter = helper.getLogWriter();
 		
 		if (!GlobalConfig.isProGetRequiredFieldsConfigured(false)) {
 			logWriter.info("Please configure ProGet Plugin global settings");
@@ -81,28 +84,43 @@ public class DownloadPackageBuilder extends Builder {
 			return false;
 		}
 		
-		ProGetApi proget = new ProGetApi(logWriter);
-		
-		String downloadTo = helper.expandVariable(downloadFolder);
-		logWriter.info("Download package to " + new File(downloadTo).getAbsolutePath());
-		
-		try {
-			DownloadFormat format = DownloadFormat.fromFormat(downloadFormat);
-			File downloaded = proget.downloadPackage(feedName, groupName, packageName, version, downloadTo, format);
+		// Define what should be run on the slave for this build
+	    Callable<Boolean, IOException> task = new Callable<Boolean, IOException>() {
+			private static final long serialVersionUID = 1L;
+
+			public Boolean call() throws IOException {
+				try {
+					ProGetApi proget = new ProGetApi(logWriter);
 					
-			if (format == DownloadFormat.EXTRACT_CONTENT) {
-				logWriter.info("Unpack " + downloaded.getName());
-				ProGetPackager.unpackContent(downloaded);
-				downloaded.delete();
-			} else {
-				helper.injectEnvrionmentVariable("PROGET_FILE", downloaded.getName());
+					String downloadTo = helper.expandVariable(downloadFolder);
+					logWriter.info("Download package to " + new File(downloadTo).getAbsolutePath());
+
+					DownloadFormat format = DownloadFormat.fromFormat(downloadFormat);
+					File downloaded = proget.downloadPackage(feedName, groupName, packageName, version, downloadTo, format);
+							
+					if (format == DownloadFormat.EXTRACT_CONTENT) {
+						logWriter.info("Unpack " + downloaded.getName());
+						ProGetPackager.unpackContent(downloaded);
+						downloaded.delete();
+					} else {
+						helper.injectEnvrionmentVariable("PROGET_FILE", downloaded.getName());
+					}
+					
+					return true;
+				} catch (IOException e) {
+					logWriter.info("Error: " + e.getMessage());
+					return false;
+				}
 			}
-		} catch (IOException e) {
-			logWriter.info("Error: " + e.getMessage());
-			return false;
-		}
+	
+			@Override
+			public void checkRoles(RoleChecker checker) throws SecurityException {
+				
+			}
+	    };
 		
-		return true;
+	    // Get a "channel" to the build machine and run the task there
+	    return launcher.getChannel().call(task);
 	}
 
 	@Extension
