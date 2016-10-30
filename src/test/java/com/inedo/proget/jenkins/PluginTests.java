@@ -64,7 +64,7 @@ public class PluginTests {
         String groupName = "andrew/sumner/proget";
         String packageName = "ExamplePackage";
         String version = "0.0.3";
-        DownloadPackageBuilder.DownloadFormat downloadFormat = DownloadPackageBuilder.DownloadFormat.PACKAGE;
+        DownloadFormat downloadFormat = DownloadFormat.PACKAGE;
         String downloadFolder = folder.getRoot().getAbsolutePath();
 
         FreeStyleProject project = j.createFreeStyleProject();

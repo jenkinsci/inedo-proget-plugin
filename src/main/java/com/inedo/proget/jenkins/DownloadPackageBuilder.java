@@ -4,17 +4,17 @@ import hudson.Launcher;
 import hudson.Extension;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
-import hudson.remoting.Callable;
 import hudson.model.AbstractProject;
 import hudson.tasks.Builder;
 import hudson.util.ListBoxModel;
+import jenkins.security.MasterToSlaveCallable;
 import hudson.tasks.BuildStepDescriptor;
 
-import org.jenkinsci.remoting.RoleChecker;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
 import com.inedo.proget.api.ProGetApi;
+import com.inedo.proget.api.ProGetConfig;
 import com.inedo.proget.api.ProGetPackager;
 import com.inedo.proget.domain.Feed;
 import com.inedo.proget.domain.ProGetPackage;
@@ -74,58 +74,77 @@ public class DownloadPackageBuilder extends Builder {
 	}
 	
 	@Override
-	public boolean perform(final AbstractBuild<?, ?> build, final Launcher launcher, final BuildListener listener) throws IOException, InterruptedException {
-		final JenkinsHelper helper = new JenkinsHelper(build, listener);
-		final JenkinsLogWriter logWriter = helper.getLogWriter();
-		
-		if (!GlobalConfig.isProGetRequiredFieldsConfigured(false)) {
-			logWriter.info("Please configure ProGet Plugin global settings");
-				
-			return false;
-		}
-		
-		// Define what should be run on the slave for this build
-	    Callable<Boolean, IOException> task = new Callable<Boolean, IOException>() {
-			private static final long serialVersionUID = 1L;
+    public boolean perform(final AbstractBuild<?, ?> build, final Launcher launcher, final BuildListener listener) throws IOException, InterruptedException {
+        JenkinsLogWriter logWriter = new JenkinsLogWriter(listener);
+        
+        if (!GlobalConfig.isProGetRequiredFieldsConfigured(false)) {
+            logWriter.error("Please configure ProGet Plugin global settings");
+            return false;
+        }
 
-			public Boolean call() throws IOException {
-				try {
-					ProGetApi proget = new ProGetApi(logWriter);
-					
-					String downloadTo = helper.expandVariable(downloadFolder);
-					logWriter.info("Download package to " + new File(downloadTo).getAbsolutePath());
+        JenkinsEnvrionmentHelper helper = new JenkinsEnvrionmentHelper(build, listener);
 
-					DownloadFormat format = DownloadFormat.fromFormat(downloadFormat);
-					File downloaded = proget.downloadPackage(feedName, groupName, packageName, version, downloadTo, format);
-							
-					if (format == DownloadFormat.EXTRACT_CONTENT) {
-						logWriter.info("Unpack " + downloaded.getName());
-						ProGetPackager.unpackContent(downloaded);
-						downloaded.delete();
-					} else {
-						helper.injectEnvrionmentVariable("PROGET_FILE", downloaded.getName());
-					}
-					
-					return true;
-				} catch (IOException e) {
-					logWriter.info("Error: " + e.getMessage());
-					return false;
-				}
-			}
-	
-			@Override
-			public void checkRoles(RoleChecker checker) throws SecurityException {
-				
-			}
-	    };
-		
-	    // Get a "channel" to the build machine and run the task there
-	    return launcher.getChannel().call(task);
+        ProGetConfig config = GlobalConfig.getProGetConfig();
+        
+        String downloadTo = helper.expandVariable(downloadFolder);
+        logWriter.info("Download package to " + new File(downloadTo).getAbsolutePath());
+
+        String downloaded = launcher.getChannel().call(new GetHello(listener, config, feedName, groupName, packageName, version, downloadFormat, downloadTo));
+
+        if (!downloaded.isEmpty()) {
+            helper.injectEnvrionmentVariable("PROGET_FILE", downloaded);
+        }
+        
+        return true;
 	}
 
+	// Define what should be run on the slave for this build
+	private static class GetHello extends MasterToSlaveCallable<String, IOException> {
+	    private final BuildListener listener;
+	    private ProGetConfig config;
+	    private final String feedName;
+	    private final String groupName;
+	    private final String packageName;
+	    private final String version;
+	    private final String downloadFormat;
+	    private final String downloadFolder;
+	    
+	    public GetHello(final BuildListener listener, ProGetConfig config, String feedName, String groupName, String packageName, String version, String downloadFormat, String downloadFolder) {
+	        this.listener = listener;
+	        this.config = config;
+	        this.feedName = feedName;
+	        this.groupName = groupName;
+	        this.packageName = packageName;
+	        this.version = version;
+	        this.downloadFormat = downloadFormat;
+	        this.downloadFolder = downloadFolder;
+	    }
+
+        public String call() throws IOException {
+            JenkinsLogWriter logWriter = new JenkinsLogWriter(listener);
+            
+            ProGetApi proget = new ProGetApi(config, logWriter);
+            DownloadFormat format = DownloadFormat.fromFormat(downloadFormat);
+            
+            File downloaded = proget.downloadPackage(feedName, groupName, packageName, version, downloadFolder, format);
+                    
+            if (format == DownloadFormat.EXTRACT_CONTENT) {
+                logWriter.info("Unpack " + downloaded.getName());
+                ProGetPackager.unpackContent(downloaded);
+                downloaded.delete();
+            } else {
+                return downloaded.getName();
+            }
+            
+            return "";
+        }
+
+        private static final long serialVersionUID = 1L;
+    }
+	
+	
 	@Extension
-	// This indicates to Jenkins that this is an implementation of an extension
-	// point.
+	// This indicates to Jenkins that this is an implementation of an extension point.
 	public static final class DescriptorImpl extends BuildStepDescriptor<Builder> {
 		private ProGetApi proget = null;
 		private String connectionError = "";
@@ -305,38 +324,5 @@ public class DownloadPackageBuilder extends Builder {
         	
             return items;
         }
-	}
-	
-	public enum DownloadFormat {
-		PACKAGE("pkg", "Package"),
-		CONTENT_AS_ZIP("zip", "Content as ZIP"), 
-		CONTENT_AS_TGZ("tgz", "Content as TGZ"),
-		EXTRACT_CONTENT("unpack", "Unpack Content");
-		
-		private final String format;
-		private final String display;
-		
-		private DownloadFormat(String format, String display) {
-			this.format = format;
-			this.display = display;
-		}
-		
-		public String getFormat() {
-			return format;
-		}
-		
-		public String getDisplay() {
-			return display;
-		}
-		
-		public static DownloadFormat fromFormat(String format) {
-			for (DownloadFormat search : DownloadFormat.values()) {
-				if (search.getFormat().equals(format)) {
-					return search;
-				}
-			}
-			
-			throw new IllegalArgumentException("Unknown format " + format);
-		}
 	}
 }

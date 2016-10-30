@@ -5,7 +5,8 @@ import com.inedo.http.LogWriter;
 import hudson.model.TaskListener;
 
 public class JenkinsLogWriter implements LogWriter {
-	private static final String LOG_PREFIX = "[ProGet] "; 
+	private static final String LOG_PREFIX = "[ProGet] ";
+	
 	private final TaskListener listener;
 	
 	public JenkinsLogWriter(TaskListener listener) {

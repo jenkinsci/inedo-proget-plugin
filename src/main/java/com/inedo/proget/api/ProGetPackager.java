@@ -8,6 +8,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -23,8 +24,9 @@ import com.inedo.proget.domain.PackageMetadata;
 
 import hudson.Util;
 
-public class ProGetPackager
-{
+public class ProGetPackager implements Serializable {
+    private static final long serialVersionUID = 1L;
+
 	public static final String WINDOWS_SEPARATOR = "\\";
 	public static final String UNIX_SEPARATOR = "/";
 	

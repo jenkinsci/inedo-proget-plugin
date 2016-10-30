@@ -151,8 +151,8 @@ public class UploadPackageBuilder extends Builder {
 	
 	@Override
 	public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException {
-		JenkinsHelper helper = new JenkinsHelper(build, listener);
-		JenkinsLogWriter logWriter = helper.getLogWriter();
+		JenkinsEnvrionmentHelper helper = new JenkinsEnvrionmentHelper(build, listener);
+		JenkinsLogWriter logWriter = new JenkinsLogWriter(listener);
 		
 		if(artifacts.length()==0) {
 			logWriter.error("Files to package not set");
@@ -197,7 +197,7 @@ public class UploadPackageBuilder extends Builder {
         return true;
 	}
 	
-	public PackageMetadata buildMetadata(JenkinsHelper helper) {
+	public PackageMetadata buildMetadata(JenkinsEnvrionmentHelper helper) {
 		PackageMetadata metadata = new PackageMetadata();
 
 		metadata.group = helper.expandVariable(getGroupName());

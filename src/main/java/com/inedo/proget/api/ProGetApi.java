@@ -2,6 +2,7 @@ package com.inedo.proget.api;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.URL;
@@ -14,7 +15,7 @@ import com.inedo.proget.domain.ProGetPackage;
 import com.inedo.proget.domain.Version;
 import com.inedo.proget.jenkins.GlobalConfig;
 import com.inedo.proget.jenkins.JenkinsLogWriter;
-import com.inedo.proget.jenkins.DownloadPackageBuilder.DownloadFormat;
+import com.inedo.proget.jenkins.DownloadFormat;
 
 /**
  * BuildMaster json api interface 
@@ -24,8 +25,10 @@ import com.inedo.proget.jenkins.DownloadPackageBuilder.DownloadFormat;
  * 
  * @author Andrew Sumner
  */
-public class ProGetApi {
-	private ProGetConfig config;
+public class ProGetApi implements Serializable {
+    private static final long serialVersionUID = 1L;
+    
+    private ProGetConfig config;
 	
 	public ProGetApi() {
 		this(GlobalConfig.getProGetConfig(), new JenkinsLogWriter(null));
@@ -39,7 +42,7 @@ public class ProGetApi {
 		this(GlobalConfig.getProGetConfig(), logWriter);
 	}
 	
-	private ProGetApi(ProGetConfig config, LogWriter logWriter) {
+	public ProGetApi(ProGetConfig config, LogWriter logWriter) {
 		this.config = config;
 		
 		HttpEasy.withDefaults()

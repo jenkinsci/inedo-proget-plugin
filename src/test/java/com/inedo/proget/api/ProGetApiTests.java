@@ -8,9 +8,9 @@ import com.inedo.proget.domain.Feed;
 import com.inedo.proget.domain.ProGetPackage;
 import com.inedo.proget.domain.Version;
 import com.inedo.proget.jenkins.GlobalConfig;
-import com.inedo.proget.jenkins.JenkinsHelper;
+import com.inedo.proget.jenkins.JenkinsEnvrionmentHelper;
 import com.inedo.proget.jenkins.UploadPackageBuilder;
-import com.inedo.proget.jenkins.DownloadPackageBuilder.DownloadFormat;
+import com.inedo.proget.jenkins.DownloadFormat;
 import com.inedo.utils.MockServer;
 import com.inedo.utils.TestConfig;
 
@@ -153,7 +153,8 @@ public class ProGetApiTests {
 		ProGetPackage pkg = proget.getPackages(feed.Feed_Id)[0];
 		
 		File downloaded = proget.downloadPackage(feed.Feed_Name, pkg.Group_Name, pkg.Package_Name, "", folder.getRoot().getAbsolutePath(), DownloadFormat.PACKAGE);
-    	
+		//File downloaded = proget.downloadPackage(feed.Feed_Name, "my/first/example", "sample", "", folder.getRoot().getAbsolutePath(), DownloadFormat.PACKAGE);
+		
         assertThat("File has content", downloaded.length(), is(greaterThan((long)1000)));
 	}
 	
@@ -161,7 +162,7 @@ public class ProGetApiTests {
 	public void uploadPackage() throws IOException {
 		preparePackageFiles();
 		
-		JenkinsHelper helper = new JenkinsHelper();
+		JenkinsEnvrionmentHelper helper = new JenkinsEnvrionmentHelper();
 		ProGetPackager packageUtils = new ProGetPackager();
 		UploadPackageBuilder builder = getExampleBuilder("**/*.*", "");
 		List<ZipItem> files = packageUtils.getFileList(folder.getRoot(), builder.getArtifacts(), builder.getExcludes(), builder.isDefaultExcludes(), builder.isCaseSensitive());

@@ -1,5 +1,6 @@
 package com.inedo.proget.api;
 
+import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
@@ -8,7 +9,9 @@ import java.net.UnknownHostException;
  * 
  * @author Andrew Sumner
  */
-public class ProGetConfig {
+public class ProGetConfig implements Serializable {
+    private static final long serialVersionUID = 1L;
+    
 	// Global Configuration Items
 	public String url;
 //	public String authentication;
