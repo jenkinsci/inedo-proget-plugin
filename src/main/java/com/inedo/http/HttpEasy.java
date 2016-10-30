@@ -2,48 +2,59 @@ package com.inedo.http;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.net.ssl.HttpsURLConnection;
-import javax.xml.bind.DatatypeConverter;
 
+import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.net.MediaType;
-import com.inedo.http.HttpEasyReader.Family;
 
 /**
  * Fluent wrapper around {@link HttpURLConnection} with full support for HTTP messages such as GET, POST, HEAD, etc
  * and supports the REST and SOAP protocols and parsing JSON and XML responses.
  * 
- * <p>This is been designed with as a fluent REST API similar to RestEasy and
+ * <p>
+ * This is been designed with as a fluent REST API similar to RestEasy and
  * RestAssurred with the only real difference being that it has great proxy
- * support.</p>
- * 
- * <p>There are two starting points for creating a rest request:
- * 
- * 1. {@code RestRequest.withDefaults()} - allows you to set some settings that apply to
- * all requests such as configuring a proxy 
- * 1. {@code RestRequest.request()} - performs the actual call, these HTTP methods are implemented: GET, HEAD, POST, PUT, DELETE
+ * support.
  * </p>
  * 
- * <p>Note: if your url can contain weird characters you will want to encode it,
- * something like this: myUrl = URLEncoder.encode(myUrl, "UTF-8");</p>
+ * <p>
+ * There are two starting points for creating a rest request:
+ * 
+ * 1. {@code HttpEasy.withDefaults()} - allows you to set some settings that apply to
+ * all requests such as configuring a proxy
+ * 1. {@code HttpEasy.request()} - performs the actual call, these HTTP methods are implemented: GET, HEAD, POST, PUT, DELETE
+ * </p>
+ * 
+ * <p>
+ * Note: if your url can contain weird characters you will want to encode it,
+ * something like this: myUrl = URLEncoder.encode(myUrl, "UTF-8");
+ * </p>
  *
- * <p><b>Example</b></p>
- * <p><pre>
- * RestResultReader r = RestRequest.request()
+ * <p>
+ * <b>Example</b>
+ * </p>
+ * <p>
+ * 
+ * <pre>
+ * HttpEasyReader r = HttpEasy.request()
  *                          .baseURI(someUrl) 
  *                          .path(viewPath + {@literal "?startkey=\"{startkey}\"&endkey=\"{endkey}\"}) 
  *                          .urlParameters(startKey[0], endKey[0])
@@ -51,55 +62,84 @@ import com.inedo.http.HttpEasyReader.Family;
  * 
  * String id = r.jsonPath("rows[0].doc._id").getAsString(); 
  * String rev = r.jsonPath("rows[0].doc._rev").getAsString();
- * </pre></p>
+ * </pre>
+ * </p>
  * 
- * <p><b>Error Handling</b></p>
+ * <p>
+ * <b>Error Handling</b>
+ * </p>
  * 
- * <p>An IOException is thrown whenever a call returns a response code that is not part of the SUCCESS 
- * family (ie 200-299).</p>
- *  
- * <p>In order to prevent an exception being thrown for an expected response use
+ * <p>
+ * An IOException is thrown whenever a call returns a response code that is not part of the SUCCESS
+ * family (ie 200-299).
+ * </p>
+ * 
+ * <p>
+ * In order to prevent an exception being thrown for an expected response use
  * one of the following methods:
- *  
+ * 
  * * request().doNotFailOn(Integer... reponseCodes)
  * * request().doNotFailOn(Family... responseFamily)
  * </p>
  * 
- * <p><b>Authentication</b></p>
+ * <p>
+ * <b>Authentication</b>
+ * </p>
  * 
- * <p>Supports two formats
+ * <p>
+ * Supports two formats
  * 
  * * http://username:password@where.ever
  * * request().authorization(username, password)
  * </p>
  * 
- * <p><b>Host and Certificate Verification</b></p>
+ * <p>
+ * <b>Host and Certificate Verification</b>
+ * </p>
  *
- * <p>There is no fine grained control, its more of an all or nothing approach:</p>
- * <p><pre>
- * RestRequest.withDefaults() 
- *     .allowAllHosts() 
- *     .trustAllCertificates();
- * </pre></p>
+ * <p>
+ * There is no fine grained control, its more of an all or nothing approach:
+ * </p>
+ * <p>
  * 
- * <p><b>Proxy</b></p>
+ * <pre>
+ * HttpEasy.withDefaults()
+ * 		.allowAllHosts()
+ * 		.trustAllCertificates();
+ * </pre>
+ * </p>
  * 
- * <p>Only basic authentication is supported, although I believe the domain can be added by included "domain/" 
- * in front of the username (not tested)</p>
+ * <p>
+ * <b>Proxy</b>
+ * </p>
  * 
- * <p><pre>
- * RestRequest.withDefaults() 
+ * <p>
+ * Only basic authentication is supported, although I believe the domain can be added by included "domain/"
+ * in front of the username (not tested)
+ * </p>
+ * 
+ * <p>
+ * 
+ * <pre>
+ * HttpEasy.withDefaults() 
  *     .proxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(user, password)))) 
  *     .proxyAuth(userName, password) 
  *     .bypassProxyForLocalAddresses(true);
- * </pre></p>
+ * </pre>
+ * </p>
  * 
- * <p><b>Redirects</b></p> 
+ * <p>
+ * <b>Redirects</b>
+ * </p>
  * 
- * <p>Redirects are NOT automatically followed - at least for REST base calls - even though the documentation
- * for HttpURLConnection says that it should...</p>
- * <p><pre>
- * RestResultReader response = RestRequest.request()
+ * <p>
+ * Redirects are NOT automatically followed - at least for REST base calls - even though the documentation
+ * for HttpURLConnection says that it should...
+ * </p>
+ * <p>
+ * 
+ * <pre>
+ * HttpEasyReader response = HttpEasy.request()
  *     .doNotFailOn(Family.REDIRECTION) 
  *     .path(url) 
  *     .head();
@@ -108,18 +148,19 @@ import com.inedo.http.HttpEasyReader.Family;
  *     url = response.getHeaderField("Location");
  *     ... 
  * }
- * </pre></p>
+ * </pre>
+ * </p>
+ * 
+ * <p>
+ * <b>Logging</b>
+ * </p>
+ * 
+ * <p>
+ * Logging of requests and responses can be enabled by {@link #logRequestDetails} or, if using Eclipse, the TCP/IP Monitor utility.
+ * </p>
  */
 public class HttpEasy {
 	static final Logger LOGGER = LoggerFactory.getLogger(HttpEasy.class);
-
-	// Static values are set by RestRequestDefaults and apply to all requests
-	static Proxy proxy = Proxy.NO_PROXY;
-	static String proxyUser = null;
-	static String proxyPassword = null;
-	static boolean bypassProxyForLocalAddresses = true;
-	static String defaultbaseURI = "";
-	static LogWriter defaultLogWriter = null;
 
 	// These only apply per request - but are visible to package
 	List<Integer> ignoreResponseCodes = new ArrayList<Integer>();
@@ -135,11 +176,18 @@ public class HttpEasy {
 	private Object[] urlParams = new Object[0];
 	private DataContentType dataContentType = DataContentType.AUTO_SELECT;
 	private Object rawData = null;
+	private String rawFileName = null;
 	private MediaType rawDataMediaType = null;
 	private Map<String, Object> headers = new LinkedHashMap<String, Object>();
 	private List<Field> fields = new ArrayList<Field>();
+	private boolean logRequestDetails;
+	private Integer timeout = null;
 	private LogWriter logWriter = null;
-	
+
+	boolean isLogRequestDetails() {
+		return logRequestDetails;
+	}
+
 	/**
 	 * @return Default settings object
 	 */
@@ -177,6 +225,22 @@ public class HttpEasy {
 	}
 
 	/**
+	 * Sets a specified timeout value, in milliseconds, to be used when opening a communications link to the resource referenced by this URLConnection,
+	 * and when reading from Input stream when a connection is established .
+	 * 
+	 * If the timeout expires a java.net.SocketTimeoutException is raised.
+	 * 
+	 * A timeout of zero is interpreted as an infinite timeout.
+	 * 
+	 * @param milliseconds Timeout value in milliseconds
+	 * @return A self reference
+	 */
+	public HttpEasy setTimeout(int milliseconds) {
+		this.timeout = milliseconds;
+		return this;
+	}
+
+	/**
 	 * Set the host and port of the URL for the end-point.  baseURI, path and query are helpers only and any of these can take full URL.
 	 * @param uri The host and port of the URL
 	 * @return A self reference
@@ -203,6 +267,20 @@ public class HttpEasy {
 	 */
 	public HttpEasy query(String query) {
 		this.query = query;
+		return this;
+	}
+
+	/**
+	 * If called will cause the request and response details to be logged.
+	 * 
+	 * <p>
+	 * An alternative to this if using Eclipse is to use the TCP/IP monitor
+	 * </p>
+	 * 
+	 * @return A self reference
+	 */
+	public HttpEasy logRequestDetails() {
+		this.logRequestDetails = true;
 		return this;
 	}
 
@@ -267,56 +345,136 @@ public class HttpEasy {
 	/**
 	 * Add a simple text field, if urlEncodedForm() has been used will try to guess the content type.
 	 * 
-	 * <p>If urlEncodedForm() or dataForm() have not been called then the form type will be auto selected:
-	 * if field containing a file has been added then content type will be set to "multipart/form-data"
-	 * else it will be set to "application/x-www-form-urlencoded"</p>
+	 * <p>
+	 * See {@link #field(String, Object, MediaType, String)}
+	 * </p>
 	 *
 	 * @param name Field name
-	 * @param value Field value
+	 * @param value Field value - this should not be URL Encoded!
 	 * @return A self reference
 	 */
 	public HttpEasy field(String name, Object value) {
-		if (rawData != null) {
-			throw new InvalidParameterException("Data cannot be used at the same time as fields");
-		}
-	
-		fields.add(new Field(name, value, null));
-		return this;
+		return field(name, value, null);
 	}
 
 	/**
-	 * Add a text field or attach file.  If value is not a file then it must be easily converted to a string.
+	 * Add a simple text field, if urlEncodedForm() has been used will try to guess the content type.
 	 * 
-	 * <p>If urlEncodedForm() or dataForm() have not been called then the form type will be auto selected:
-	 * if field containing a file has been added then content type will be set to "multipart/form-data"
-	 * else it will be set to "application/x-www-form-urlencoded"</p>
+	 * <p>
+	 * See {@link #field(String, Object, MediaType, String)}
+	 * </p>
+	 *
+	 * @param name Field name
+	 * @param value Field value - this should not be URL Encoded!
+	 * @param type Field's media type
 	 * 
-	 * @param name Field's name
-	 * @param value Field's value
-	 * @param type Field's media type 
 	 * @return A self reference
 	 */
 	public HttpEasy field(String name, Object value, MediaType type) {
+		return field(name, value, type, null);
+	}
+
+	/**
+	 * Add a simple text field, if urlEncodedForm() has been used will try to guess the content type.
+	 * 
+	 * <p>
+	 * See {@link #field(String, Object, MediaType, String)}
+	 * </p>
+	 *
+	 * @param name Field name
+	 * @param value File
+	 * @param type File's media type
+	 * @return A self reference
+	 */
+	public HttpEasy field(String name, File value, MediaType type) {
+		return field(name, value, type, null);
+	}
+
+	/**
+	 * Add a text field or attach file. If value is not a file then it must be easily converted to a string.
+	 * 
+	 * <p>
+	 * See {@link #field(String, Object, MediaType, String)}
+	 * </p>
+	 * 
+	 * @param name Field's name
+	 * @param value Field's value - File, Inputstream, or object easily converted to a string
+	 * @param type Field's media type
+	 * @param fileName Field's file name - only required if field is an InputStream as this is assumed to be an attachment
+	 * @return A self reference
+	 */
+	public HttpEasy field(String name, InputStream value, MediaType type, String fileName) {
+		return field(name, (Object) value, type, fileName);
+	}
+
+	/**
+	 * Add a text field or attach file.
+	 * <ul>
+	 * <li>If value is not a file then it must be easily converted to a string</li>
+	 * <li>If value is an InputStream it is assumed to be a file attachment and the file name must be provided</li>
+	 * </ul>
+	 * 
+	 * <p>
+	 * If urlEncodedForm() or dataForm() have not been called then the form type will be auto selected:
+	 * if field containing a file or input stream has been added then content type will be set to "multipart/form-data"
+	 * else it will be set to "application/x-www-form-urlencoded"
+	 * </p>
+	 * 
+	 * @param name Field's name
+	 * @param value Field's value, if File or Inputstream will upload content as "multipart/form-data"
+	 * @param type Field's media type
+	 * @param fileName name of
+	 * @return A self reference
+	 */
+	public HttpEasy field(String name, Object value, MediaType type, String fileName) {
 		if (rawData != null) {
 			throw new InvalidParameterException("Data cannot be used at the same time as fields");
 		}
 
-		fields.add(new Field(name, value, type));
+		if (value instanceof InputStream && (fileName == null || fileName.isEmpty())) {
+			throw new InvalidParameterException("InputStream must provide filename");
+		}
+
+		fields.add(new Field(name, value, type, fileName));
 		return this;
 	}
 	
 	/**
 	 * Sets the content type request property to the value of the supplied media type.
+	 * 
+	 * <p>
 	 * This can only be called once as passing raw data can only support one text block or binary file.
 	 * With this in mind files are supported but any other objects must be easily converted to a string value.
+	 * </p>
 	 * 
-	 * @param data File or String containing the data
-	 * @param mediaType Media type of the data 
+	 * @param data File, or object easily converted to a string
+	 * @param mediaType Media type of the data
 	 * @return A self reference
 	 */
 	public HttpEasy data(Object data, MediaType mediaType) {
+		return data(data, mediaType, null);
+	}
+
+	/**
+	 * Sets the content type request property to the value of the supplied media type.
+	 * 
+	 * <p>
+	 * This can only be called once as passing raw data can only support one text block or binary file.
+	 * With this in mind files are supported but any other objects must be easily converted to a string value.
+	 * </p>
+	 * 
+	 * @param data File, InputStream, or object easily converted to a string
+	 * @param mediaType Media type of the data
+	 * @param fileName name of file
+	 * @return A self reference
+	 */
+	public HttpEasy data(Object data, MediaType mediaType, String fileName) {
 		if (rawData != null) {
 			throw new InvalidParameterException("Only a single data value can be added");
+		}
+
+		if (data instanceof InputStream && (fileName == null || fileName.isEmpty())) {
+			throw new InvalidParameterException("InputStream must provide filename");
 		}
 
 		if (this.dataContentType != DataContentType.AUTO_SELECT) {
@@ -326,6 +484,7 @@ public class HttpEasy {
 		dataContentType = DataContentType.RAW;
 		rawDataMediaType = mediaType;
 		rawData = data;
+		rawFileName = fileName;
 
 		return this;
 	}
@@ -334,7 +493,7 @@ public class HttpEasy {
 	 * Add a list of response codes to ignore that would otherwise case a exception to be thrown.
 	 * Example: doNotFailOn(HttpURLConnection.HTTP_CONFLICT)
 	 * 
-	 * @param reponseCodes A list of failing response codes  
+	 * @param reponseCodes A list of failing response codes
 	 * @return A self reference
 	 */
 	public HttpEasy doNotFailOn(Integer... reponseCodes) {
@@ -353,12 +512,12 @@ public class HttpEasy {
 		this.ignoreResponseFamily.addAll(Arrays.asList(responseFamily));
 		return this;
 	}
-	
-	public HttpEasy withLogWriter(LogWriter logWriter) {
-		this.logWriter = logWriter;
-		return this;
-	}
 
+	public HttpEasy withLogWriter(LogWriter logWriter) {
+        this.logWriter = logWriter;
+        return this;
+    }
+	
 	/**
 	 * Performs an HTTP GET.
 	 * @return The request response wrapped by {@link HttpEasyReader}
@@ -414,35 +573,66 @@ public class HttpEasy {
 		setHeaders(connection);
 
 		connection.setRequestMethod(requestMethod);
-		connection.setReadTimeout(fifteenSeconds);
+
+		if (timeout != null) {
+			connection.setConnectTimeout(timeout);
+			connection.setReadTimeout(timeout);
+		} else {
+			connection.setConnectTimeout(fifteenSeconds);
+		}
+
 		connection.setInstanceFollowRedirects(false);
 		
 		if (requestMethod.equals("POST") || requestMethod.equals("PUT")) {
 			dataWriter = getDataWriter(dataWriter, url, connection);
 			
 			connection.setDoOutput(true);
+		} else {
+			if (fields.size() > 0) {
+				throw new IllegalStateException("Fields have been specified but the method " + requestMethod + " will not use them, try POST or PUT instead.");
+			}
 		}
-		
+
+		String authUser = "";
+
+		if (authString != null && !authString.isEmpty()) {
+			authUser = authString.substring(0, authString.indexOf(":"));
+			authUser = " as user '" + authUser + "'";
+		}
+
 		log("Sending " + requestMethod + " to " + url.toString());
+		
+		if (logRequestDetails) {
+			StringBuilder sb = new StringBuilder();
+
+			for (Entry<String, List<String>> header : connection.getRequestProperties().entrySet()) {
+				for (String value : header.getValue()) {
+					sb.append("\t").append(header.getKey()).append(": ").append(value).append(System.lineSeparator());
+				}
+			}
+
+			log("With Request Headers:" + System.lineSeparator() + sb.toString());
+		}
+
 		connection.connect();
 
 		if (dataWriter != null) {
-			dataWriter.write();
+			dataWriter.write(logRequestDetails ? LOGGER : null);
 		}
-		
+
 		return connection;
 	}
 
-	private void log(String message) {
-		if (logWriter != null) {
-			logWriter.info(message);
-		} else if (defaultLogWriter != null) {
-			defaultLogWriter.info(message);
-		} else {
-			LOGGER.trace(message);
-		}		
-	}
-
+	void log(String message) {
+        if (logWriter != null) {
+            logWriter.info(message);
+        } else if (HttpEasyDefaults.getDefaultLogWriter() != null) {
+            HttpEasyDefaults.getDefaultLogWriter().info(message);
+        } else {
+            LOGGER.trace(message);
+        }       
+    }
+	
 	private DataWriter getDataWriter(DataWriter dataWriter, URL url, HttpURLConnection connection) throws UnsupportedEncodingException {
 		if (dataContentType == DataContentType.AUTO_SELECT) {
 			if (!fields.isEmpty()) {
@@ -455,30 +645,35 @@ public class HttpEasy {
 		}
 		
 		switch (dataContentType) {
-			case RAW:
-				dataWriter = new RawDataWriter(connection, rawData, rawDataMediaType);
-				break;
+		case RAW:
+			dataWriter = new RawDataWriter(connection, rawData, rawDataMediaType, rawFileName);
+			break;
 				
-			case FORM_DATA:
-				dataWriter = new FormDataWriter(connection, url.getQuery(), fields);
-				break;
+		case FORM_DATA:
+			dataWriter = new FormDataWriter(connection, url.getQuery(), fields);
+			break;
 			
-			case X_WWW_FORM_URLENCODED:
-				dataWriter = new FormUrlEncodedDataWriter(connection, url.getQuery(), fields);
-				break;
+		case X_WWW_FORM_URLENCODED:
+			dataWriter = new FormUrlEncodedDataWriter(connection, url.getQuery(), fields);
+			break;
 				
-			case AUTO_SELECT:
-				break;
+		case AUTO_SELECT:
+			break;
 				
-			default:
-				throw new InvalidParameterException(dataContentType.toString() + " is unknown");
+		default:
+			throw new InvalidParameterException(dataContentType.toString() + " is unknown");
 		}
+
 		return dataWriter;
 	}
 
 	private boolean fieldsHasFile() {
 		for (Field field : fields) {
 			if (field.value instanceof File) {
+				return true;
+			}
+
+			if (field.value instanceof InputStream) {
 				return true;
 			}
 		}
@@ -488,9 +683,9 @@ public class HttpEasy {
 
 	private HttpURLConnection getConnection(URL url) throws IOException {
 		HttpURLConnection connection;
-		Proxy useProxy = proxy;
+		Proxy useProxy = HttpEasyDefaults.getProxy();
 
-		if (bypassProxyForLocalAddresses && isLocalAddress(url)) {
+		if (HttpEasyDefaults.isBypassProxyForLocalAddresses() && isLocalAddress(url)) {
 			useProxy = Proxy.NO_PROXY;
 		}
 
@@ -511,7 +706,7 @@ public class HttpEasy {
 		String spec = "";
 		
 		if (!containsProtol(path) && !containsProtol(query)) {
-			spec = (baseURI == null || baseURI.isEmpty()) ? defaultbaseURI : baseURI;	
+			spec = (baseURI == null || baseURI.isEmpty()) ? HttpEasyDefaults.getBaseURI() : baseURI;	
 		}
 		
 		spec = appendSegmentToUrl(spec, path, "/");
@@ -569,6 +764,10 @@ public class HttpEasy {
 				param++;
 			}
 
+			if (currentParameter.contains(" ")) {
+				throw new IllegalArgumentException("URL Parameter [" + param + "] cannot contain a space");
+			}
+
 			url = url.substring(0, index) + currentParameter + url.substring(url.indexOf(endToken) + 1);
 		}
 
@@ -589,21 +788,22 @@ public class HttpEasy {
 			return;
 		}
 		
-		authString = "Basic " + DatatypeConverter.printBase64Binary(authString.getBytes());
-		connection.setRequestProperty("Authorization", authString);
+		//connection.setRequestProperty("Authorization", "Basic " + Base64.getEncoder().encodeToString(authString.getBytes(StandardCharsets.UTF_8)));
+		connection.setRequestProperty("Authorization", "Basic " + Base64.encodeBase64String(authString.getBytes(StandardCharsets.UTF_8)));
 	}
 
 	private void setProxyAuthorization(HttpURLConnection connection) {
-		if (proxyUser == null || proxyUser.isEmpty()) {
+		if (HttpEasyDefaults.getProxyUser() == null || HttpEasyDefaults.getProxyUser().isEmpty()) {
 			return;
 		}
 		
-		if (proxyPassword == null || proxyPassword.isEmpty()) {
+		if (HttpEasyDefaults.getProxyPassword() == null || HttpEasyDefaults.getProxyPassword().isEmpty()) {
 			return;
 		}
 
-		String usernameAndPassword = proxyUser + ":" + proxyPassword;
-		String proxyAuthString = "Basic " + DatatypeConverter.printBase64Binary(usernameAndPassword.getBytes());
+		String usernameAndPassword = HttpEasyDefaults.getProxyUser() + ":" + HttpEasyDefaults.getProxyPassword();
+		//String proxyAuthString = "Basic " + Base64.getEncoder().encodeToString(usernameAndPassword.getBytes(StandardCharsets.UTF_8));
+		String proxyAuthString = "Basic " + Base64.encodeBase64String(usernameAndPassword.getBytes(StandardCharsets.UTF_8));
 		connection.setRequestProperty("Proxy-Authorization", proxyAuthString);
 	}
 

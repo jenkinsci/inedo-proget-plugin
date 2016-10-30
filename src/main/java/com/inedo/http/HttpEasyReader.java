@@ -7,11 +7,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map.Entry;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.http.client.HttpResponseException;
 import org.xml.sax.SAXException;
 
 /**
@@ -29,33 +30,42 @@ public class HttpEasyReader {
 	 * @param connection HttpURLConnection
 	 * @param request Request that is creating this reader
 	 * @throws HttpResponseException if request failed
-	 * @throws IOException
+	 * @throws IOException for connection errors
 	 */
-	public HttpEasyReader(HttpURLConnection connection, HttpEasy request) throws IOException {
-		this.connection = connection;
-		
-		Family resposeFamily = getResponseCodeFamily(); 
+	public HttpEasyReader(HttpURLConnection connection, HttpEasy request) throws HttpResponseException, IOException {
 
-		//TODO Should I automatically follow redirects?
+		this.connection = connection;
+
+		Family resposeFamily = getResponseCodeFamily();
+
+		if (request.isLogRequestDetails()) {
+			StringBuilder sb = new StringBuilder();
+
+			for (Entry<String, List<String>> header : getConnection().getHeaderFields().entrySet()) {
+				for (String value : header.getValue()) {
+					sb.append("\t").append(header.getKey()).append(": ").append(value).append(System.lineSeparator());
+				}
+			}
+
+			request.log("With Response Headers:" + System.lineSeparator() + sb.toString());
+			request.log("With Response:" + System.lineSeparator()+ asString());
+		}
+
 		if (resposeFamily != Family.SUCCESSFUL) {
 			if (listContains(request.ignoreResponseCodes, getResponseCode())) {
 				return;
 			}
-			
+
 			if (listContains(request.ignoreResponseFamily, resposeFamily)) {
 				return;
 			}
-			
-			throw new HttpResponseException(getResponseCode(), 
-						String.format("Server returned HTTP response code %s: %s%s%s",
-								 connection.getResponseCode(), 
-								 connection.getResponseMessage(), 
-								 (asString().isEmpty()) ? "" : " - ", 
-								 asString()));
+
+			throw new HttpResponseException(getResponseCode(),
+					"Server returned HTTP response code " + connection.getResponseCode() + ": " + connection.getResponseMessage() +
+							"\r\nResponse Content: " + asString(connection.getErrorStream()));
 		}
+
 	}
-	
-	
 
 	private <T> boolean listContains(List<T> array, T targetValue) {
 		for (T s : array) {
@@ -105,7 +115,7 @@ public class HttpEasyReader {
 			return returned;
 		} 
 		
-		if (getResponseCodeFamily() == Family.SUCCESSFUL) {
+		if (connection.getResponseCode() < HttpURLConnection.HTTP_BAD_REQUEST) {
 			return asString(connection.getInputStream());
 		} else {
 			return asString(connection.getErrorStream());
@@ -113,14 +123,13 @@ public class HttpEasyReader {
 	}
 	
 	private String asString(InputStream stream) throws IOException {
-		returned = "";
-
 		if (stream == null) {
+			returned = "";
 			return returned;
 		}
 		
 		// read the output from the server
-		try (BufferedReader reader = new BufferedReader(new InputStreamReader(stream))) {
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8))) {
 			StringBuilder sb = new StringBuilder();
 
 			String line = null;
@@ -128,7 +137,7 @@ public class HttpEasyReader {
 				sb.append(line + "\n");
 			}
 			
-			returned = sb.toString();
+			returned = sb.toString().trim();
 		} finally {
 			connection.disconnect();
 		}
@@ -165,7 +174,7 @@ public class HttpEasyReader {
 	 */
 	public File downloadFile(String saveDir) throws IOException {
 		final int bufferSize = 4096;
-
+		
 		String fileName = parseDispositionFilename(connection.getHeaderField("Content-Disposition"));
 		
 		if (fileName == null) {
@@ -185,7 +194,9 @@ public class HttpEasyReader {
 
 		File folder = new File(saveDir);
 		if (!folder.exists()) {
-			folder.mkdirs();
+			if (!folder.mkdirs()) {
+				throw new IOException("Unable to create the folder " + folder.getPath());
+			}
 		}
 		
 		File saveFile = new File(saveDir, fileName);
@@ -248,70 +259,29 @@ public class HttpEasyReader {
 
 		return null;
 	}
-    
-	
 
     /**
-     * Response header field.
-     * @param name Field name
-     * @return Field value
-     */
-	public String getHeaderField(String name) {
+	 * Response header field.
+	 * 
+	 * <b>If called on a connection that sets the same header multiple times with possibly different values, only the last value is returned. See
+	 * {@link #getResponseHeaderFields(String)}.</b>
+	 * 
+	 * @param name Field name
+	 * @return Field value
+	 */
+	public String getResponseHeaderField(String name) {
 		return connection.getHeaderField(name);
 	}
-		
-	
+
 	/**
-     * An enumeration representing the class of an http response status code.
-     */
-	public enum Family {
-
-		/**
-		 * {@code 1xx} HTTP status codes.
-		 */
-		INFORMATIONAL,
-		/**
-		 * {@code 2xx} HTTP status codes.
-		 */
-		SUCCESSFUL,
-		/**
-		 * {@code 3xx} HTTP status codes.
-		 */
-		REDIRECTION,
-		/**
-		 * {@code 4xx} HTTP status codes.
-		 */
-		CLIENT_ERROR,
-		/**
-		 * {@code 5xx} HTTP status codes.
-		 */
-		SERVER_ERROR,
-		/**
-		 * Other, unrecognized HTTP status codes.
-		 */
-		OTHER;
-
-		/**
-		 * Get the response status family for the status code.
-		 *
-		 * @param statusCode response status code to get the family for.
-		 * @return family of the response status code.
-		 */
-		public static Family familyOf(final int statusCode) {
-			switch (statusCode / 100) {
-			case 1:
-				return Family.INFORMATIONAL;
-			case 2:
-				return Family.SUCCESSFUL;
-			case 3:
-				return Family.REDIRECTION;
-			case 4:
-				return Family.CLIENT_ERROR;
-			case 5:
-				return Family.SERVER_ERROR;
-			default:
-				return Family.OTHER;
-			}
-		}
+	 * Response header field.
+	 * 
+	 * <b>If called on a connection that sets the same header multiple times then all values are returned in a list.</b>
+	 * 
+	 * @param name Field name
+	 * @return Field value
+	 */
+	public List<String> getResponseHeaderFields(String name) {
+		return connection.getHeaderFields().get(name);
 	}
 }

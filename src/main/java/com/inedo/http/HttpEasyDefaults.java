@@ -16,6 +16,13 @@ import javax.net.ssl.X509TrustManager;
  * @author Andrew Sumner
  */
 public class HttpEasyDefaults {
+	// Static values are set by RestRequestDefaults and apply to all requests
+	private static Proxy proxy = Proxy.NO_PROXY;
+	private static String proxyUser = null;
+	private static String proxyPassword = null;
+	private static boolean bypassProxyForLocalAddresses = true;
+	private static String baseURI = "";
+	private static LogWriter defaultLogWriter = null;
 	
 	/**
 	 * Create all-trusting certificate verifier.
@@ -74,7 +81,7 @@ public class HttpEasyDefaults {
 	 * @return A self reference
 	 */
 	public HttpEasyDefaults proxy(Proxy proxy) {
-		HttpEasy.proxy = proxy;
+		HttpEasyDefaults.setProxy(proxy);
 		return this;
 	}
 	
@@ -86,8 +93,7 @@ public class HttpEasyDefaults {
 	 * @return A self reference
 	 */
 	public HttpEasyDefaults proxyAuth(String userName, String password) {
-		HttpEasy.proxyUser = userName;
-		HttpEasy.proxyPassword = password;
+		HttpEasyDefaults.setProxyAuth(userName, password);
 		return this;
 	}
 
@@ -98,7 +104,7 @@ public class HttpEasyDefaults {
 	 * @return A self reference
 	 */
 	public HttpEasyDefaults bypassProxyForLocalAddresses(boolean bypassLocalAddresses) {
-		HttpEasy.bypassProxyForLocalAddresses = bypassLocalAddresses;
+		HttpEasyDefaults.setBypassProxyForLocalAddresses(bypassLocalAddresses);
 		return this;
 	}
 
@@ -109,17 +115,62 @@ public class HttpEasyDefaults {
 	 * @return A self reference
 	 */
 	public HttpEasyDefaults baseUrl(String baseUrl) {
-		HttpEasy.defaultbaseURI = baseUrl;
+		HttpEasyDefaults.setBaseUrl(baseUrl);
 		return this;
 	}
 	
-	/**
-	 * Set the logger to write to
-	 * @param logWriter
-	 * @return A self reference
-	 */
-	public HttpEasyDefaults withLogWriter(LogWriter logWriter) {
-		HttpEasy.defaultLogWriter = logWriter;
-		return this;
+	 /**
+     * Set the logger to write to
+     * @param logWriter
+     * @return A self reference
+     */
+    public HttpEasyDefaults withLogWriter(LogWriter logWriter) {
+        HttpEasyDefaults.setDefaultLogWriter(logWriter);
+        return this;
+    }
+
+	public static Proxy getProxy() {
+		return HttpEasyDefaults.proxy;
 	}
+
+	public static String getProxyUser() {
+		return HttpEasyDefaults.proxyUser;
+	}
+
+	public static String getProxyPassword() {
+		return HttpEasyDefaults.proxyPassword;
+	}
+
+	public static boolean isBypassProxyForLocalAddresses() {
+		return HttpEasyDefaults.bypassProxyForLocalAddresses;
+	}
+
+	public static String getBaseURI() {
+		return HttpEasyDefaults.baseURI;
+	}
+	
+    public static LogWriter getDefaultLogWriter() {
+        return defaultLogWriter;
+    }
+
+	private static void setBaseUrl(String baseUrl) {
+		HttpEasyDefaults.baseURI = baseUrl;
+	}
+
+	private static void setProxy(Proxy proxy) {
+		HttpEasyDefaults.proxy = proxy;
+	}
+
+	private static void setProxyAuth(String userName, String password) {
+		HttpEasyDefaults.proxyUser = userName;
+		HttpEasyDefaults.proxyPassword = password;
+	}
+	
+	private static void setBypassProxyForLocalAddresses(boolean bypassLocalAddresses) {
+		HttpEasyDefaults.bypassProxyForLocalAddresses = bypassLocalAddresses;
+	}
+	
+	public static void setDefaultLogWriter(LogWriter logWriter) {
+	    HttpEasyDefaults.defaultLogWriter = logWriter;
+    }
 }

@@ -95,7 +95,7 @@ public class ProGetApi implements Serializable {
 				.urlParameters(config.apiKey, "N")
 				.get()
 				.getJsonReader()
-				.asJson(Feed[].class);
+				.fromJson(Feed[].class);
 		
 		return result;
 	}	
@@ -107,7 +107,7 @@ public class ProGetApi implements Serializable {
 				.urlParameters(config.apiKey, feedName)
 				.get()
 				.getJsonReader()
-				.asJson(Feed.class);
+				.fromJson(Feed.class);
 		
 		if (feed == null) {
 			throw new IOException("Feed " + feedName + " was not found");
@@ -123,7 +123,7 @@ public class ProGetApi implements Serializable {
 				.urlParameters(config.apiKey, feedId, "Y")
 				.get()
 				.getJsonReader()
-				.asJson(ProGetPackage[].class);
+				.fromJson(ProGetPackage[].class);
 	}
 
 	/** Gets the package versions in a ProGet feed */
@@ -133,7 +133,7 @@ public class ProGetApi implements Serializable {
 				.urlParameters(config.apiKey, feedId, groupName, packageName)
 				.get()
 				.getJsonReader()
-				.asJson(Version[].class);
+				.fromJson(Version[].class);
 	}
 	
 	
@@ -166,7 +166,7 @@ public class ProGetApi implements Serializable {
 		}
 		
 		return HttpEasy.request()
-				.path(path)
+		        .path(path)
 				.query(query)
 				.urlParameters(feedName, groupName, packageName, version, downloadFormat.getFormat())
 				.get()

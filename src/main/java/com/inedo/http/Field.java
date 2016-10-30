@@ -11,6 +11,7 @@ class Field {
 	final MediaType type;
 	final String name;
 	final Object value;
+	final String fileName;
 
 	/**
 	 * Create a new form field.
@@ -18,10 +19,12 @@ class Field {
 	 * @param name Field name
 	 * @param value Field contents
 	 * @param type Field media type
+	 * @param fileName Field file name for attachments
 	 */
-	Field(String name, Object value, MediaType type) {
+	Field(String name, Object value, MediaType type, String fileName) {
 		this.name = name;
 		this.value = value;
 		this.type = type;
+		this.fileName = fileName;
 	}
 }
