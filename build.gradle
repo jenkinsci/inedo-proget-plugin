@@ -21,7 +21,7 @@ sourceCompatibility = 1.7
 targetCompatibility = 1.7
 
 group = 'com.inedo.proget'
-version = '0.5-SNAPSHOT'
+version = '0.6-SNAPSHOT'
 description = 'Inedo ProGet Plugin'
 
 ext {
