@@ -180,7 +180,8 @@ public class HttpEasyReader {
 		if (fileName == null) {
 			fileName = connection.getURL().getPath();
 			
-			if (connection.getURL().getQuery() != null || fileName == null || fileName.isEmpty()) {
+			//if (connection.getURL().getQuery() != null || fileName == null || fileName.isEmpty()) {
+			if (fileName == null || fileName.isEmpty()) {
 				throw new IOException("Unable to get fileName from either Content-Disposition header or url:" + connection.getURL());
 			}
 		}
