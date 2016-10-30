@@ -89,7 +89,7 @@ public class DownloadPackageBuilder extends Builder {
         String downloadTo = helper.expandVariable(downloadFolder);
         logWriter.info("Download package to " + new File(downloadTo).getAbsolutePath());
 
-        String downloaded = launcher.getChannel().call(new GetHello(listener, config, feedName, groupName, packageName, version, downloadFormat, downloadTo));
+        String downloaded = launcher.getChannel().call(new GetPackage(listener, config, feedName, groupName, packageName, version, downloadFormat, downloadTo));
 
         if (!downloaded.isEmpty()) {
             helper.injectEnvrionmentVariable("PROGET_FILE", downloaded);
@@ -99,7 +99,7 @@ public class DownloadPackageBuilder extends Builder {
 	}
 
 	// Define what should be run on the slave for this build
-	private static class GetHello extends MasterToSlaveCallable<String, IOException> {
+	private static class GetPackage extends MasterToSlaveCallable<String, IOException> {
 	    private final BuildListener listener;
 	    private ProGetConfig config;
 	    private final String feedName;
@@ -109,7 +109,7 @@ public class DownloadPackageBuilder extends Builder {
 	    private final String downloadFormat;
 	    private final String downloadFolder;
 	    
-	    public GetHello(final BuildListener listener, ProGetConfig config, String feedName, String groupName, String packageName, String version, String downloadFormat, String downloadFolder) {
+	    public GetPackage(final BuildListener listener, ProGetConfig config, String feedName, String groupName, String packageName, String version, String downloadFormat, String downloadFolder) {
 	        this.listener = listener;
 	        this.config = config;
 	        this.feedName = feedName;
@@ -125,6 +125,14 @@ public class DownloadPackageBuilder extends Builder {
             
             ProGetApi proget = new ProGetApi(config, logWriter);
             DownloadFormat format = DownloadFormat.fromFormat(downloadFormat);
+            
+            logWriter.info(this.feedName);
+            logWriter.info(this.groupName);
+            logWriter.info(this.packageName);
+            logWriter.info(this.version);
+            logWriter.info(this.downloadFormat);
+            logWriter.info(this.downloadFolder);
+            logWriter.info(format.toString());
             
             File downloaded = proget.downloadPackage(feedName, groupName, packageName, version, downloadFolder, format);
                     

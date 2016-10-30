@@ -149,28 +149,26 @@ public class ProGetApi implements Serializable {
 	 * @throws IOException
 	 */
 	public File downloadPackage(String feedName, String groupName, String packageName, String version, String toFolder, DownloadFormat downloadFormat) throws IOException {
+	    boolean latest = (version == null || version.trim().isEmpty() || version.equalsIgnoreCase("latest"));
 		String path = "upack/{feed-name}/download/{group-name}/{package-name}";
-		String query = "";
 		
-		if (version == null || version.trim().isEmpty() || version.equalsIgnoreCase("latest")) {
-			query = "latest";
-		} else {
+		if (!latest){
 			path += "/{package-version}";
 		}
 		
-		if (downloadFormat == DownloadFormat.CONTENT_AS_ZIP || downloadFormat == DownloadFormat.CONTENT_AS_TGZ) {
-			if (!query.isEmpty()) {
-				query += "&";
-			}
-			query += "contentOnly={zip|tgz}";
+		HttpEasy request = HttpEasy.request()
+                .path(path)
+                .urlParameters(feedName, groupName, packageName, version);
+		
+		if (latest) {
+		    request.query("latest");
 		}
 		
-		return HttpEasy.request()
-		        .path(path)
-				.query(query)
-				.urlParameters(feedName, groupName, packageName, version, downloadFormat.getFormat())
-				.get()
-				.downloadFile(toFolder);
+		if (downloadFormat == DownloadFormat.CONTENT_AS_ZIP || downloadFormat == DownloadFormat.CONTENT_AS_TGZ) {
+		    request.queryParam("contentOnly", downloadFormat.getFormat());
+		}
+		
+		return request.get().downloadFile(toFolder);
 	}
 	
 	public void uploadPackage(String feedName, File progetPackage) throws IOException {

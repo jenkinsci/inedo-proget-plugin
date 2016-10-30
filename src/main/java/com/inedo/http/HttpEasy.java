@@ -104,8 +104,8 @@ import com.google.common.net.MediaType;
  * 
  * <pre>
  * HttpEasy.withDefaults()
- * 		.allowAllHosts()
- * 		.trustAllCertificates();
+ *      .allowAllHosts()
+ *      .trustAllCertificates();
  * </pre>
  * </p>
  * 
@@ -160,470 +160,501 @@ import com.google.common.net.MediaType;
  * </p>
  */
 public class HttpEasy {
-	static final Logger LOGGER = LoggerFactory.getLogger(HttpEasy.class);
+    static final Logger LOGGER = LoggerFactory.getLogger(HttpEasy.class);
 
-	// These only apply per request - but are visible to package
-	List<Integer> ignoreResponseCodes = new ArrayList<Integer>();
-	List<Family> ignoreResponseFamily = new ArrayList<Family>();
+    // These only apply per request - but are visible to package
+    List<Integer> ignoreResponseCodes = new ArrayList<Integer>();
+    List<Family> ignoreResponseFamily = new ArrayList<Family>();
 
-	// These only apply per request
-	private String authString = null;
-	private String baseURI = "";
-	private String path = "";
-	private String query = "";
-	private String startToken = "{";
-	private String endToken = "}";
-	private Object[] urlParams = new Object[0];
-	private DataContentType dataContentType = DataContentType.AUTO_SELECT;
-	private Object rawData = null;
-	private String rawFileName = null;
-	private MediaType rawDataMediaType = null;
-	private Map<String, Object> headers = new LinkedHashMap<String, Object>();
-	private List<Field> fields = new ArrayList<Field>();
-	private boolean logRequestDetails;
-	private Integer timeout = null;
-	private LogWriter logWriter = null;
+    // These only apply per request
+    private String authString = null;
+    private String baseURI = "";
+    private String path = "";
+    private StringBuilder query = new StringBuilder();
+    private String startToken = "{";
+    private String endToken = "}";
+    private Object[] urlParams = new Object[0];
+    private DataContentType dataContentType = DataContentType.AUTO_SELECT;
+    private Object rawData = null;
+    private String rawFileName = null;
+    private MediaType rawDataMediaType = null;
+    private Map<String, Object> headers = new LinkedHashMap<String, Object>();
+    private List<Field> fields = new ArrayList<Field>();
+    private LogWriter logWriter = null;
+    private boolean logRequestDetails;
+    private Integer timeout = null;
 
-	boolean isLogRequestDetails() {
-		return logRequestDetails;
-	}
+    boolean isLogRequestDetails() {
+        return logRequestDetails;
+    }
 
-	/**
-	 * @return Default settings object
-	 */
-	public static HttpEasyDefaults withDefaults() {
-		return new HttpEasyDefaults();
-	}
+    /**
+     * @return Default settings object
+     */
+    public static HttpEasyDefaults withDefaults() {
+        return new HttpEasyDefaults();
+    }
 
-	/**
-	 * @return Request object
-	 */
-	public static HttpEasy request() {
-		return new HttpEasy();
-	}
+    /**
+     * @return Request object
+     */
+    public static HttpEasy request() {
+        return new HttpEasy();
+    }
 
-	/**
-	 * Add a header to request.
-	 * @param name Header name
-	 * @param value Header value
-	 * @return A self reference
-	 */
-	public HttpEasy header(String name, String value) {
-		headers.put(name, value);
-		return this;
-	}
+    /**
+     * Add a header to request.
+     * @param name Header name
+     * @param value Header value
+     * @return A self reference
+     */
+    public HttpEasy header(String name, String value) {
+        headers.put(name, value);
+        return this;
+    }
 
-	/**
-	 * Add an authorization header to request.
-	 * @param username username
-	 * @param password password
-	 * @return A self reference
-	 */
-	public HttpEasy authorization(String username, String password) {
-		authString = username + ":" + password;
-		return this;
-	}
+    /**
+     * Add an authorization header to request.
+     * @param username username
+     * @param password password
+     * @return A self reference
+     */
+    public HttpEasy authorization(String username, String password) {
+        authString = username + ":" + password;
+        return this;
+    }
 
-	/**
-	 * Sets a specified timeout value, in milliseconds, to be used when opening a communications link to the resource referenced by this URLConnection,
-	 * and when reading from Input stream when a connection is established .
-	 * 
-	 * If the timeout expires a java.net.SocketTimeoutException is raised.
-	 * 
-	 * A timeout of zero is interpreted as an infinite timeout.
-	 * 
-	 * @param milliseconds Timeout value in milliseconds
-	 * @return A self reference
-	 */
-	public HttpEasy setTimeout(int milliseconds) {
-		this.timeout = milliseconds;
-		return this;
-	}
+    /**
+     * Sets a specified timeout value, in milliseconds, to be used when opening a communications link to the resource referenced by this URLConnection,
+     * and when reading from Input stream when a connection is established .
+     * 
+     * If the timeout expires a java.net.SocketTimeoutException is raised.
+     * 
+     * A timeout of zero is interpreted as an infinite timeout.
+     * 
+     * @param milliseconds Timeout value in milliseconds
+     * @return A self reference
+     */
+    public HttpEasy setTimeout(int milliseconds) {
+        this.timeout = milliseconds;
+        return this;
+    }
 
-	/**
-	 * Set the host and port of the URL for the end-point.  baseURI, path and query are helpers only and any of these can take full URL.
-	 * @param uri The host and port of the URL
-	 * @return A self reference
-	 */
-	public HttpEasy baseURI(String uri) {
-		this.baseURI = uri;
-		return this;
-	}
+    /**
+     * Set the host and port of the URL for the end-point.  baseURI, path and query are helpers only and any of these can take full URL.
+     * @param uri The host and port of the URL
+     * @return A self reference
+     */
+    public HttpEasy baseURI(String uri) {
+        this.baseURI = uri;
+        return this;
+    }
 
-	/**
-	 * Set the path part of the URL for the end-point.  baseURI, path and query are helpers only and any of these can take full URL.
-	 * @param path The host and port of the URL
-	 * @return A self reference
-	 */
-	public HttpEasy path(String path) {
-		this.path = path;
-		return this;
-	}
+    /**
+     * Set the path part of the URL for the end-point.  baseURI, path and query are helpers only and any of these can take full URL.
+     * @param path The host and port of the URL
+     * @return A self reference
+     */
+    public HttpEasy path(String path) {
+        this.path = path;
+        return this;
+    }
 
-	/**
-	 * Set the query part of the URL for the end-point.  baseURI, path and query are helpers only and any of these can take full URL.
-	 * @param query The host and port of the URL
-	 * @return A self reference
-	 */
-	public HttpEasy query(String query) {
-		this.query = query;
-		return this;
-	}
+    /**
+     * Set the query part of the URL for the end-point.  baseURI, path and query are helpers only and any of these can take full URL.
+     * @param query The host and port of the URL
+     * @return A self reference
+     */
+    public HttpEasy query(String query) {
+        this.query = new StringBuilder(query);
+        return this;
+    }
 
-	/**
-	 * If called will cause the request and response details to be logged.
-	 * 
-	 * <p>
-	 * An alternative to this if using Eclipse is to use the TCP/IP monitor
-	 * </p>
-	 * 
-	 * @return A self reference
-	 */
-	public HttpEasy logRequestDetails() {
-		this.logRequestDetails = true;
-		return this;
-	}
+    /**
+     * Appends parameter to query portion of url.
+     * 
+     * <ul>
+     * <li>If value is null then parameter will not be added</li>
+     * <li>If value is empty then parameter will be added as 'name='</li>
+     * </ul>
+     * @param name Parameter name
+     * @param value Parameter value
+     * @return A self reference
+     */
+    public HttpEasy queryParam(String name, Object value) {
+        if (name == null || name.isEmpty()) {
+            return this;
+        }
+        
+        if (value == null) {
+            return this;
+        }
+        
+        if (this.query.length() > 0) {
+            this.query.append("&");
+        }
+        
+        this.query.append(name).append("=").append(value.toString());
+        
+        return this;
+    }
 
-	/**
-	 * Override the default parameter start and end tokens.  By default any part of the url containing {...} is treated as a parameter and 
-	 * replaced by the values passed in by {@link #urlParameters(Object...)}.
-	 * 
-	 * @param startToken Start token
-	 * @param endToken End Token
-	 * @return A self reference
-	 */
-	public HttpEasy parameterTokens(String startToken, String endToken) {
-		this.startToken = startToken;
-		this.endToken = endToken;
-		
-		return this;
-		
-	}
-	
-	/**
-	 * Set the parameter values for the parameters in the URL. 
-	 * @param pathParams A list of parameters to fill in any parameters required by the URL.  These are replaced in the order they are found in the URL.  
-	 * @return A self reference
-	 */
-	public HttpEasy urlParameters(Object... pathParams) {
-		this.urlParams = pathParams;
-		return this;
-	}
-	
-	/**
-	 * Sets the content type request property to "multipart/form-data"
-	 * Any data that is required must be added via field(name, value, mediaType) method.
-	 * Files are supported but any other objects must be easily converted to a string value.
-	 * 
-	 * @return A self reference
-	 */
-	public HttpEasy dataForm() {
-		if (this.dataContentType != DataContentType.AUTO_SELECT) {
-			throw new InvalidParameterException("Content type cannot be changed once set");
-		}
-		
-		this.dataContentType = DataContentType.FORM_DATA;
-		return this;
-	}
-	
-	/**
-	 * Sets the content type request property to "application/x-www-form-urlencoded"
-	 * Any data that is required must be added via field(name, value) method
-	 * and the value must be easily converted to a string value.
-	 * 
-	 * @return A self reference
-	 */
-	public HttpEasy urlEncodedForm() {
-		if (this.dataContentType != DataContentType.AUTO_SELECT) {
-			throw new InvalidParameterException("Content type cannot be changed once set");
-		}
-		
-		this.dataContentType = DataContentType.X_WWW_FORM_URLENCODED;
-		return this;
-	}
-	
-	/**
-	 * Add a simple text field, if urlEncodedForm() has been used will try to guess the content type.
-	 * 
-	 * <p>
-	 * See {@link #field(String, Object, MediaType, String)}
-	 * </p>
-	 *
-	 * @param name Field name
-	 * @param value Field value - this should not be URL Encoded!
-	 * @return A self reference
-	 */
-	public HttpEasy field(String name, Object value) {
-		return field(name, value, null);
-	}
+    /**
+     * If called will cause the request and response details to be logged.
+     * 
+     * <p>
+     * An alternative to this if using Eclipse is to use the TCP/IP monitor
+     * </p>
+     * 
+     * @return A self reference
+     */
+    public HttpEasy logRequestDetails() {
+        this.logRequestDetails = true;
+        return this;
+    }
 
-	/**
-	 * Add a simple text field, if urlEncodedForm() has been used will try to guess the content type.
-	 * 
-	 * <p>
-	 * See {@link #field(String, Object, MediaType, String)}
-	 * </p>
-	 *
-	 * @param name Field name
-	 * @param value Field value - this should not be URL Encoded!
-	 * @param type Field's media type
-	 * 
-	 * @return A self reference
-	 */
-	public HttpEasy field(String name, Object value, MediaType type) {
-		return field(name, value, type, null);
-	}
+    /**
+     * Override the default parameter start and end tokens.  By default any part of the url containing {...} is treated as a parameter and 
+     * replaced by the values passed in by {@link #urlParameters(Object...)}.
+     * 
+     * @param startToken Start token
+     * @param endToken End Token
+     * @return A self reference
+     */
+    public HttpEasy parameterTokens(String startToken, String endToken) {
+        this.startToken = startToken;
+        this.endToken = endToken;
+        
+        return this;
+        
+    }
+    
+    /**
+     * Set the parameter values for the parameters in the URL. 
+     * @param pathParams A list of parameters to fill in any parameters required by the URL.  These are replaced in the order they are found in the URL.  
+     * @return A self reference
+     */
+    public HttpEasy urlParameters(Object... pathParams) {
+        this.urlParams = pathParams;
+        return this;
+    }
+    
+    /**
+     * Sets the content type request property to "multipart/form-data"
+     * Any data that is required must be added via field(name, value, mediaType) method.
+     * Files are supported but any other objects must be easily converted to a string value.
+     * 
+     * @return A self reference
+     */
+    public HttpEasy dataForm() {
+        if (this.dataContentType != DataContentType.AUTO_SELECT) {
+            throw new InvalidParameterException("Content type cannot be changed once set");
+        }
+        
+        this.dataContentType = DataContentType.FORM_DATA;
+        return this;
+    }
+    
+    /**
+     * Sets the content type request property to "application/x-www-form-urlencoded"
+     * Any data that is required must be added via field(name, value) method
+     * and the value must be easily converted to a string value.
+     * 
+     * @return A self reference
+     */
+    public HttpEasy urlEncodedForm() {
+        if (this.dataContentType != DataContentType.AUTO_SELECT) {
+            throw new InvalidParameterException("Content type cannot be changed once set");
+        }
+        
+        this.dataContentType = DataContentType.X_WWW_FORM_URLENCODED;
+        return this;
+    }
+    
+    /**
+     * Add a simple text field, if urlEncodedForm() has been used will try to guess the content type.
+     * 
+     * <p>
+     * See {@link #field(String, Object, MediaType, String)}
+     * </p>
+     *
+     * @param name Field name
+     * @param value Field value - this should not be URL Encoded!
+     * @return A self reference
+     */
+    public HttpEasy field(String name, Object value) {
+        return field(name, value, null);
+    }
 
-	/**
-	 * Add a simple text field, if urlEncodedForm() has been used will try to guess the content type.
-	 * 
-	 * <p>
-	 * See {@link #field(String, Object, MediaType, String)}
-	 * </p>
-	 *
-	 * @param name Field name
-	 * @param value File
-	 * @param type File's media type
-	 * @return A self reference
-	 */
-	public HttpEasy field(String name, File value, MediaType type) {
-		return field(name, value, type, null);
-	}
+    /**
+     * Add a simple text field, if urlEncodedForm() has been used will try to guess the content type.
+     * 
+     * <p>
+     * See {@link #field(String, Object, MediaType, String)}
+     * </p>
+     *
+     * @param name Field name
+     * @param value Field value - this should not be URL Encoded!
+     * @param type Field's media type
+     * 
+     * @return A self reference
+     */
+    public HttpEasy field(String name, Object value, MediaType type) {
+        return field(name, value, type, null);
+    }
 
-	/**
-	 * Add a text field or attach file. If value is not a file then it must be easily converted to a string.
-	 * 
-	 * <p>
-	 * See {@link #field(String, Object, MediaType, String)}
-	 * </p>
-	 * 
-	 * @param name Field's name
-	 * @param value Field's value - File, Inputstream, or object easily converted to a string
-	 * @param type Field's media type
-	 * @param fileName Field's file name - only required if field is an InputStream as this is assumed to be an attachment
-	 * @return A self reference
-	 */
-	public HttpEasy field(String name, InputStream value, MediaType type, String fileName) {
-		return field(name, (Object) value, type, fileName);
-	}
+    /**
+     * Add a simple text field, if urlEncodedForm() has been used will try to guess the content type.
+     * 
+     * <p>
+     * See {@link #field(String, Object, MediaType, String)}
+     * </p>
+     *
+     * @param name Field name
+     * @param value File
+     * @param type File's media type
+     * @return A self reference
+     */
+    public HttpEasy field(String name, File value, MediaType type) {
+        return field(name, value, type, null);
+    }
 
-	/**
-	 * Add a text field or attach file.
-	 * <ul>
-	 * <li>If value is not a file then it must be easily converted to a string</li>
-	 * <li>If value is an InputStream it is assumed to be a file attachment and the file name must be provided</li>
-	 * </ul>
-	 * 
-	 * <p>
-	 * If urlEncodedForm() or dataForm() have not been called then the form type will be auto selected:
-	 * if field containing a file or input stream has been added then content type will be set to "multipart/form-data"
-	 * else it will be set to "application/x-www-form-urlencoded"
-	 * </p>
-	 * 
-	 * @param name Field's name
-	 * @param value Field's value, if File or Inputstream will upload content as "multipart/form-data"
-	 * @param type Field's media type
-	 * @param fileName name of
-	 * @return A self reference
-	 */
-	public HttpEasy field(String name, Object value, MediaType type, String fileName) {
-		if (rawData != null) {
-			throw new InvalidParameterException("Data cannot be used at the same time as fields");
-		}
+    /**
+     * Add a text field or attach file. If value is not a file then it must be easily converted to a string.
+     * 
+     * <p>
+     * See {@link #field(String, Object, MediaType, String)}
+     * </p>
+     * 
+     * @param name Field's name
+     * @param value Field's value - File, Inputstream, or object easily converted to a string
+     * @param type Field's media type
+     * @param fileName Field's file name - only required if field is an InputStream as this is assumed to be an attachment
+     * @return A self reference
+     */
+    public HttpEasy field(String name, InputStream value, MediaType type, String fileName) {
+        return field(name, (Object) value, type, fileName);
+    }
 
-		if (value instanceof InputStream && (fileName == null || fileName.isEmpty())) {
-			throw new InvalidParameterException("InputStream must provide filename");
-		}
+    /**
+     * Add a text field or attach file.
+     * <ul>
+     * <li>If value is not a file then it must be easily converted to a string</li>
+     * <li>If value is an InputStream it is assumed to be a file attachment and the file name must be provided</li>
+     * </ul>
+     * 
+     * <p>
+     * If urlEncodedForm() or dataForm() have not been called then the form type will be auto selected:
+     * if field containing a file or input stream has been added then content type will be set to "multipart/form-data"
+     * else it will be set to "application/x-www-form-urlencoded"
+     * </p>
+     * 
+     * @param name Field's name
+     * @param value Field's value, if File or Inputstream will upload content as "multipart/form-data"
+     * @param type Field's media type
+     * @param fileName name of
+     * @return A self reference
+     */
+    public HttpEasy field(String name, Object value, MediaType type, String fileName) {
+        if (rawData != null) {
+            throw new InvalidParameterException("Data cannot be used at the same time as fields");
+        }
 
-		fields.add(new Field(name, value, type, fileName));
-		return this;
-	}
-	
-	/**
-	 * Sets the content type request property to the value of the supplied media type.
-	 * 
-	 * <p>
-	 * This can only be called once as passing raw data can only support one text block or binary file.
-	 * With this in mind files are supported but any other objects must be easily converted to a string value.
-	 * </p>
-	 * 
-	 * @param data File, or object easily converted to a string
-	 * @param mediaType Media type of the data
-	 * @return A self reference
-	 */
-	public HttpEasy data(Object data, MediaType mediaType) {
-		return data(data, mediaType, null);
-	}
+        if (value instanceof InputStream && (fileName == null || fileName.isEmpty())) {
+            throw new InvalidParameterException("InputStream must provide filename");
+        }
 
-	/**
-	 * Sets the content type request property to the value of the supplied media type.
-	 * 
-	 * <p>
-	 * This can only be called once as passing raw data can only support one text block or binary file.
-	 * With this in mind files are supported but any other objects must be easily converted to a string value.
-	 * </p>
-	 * 
-	 * @param data File, InputStream, or object easily converted to a string
-	 * @param mediaType Media type of the data
-	 * @param fileName name of file
-	 * @return A self reference
-	 */
-	public HttpEasy data(Object data, MediaType mediaType, String fileName) {
-		if (rawData != null) {
-			throw new InvalidParameterException("Only a single data value can be added");
-		}
+        fields.add(new Field(name, value, type, fileName));
+        return this;
+    }
+    
+    /**
+     * Sets the content type request property to the value of the supplied media type.
+     * 
+     * <p>
+     * This can only be called once as passing raw data can only support one text block or binary file.
+     * With this in mind files are supported but any other objects must be easily converted to a string value.
+     * </p>
+     * 
+     * @param data File, or object easily converted to a string
+     * @param mediaType Media type of the data
+     * @return A self reference
+     */
+    public HttpEasy data(Object data, MediaType mediaType) {
+        return data(data, mediaType, null);
+    }
 
-		if (data instanceof InputStream && (fileName == null || fileName.isEmpty())) {
-			throw new InvalidParameterException("InputStream must provide filename");
-		}
+    /**
+     * Sets the content type request property to the value of the supplied media type.
+     * 
+     * <p>
+     * This can only be called once as passing raw data can only support one text block or binary file.
+     * With this in mind files are supported but any other objects must be easily converted to a string value.
+     * </p>
+     * 
+     * @param data File, InputStream, or object easily converted to a string
+     * @param mediaType Media type of the data
+     * @param fileName name of file
+     * @return A self reference
+     */
+    public HttpEasy data(Object data, MediaType mediaType, String fileName) {
+        if (rawData != null) {
+            throw new InvalidParameterException("Only a single data value can be added");
+        }
 
-		if (this.dataContentType != DataContentType.AUTO_SELECT) {
-			throw new InvalidParameterException("Content type cannot be changed once set");
-		}
+        if (data instanceof InputStream && (fileName == null || fileName.isEmpty())) {
+            throw new InvalidParameterException("InputStream must provide filename");
+        }
 
-		dataContentType = DataContentType.RAW;
-		rawDataMediaType = mediaType;
-		rawData = data;
-		rawFileName = fileName;
+        if (this.dataContentType != DataContentType.AUTO_SELECT) {
+            throw new InvalidParameterException("Content type cannot be changed once set");
+        }
 
-		return this;
-	}
+        dataContentType = DataContentType.RAW;
+        rawDataMediaType = mediaType;
+        rawData = data;
+        rawFileName = fileName;
 
-	/**
-	 * Add a list of response codes to ignore that would otherwise case a exception to be thrown.
-	 * Example: doNotFailOn(HttpURLConnection.HTTP_CONFLICT)
-	 * 
-	 * @param reponseCodes A list of failing response codes
-	 * @return A self reference
-	 */
-	public HttpEasy doNotFailOn(Integer... reponseCodes) {
-		this.ignoreResponseCodes.addAll(Arrays.asList(reponseCodes));
-		return this;
-	}
-	
-	/**
-	 * Add a list of response family codes to ignore that would otherwise case a exception to be thrown.
-	 * Example: doNotFailOn(Family.REDIRECTION)
-	 *
-	 * @param responseFamily A list of failing response family codes  
-	 * @return A self reference
-	 */
-	public HttpEasy doNotFailOn(Family... responseFamily) {
-		this.ignoreResponseFamily.addAll(Arrays.asList(responseFamily));
-		return this;
-	}
+        return this;
+    }
 
-	public HttpEasy withLogWriter(LogWriter logWriter) {
+    /**
+     * Add a list of response codes to ignore that would otherwise case a exception to be thrown.
+     * Example: doNotFailOn(HttpURLConnection.HTTP_CONFLICT)
+     * 
+     * @param reponseCodes A list of failing response codes
+     * @return A self reference
+     */
+    public HttpEasy doNotFailOn(Integer... reponseCodes) {
+        this.ignoreResponseCodes.addAll(Arrays.asList(reponseCodes));
+        return this;
+    }
+    
+    /**
+     * Add a list of response family codes to ignore that would otherwise case a exception to be thrown.
+     * Example: doNotFailOn(Family.REDIRECTION)
+     *
+     * @param responseFamily A list of failing response family codes  
+     * @return A self reference
+     */
+    public HttpEasy doNotFailOn(Family... responseFamily) {
+        this.ignoreResponseFamily.addAll(Arrays.asList(responseFamily));
+        return this;
+    }
+
+    public HttpEasy withLogWriter(LogWriter logWriter) {
         this.logWriter = logWriter;
         return this;
     }
-	
-	/**
-	 * Performs an HTTP GET.
-	 * @return The request response wrapped by {@link HttpEasyReader}
-	 * @throws IOException If any connection or request errors
-	 */
-	public HttpEasyReader get() throws IOException {
-		return new HttpEasyReader(getConnectionMethod("GET"), this);
-	}
 
-	/**
-	 * Performs an HTTP HEAD.
-	 * @return The request response wrapped by {@link HttpEasyReader}
-	 * @throws IOException If any connection or request errors
-	 */
-	public HttpEasyReader head() throws IOException {
-		return new HttpEasyReader(getConnectionMethod("HEAD"), this);
-	}
+    /**
+     * Performs an HTTP GET.
+     * @return The request response wrapped by {@link HttpEasyReader}
+     * @throws IOException If any connection or request errors
+     */
+    public HttpEasyReader get() throws IOException {
+        return new HttpEasyReader(getConnectionMethod("GET"), this);
+    }
 
-	/**
-	 * Performs an HTTP POST.
-	 * @return The request response wrapped by {@link HttpEasyReader}
-	 * @throws IOException If any connection or request errors
-	 */
-	public HttpEasyReader post() throws IOException {
-		return new HttpEasyReader(getConnectionMethod("POST"), this);
-	}
+    /**
+     * Performs an HTTP HEAD.
+     * @return The request response wrapped by {@link HttpEasyReader}
+     * @throws IOException If any connection or request errors
+     */
+    public HttpEasyReader head() throws IOException {
+        return new HttpEasyReader(getConnectionMethod("HEAD"), this);
+    }
 
-	/**
-	 * Performs an HTTP PUT.
-	 * @return The request response wrapped by {@link HttpEasyReader}
-	 * @throws IOException If any connection or request errors
-	 */
-	
-	public HttpEasyReader put() throws IOException {
-		return new HttpEasyReader(getConnectionMethod("PUT"), this);
-	}
+    /**
+     * Performs an HTTP POST.
+     * @return The request response wrapped by {@link HttpEasyReader}
+     * @throws IOException If any connection or request errors
+     */
+    public HttpEasyReader post() throws IOException {
+        return new HttpEasyReader(getConnectionMethod("POST"), this);
+    }
 
-	/**
-	 * Performs an HTTP DELETE.
-	 * @return The request response wrapped by {@link HttpEasyReader}
-	 * @throws IOException If any connection or request errors
-	 */
-	public HttpEasyReader delete() throws IOException {
-		return new HttpEasyReader(getConnectionMethod("DELETE"), this);
-	}
+    /**
+     * Performs an HTTP PUT.
+     * @return The request response wrapped by {@link HttpEasyReader}
+     * @throws IOException If any connection or request errors
+     */
+    
+    public HttpEasyReader put() throws IOException {
+        return new HttpEasyReader(getConnectionMethod("PUT"), this);
+    }
 
-	private HttpURLConnection getConnectionMethod(String requestMethod) throws IOException {
-		int fifteenSeconds = 15 * 1000;
-		DataWriter dataWriter = null;
-		URL url = getURL();
-		HttpURLConnection connection = getConnection(url);
+    /**
+     * Performs an HTTP DELETE.
+     * @return The request response wrapped by {@link HttpEasyReader}
+     * @throws IOException If any connection or request errors
+     */
+    public HttpEasyReader delete() throws IOException {
+        return new HttpEasyReader(getConnectionMethod("DELETE"), this);
+    }
+
+    private HttpURLConnection getConnectionMethod(String requestMethod) throws IOException {
+        int fifteenSeconds = 15 * 1000;
+        DataWriter dataWriter = null;
+        URL url = getURL();
+        HttpURLConnection connection = getConnection(url);
         
-		setHeaders(connection);
+        setHeaders(connection);
 
-		connection.setRequestMethod(requestMethod);
+        connection.setRequestMethod(requestMethod);
 
-		if (timeout != null) {
-			connection.setConnectTimeout(timeout);
-			connection.setReadTimeout(timeout);
-		} else {
-			connection.setConnectTimeout(fifteenSeconds);
-		}
+        if (timeout != null) {
+            connection.setConnectTimeout(timeout);
+            connection.setReadTimeout(timeout);
+        } else {
+            connection.setConnectTimeout(fifteenSeconds);
+        }
 
-		connection.setInstanceFollowRedirects(false);
-		
-		if (requestMethod.equals("POST") || requestMethod.equals("PUT")) {
-			dataWriter = getDataWriter(dataWriter, url, connection);
-			
-			connection.setDoOutput(true);
-		} else {
-			if (fields.size() > 0) {
-				throw new IllegalStateException("Fields have been specified but the method " + requestMethod + " will not use them, try POST or PUT instead.");
-			}
-		}
+        connection.setInstanceFollowRedirects(false);
+        
+        if (requestMethod.equals("POST") || requestMethod.equals("PUT")) {
+            dataWriter = getDataWriter(dataWriter, url, connection);
+            
+            connection.setDoOutput(true);
+        } else {
+            if (fields.size() > 0) {
+                throw new IllegalStateException("Fields have been specified but the method " + requestMethod + " will not use them, try POST or PUT instead.");
+            }
+        }
 
-		String authUser = "";
+        String authUser = "";
 
-		if (authString != null && !authString.isEmpty()) {
-			authUser = authString.substring(0, authString.indexOf(":"));
-			authUser = " as user '" + authUser + "'";
-		}
+        if (authString != null && !authString.isEmpty()) {
+            authUser = authString.substring(0, authString.indexOf(":"));
+            authUser = " as user '" + authUser + "'";
+        }
 
-		log("Sending " + requestMethod + " to " + url.toString());
-		
-		if (logRequestDetails) {
-			StringBuilder sb = new StringBuilder();
+        log("Sending " + requestMethod + " to " + url.toString());
+        //LOGGER.debug("Sending {}{} to {}", requestMethod, authUser, url.toString());
+        
+        if (logRequestDetails) {
+            StringBuilder sb = new StringBuilder();
 
-			for (Entry<String, List<String>> header : connection.getRequestProperties().entrySet()) {
-				for (String value : header.getValue()) {
-					sb.append("\t").append(header.getKey()).append(": ").append(value).append(System.lineSeparator());
-				}
-			}
+            for (Entry<String, List<String>> header : connection.getRequestProperties().entrySet()) {
+                for (String value : header.getValue()) {
+                    sb.append("\t").append(header.getKey()).append(": ").append(value).append(System.lineSeparator());
+                }
+            }
 
-			log("With Request Headers:" + System.lineSeparator() + sb.toString());
-		}
+            log("With Request Headers:" + System.lineSeparator() + sb.toString());
+            //LOGGER.trace("With Request Headers:{}{}", System.lineSeparator(), sb);
+        }
 
-		connection.connect();
+        connection.connect();
 
-		if (dataWriter != null) {
-			dataWriter.write(logRequestDetails ? LOGGER : null);
-		}
+        if (dataWriter != null) {
+            dataWriter.write(logRequestDetails ? LOGGER : null);
+        }
 
-		return connection;
-	}
+        return connection;
+    }
 
-	void log(String message) {
+    public void log(String message) {
         if (logWriter != null) {
             logWriter.info(message);
         } else if (HttpEasyDefaults.getDefaultLogWriter() != null) {
@@ -632,185 +663,184 @@ public class HttpEasy {
             LOGGER.trace(message);
         }       
     }
-	
-	private DataWriter getDataWriter(DataWriter dataWriter, URL url, HttpURLConnection connection) throws UnsupportedEncodingException {
-		if (dataContentType == DataContentType.AUTO_SELECT) {
-			if (!fields.isEmpty()) {
-				if (fieldsHasFile()) {
-					dataContentType = DataContentType.FORM_DATA;
-				} else {
-					dataContentType = DataContentType.X_WWW_FORM_URLENCODED;
-				}
-			}
-		}
-		
-		switch (dataContentType) {
-		case RAW:
-			dataWriter = new RawDataWriter(connection, rawData, rawDataMediaType, rawFileName);
-			break;
-				
-		case FORM_DATA:
-			dataWriter = new FormDataWriter(connection, url.getQuery(), fields);
-			break;
-			
-		case X_WWW_FORM_URLENCODED:
-			dataWriter = new FormUrlEncodedDataWriter(connection, url.getQuery(), fields);
-			break;
-				
-		case AUTO_SELECT:
-			break;
-				
-		default:
-			throw new InvalidParameterException(dataContentType.toString() + " is unknown");
-		}
 
-		return dataWriter;
-	}
+    private DataWriter getDataWriter(DataWriter dataWriter, URL url, HttpURLConnection connection) throws UnsupportedEncodingException {
+        if (dataContentType == DataContentType.AUTO_SELECT) {
+            if (!fields.isEmpty()) {
+                if (fieldsHasFile()) {
+                    dataContentType = DataContentType.FORM_DATA;
+                } else {
+                    dataContentType = DataContentType.X_WWW_FORM_URLENCODED;
+                }
+            }
+        }
+        
+        switch (dataContentType) {
+        case RAW:
+            dataWriter = new RawDataWriter(connection, rawData, rawDataMediaType, rawFileName);
+            break;
+                
+        case FORM_DATA:
+            dataWriter = new FormDataWriter(connection, url.getQuery(), fields);
+            break;
+            
+        case X_WWW_FORM_URLENCODED:
+            dataWriter = new FormUrlEncodedDataWriter(connection, url.getQuery(), fields);
+            break;
+                
+        case AUTO_SELECT:
+            break;
+                
+        default:
+            throw new InvalidParameterException(dataContentType.toString() + " is unknown");
+        }
 
-	private boolean fieldsHasFile() {
-		for (Field field : fields) {
-			if (field.value instanceof File) {
-				return true;
-			}
+        return dataWriter;
+    }
 
-			if (field.value instanceof InputStream) {
-				return true;
-			}
-		}
+    private boolean fieldsHasFile() {
+        for (Field field : fields) {
+            if (field.value instanceof File) {
+                return true;
+            }
 
-		return false;
-	}
+            if (field.value instanceof InputStream) {
+                return true;
+            }
+        }
 
-	private HttpURLConnection getConnection(URL url) throws IOException {
-		HttpURLConnection connection;
-		Proxy useProxy = HttpEasyDefaults.getProxy();
+        return false;
+    }
 
-		if (HttpEasyDefaults.isBypassProxyForLocalAddresses() && isLocalAddress(url)) {
-			useProxy = Proxy.NO_PROXY;
-		}
+    private HttpURLConnection getConnection(URL url) throws IOException {
+        HttpURLConnection connection;
+        Proxy useProxy = HttpEasyDefaults.getProxy();
 
-		if (url.getProtocol().equals("https")) {
-			connection = (HttpsURLConnection) url.openConnection(useProxy);
-		} else {
-			connection = (HttpURLConnection) url.openConnection(useProxy);
-		}
+        if (HttpEasyDefaults.isBypassProxyForLocalAddresses() && isLocalAddress(url)) {
+            useProxy = Proxy.NO_PROXY;
+        }
 
-		return connection;
-	}
+        if (url.getProtocol().equals("https")) {
+            connection = (HttpsURLConnection) url.openConnection(useProxy);
+        } else {
+            connection = (HttpURLConnection) url.openConnection(useProxy);
+        }
 
-	private boolean isLocalAddress(URL url) {
-		return "localhost, 127.0.0.1".contains(url.getHost());
-	}
+        return connection;
+    }
 
-	private URL getURL() throws MalformedURLException {
-		String spec = "";
-		
-		if (!containsProtol(path) && !containsProtol(query)) {
-			spec = (baseURI == null || baseURI.isEmpty()) ? HttpEasyDefaults.getBaseURI() : baseURI;	
-		}
-		
-		spec = appendSegmentToUrl(spec, path, "/");
-		spec = appendSegmentToUrl(spec, query, "?");
-		spec = replaceParameters(spec);
+    private boolean isLocalAddress(URL url) {
+        return "localhost, 127.0.0.1".contains(url.getHost());
+    }
 
-		URL url = new URL(spec);
+    private URL getURL() throws MalformedURLException {
+        String spec = "";
+        
+        if (!containsProtol(path) && !containsProtol(query.toString())) {
+            spec = (baseURI == null || baseURI.isEmpty()) ? HttpEasyDefaults.getBaseURI() : baseURI;    
+        }
+        
+        spec = appendSegmentToUrl(spec, path, "/");
+        spec = appendSegmentToUrl(spec, query.toString(), "?");
+        spec = replaceParameters(spec);
 
-		if (url.getUserInfo() != null) {
-			authString = url.getUserInfo();
-			spec = url.toExternalForm().replace(url.getUserInfo() + "@", "");
-			url = new URL(spec);
-		}
+        URL url = new URL(spec);
 
-		return url;
-	}
+        if (url.getUserInfo() != null) {
+            authString = url.getUserInfo();
+            spec = url.toExternalForm().replace(url.getUserInfo() + "@", "");
+            url = new URL(spec);
+        }
 
-	private boolean containsProtol(String url) {
-		if (url == null || url.isEmpty()) {
-			return false;
-		}
-		
-		return url.contains("//");
-	}
-	
-	private String appendSegmentToUrl(String url, String segment, String join) {
-		if (url == null || url.isEmpty()) {
-			return segment;
-		}
+        return url;
+    }
 
-		if (segment == null || segment.isEmpty()) {
-			return url;
-		}
+    private boolean containsProtol(String url) {
+        if (url == null || url.isEmpty()) {
+            return false;
+        }
+        
+        return url.contains("//");
+    }
+    
+    private String appendSegmentToUrl(String url, String segment, String join) {
+        if (url == null || url.isEmpty()) {
+            return segment;
+        }
 
-		if (url.endsWith("/")) {
-			url = url.substring(0, url.length() - 1);
-		}
+        if (segment == null || segment.isEmpty()) {
+            return url;
+        }
 
-		if (!segment.startsWith(join)) {
-			segment = join + segment;
-		}
+        if (url.endsWith("/")) {
+            url = url.substring(0, url.length() - 1);
+        }
 
-		return url + segment;
-	}
+        if (!segment.startsWith(join)) {
+            segment = join + segment;
+        }
 
-	private String replaceParameters(String url) {
-		int index = 0;
-		int param = 0;
-		String currentParameter = "";
+        return url + segment;
+    }
 
-		// Check all occurrences
-		while ((index = url.indexOf(startToken, index)) > 0) {
-			if (param < urlParams.length) {
-				currentParameter = String.valueOf(urlParams[param]);
-				param++;
-			}
+    private String replaceParameters(String url) {
+        int index = 0;
+        int param = 0;
+        String currentParameter = "";
 
-			if (currentParameter.contains(" ")) {
-				throw new IllegalArgumentException("URL Parameter [" + param + "] cannot contain a space");
-			}
+        // Check all occurrences
+        while ((index = url.indexOf(startToken, index)) > 0) {
+            if (param < urlParams.length) {
+                currentParameter = String.valueOf(urlParams[param]);
+                param++;
+            }
 
-			url = url.substring(0, index) + currentParameter + url.substring(url.indexOf(endToken) + 1);
-		}
+            if (currentParameter.contains(" ")) {
+                throw new IllegalArgumentException("URL Parameter [" + param + "] cannot contain a space");
+            }
 
-		return url;
-	}
+            url = url.substring(0, index) + currentParameter + url.substring(url.indexOf(endToken) + 1);
+        }
 
-	private void setHeaders(HttpURLConnection connection) throws UnsupportedEncodingException {
-		setProxyAuthorization(connection);
-		setAuthorization(connection);
+        return url;
+    }
 
-		for (Map.Entry<String, Object> header : headers.entrySet()) {
-			connection.setRequestProperty(header.getKey(), String.valueOf(header.getValue()));
-		}
-	}
+    private void setHeaders(HttpURLConnection connection) throws UnsupportedEncodingException {
+        setProxyAuthorization(connection);
+        setAuthorization(connection);
 
-	private void setAuthorization(HttpURLConnection connection) {
-		if (authString == null || authString.isEmpty()) {
-			return;
-		}
-		
-		//connection.setRequestProperty("Authorization", "Basic " + Base64.getEncoder().encodeToString(authString.getBytes(StandardCharsets.UTF_8)));
-		connection.setRequestProperty("Authorization", "Basic " + Base64.encodeBase64String(authString.getBytes(StandardCharsets.UTF_8)));
-	}
+        for (Map.Entry<String, Object> header : headers.entrySet()) {
+            connection.setRequestProperty(header.getKey(), String.valueOf(header.getValue()));
+        }
+    }
 
-	private void setProxyAuthorization(HttpURLConnection connection) {
-		if (HttpEasyDefaults.getProxyUser() == null || HttpEasyDefaults.getProxyUser().isEmpty()) {
-			return;
-		}
-		
-		if (HttpEasyDefaults.getProxyPassword() == null || HttpEasyDefaults.getProxyPassword().isEmpty()) {
-			return;
-		}
+    private void setAuthorization(HttpURLConnection connection) {
+        if (authString == null || authString.isEmpty()) {
+            return;
+        }
+        
+        //connection.setRequestProperty("Authorization", "Basic " + java.util.Base64.getEncoder().encodeToString(authString.getBytes(StandardCharsets.UTF_8)));
+        connection.setRequestProperty("Authorization", "Basic " + Base64.encodeBase64String(authString.getBytes(StandardCharsets.UTF_8)));
+    }
 
-		String usernameAndPassword = HttpEasyDefaults.getProxyUser() + ":" + HttpEasyDefaults.getProxyPassword();
-		//String proxyAuthString = "Basic " + Base64.getEncoder().encodeToString(usernameAndPassword.getBytes(StandardCharsets.UTF_8));
-		String proxyAuthString = "Basic " + Base64.encodeBase64String(usernameAndPassword.getBytes(StandardCharsets.UTF_8));
-		connection.setRequestProperty("Proxy-Authorization", proxyAuthString);
-	}
+    private void setProxyAuthorization(HttpURLConnection connection) {
+        if (HttpEasyDefaults.getProxyUser() == null || HttpEasyDefaults.getProxyUser().isEmpty()) {
+            return;
+        }
+        
+        if (HttpEasyDefaults.getProxyPassword() == null || HttpEasyDefaults.getProxyPassword().isEmpty()) {
+            return;
+        }
 
-	/**
-	 * Supported form types.
-	 */
-	private enum DataContentType {
-		AUTO_SELECT, RAW, X_WWW_FORM_URLENCODED, FORM_DATA; 
-	}
+        String usernameAndPassword = HttpEasyDefaults.getProxyUser() + ":" + HttpEasyDefaults.getProxyPassword();
+        String proxyAuthString = "Basic " + Base64.encodeBase64String(usernameAndPassword.getBytes(StandardCharsets.UTF_8));
+        connection.setRequestProperty("Proxy-Authorization", proxyAuthString);
+    }
+
+    /**
+     * Supported form types.
+     */
+    private enum DataContentType {
+        AUTO_SELECT, RAW, X_WWW_FORM_URLENCODED, FORM_DATA; 
+    }
 }
