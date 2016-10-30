@@ -125,15 +125,6 @@ public class DownloadPackageBuilder extends Builder {
             
             ProGetApi proget = new ProGetApi(config, logWriter);
             DownloadFormat format = DownloadFormat.fromFormat(downloadFormat);
-            
-            logWriter.info(this.feedName);
-            logWriter.info(this.groupName);
-            logWriter.info(this.packageName);
-            logWriter.info(this.version);
-            logWriter.info(this.downloadFormat);
-            logWriter.info(this.downloadFolder);
-            logWriter.info(format.toString());
-            
             File downloaded = proget.downloadPackage(feedName, groupName, packageName, version, downloadFolder, format);
                     
             if (format == DownloadFormat.EXTRACT_CONTENT) {
