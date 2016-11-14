@@ -592,6 +592,7 @@ public class HttpEasy {
 		setHeaders(connection);
 
 		connection.setRequestMethod(requestMethod);
+		connection.setUseCaches(false);
 
 		if (timeout != null) {
 			connection.setConnectTimeout(timeout);
