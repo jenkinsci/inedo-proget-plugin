@@ -161,7 +161,7 @@ public class ProGetConfiguration extends GlobalConfiguration {
 			config.password = password;
 			config.apiKey = apiKey;
 			
-			ProGetApi proget = new ProGetApi(config);
+			ProGetApi proget = new ProGetApi(config, new JenkinsConsoleLogWriter());
 
 			try {
 				proget.canConnect();

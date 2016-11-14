@@ -75,19 +75,17 @@ public class DownloadPackageBuilder extends Builder {
 	
 	@Override
     public boolean perform(final AbstractBuild<?, ?> build, final Launcher launcher, final BuildListener listener) throws IOException, InterruptedException {
-        JenkinsLogWriter logWriter = new JenkinsLogWriter(listener);
+	    JenkinsHelper helper = new JenkinsHelper(build, listener);
         
         if (!GlobalConfig.isProGetRequiredFieldsConfigured(false)) {
-            logWriter.error("Please configure ProGet Plugin global settings");
+            helper.getLogWriter().error("Please configure ProGet Plugin global settings");
             return false;
         }
-
-        JenkinsEnvrionmentHelper helper = new JenkinsEnvrionmentHelper(build, listener);
 
         ProGetConfig config = GlobalConfig.getProGetConfig();
         
         String downloadTo = helper.expandVariable(downloadFolder);
-        logWriter.info("Download package to " + new File(downloadTo).getAbsolutePath());
+        helper.getLogWriter().info("Download package to " + new File(downloadTo).getAbsolutePath());
 
         String downloaded = launcher.getChannel().call(new GetPackage(listener, config, feedName, groupName, packageName, version, downloadFormat, downloadTo));
 
@@ -121,7 +119,7 @@ public class DownloadPackageBuilder extends Builder {
 	    }
 
         public String call() throws IOException {
-            JenkinsLogWriter logWriter = new JenkinsLogWriter(listener);
+            JenkinsLogWriter logWriter = new JenkinsTaskLogWriter(listener);
             
             ProGetApi proget = new ProGetApi(config, logWriter);
             DownloadFormat format = DownloadFormat.fromFormat(downloadFormat);
@@ -203,7 +201,7 @@ public class DownloadPackageBuilder extends Builder {
 				return false;
 			}
 			
-			proget = new ProGetApi();
+			proget = new ProGetApi(new JenkinsConsoleLogWriter());
 
 			try {
             	proget.canConnect();

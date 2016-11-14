@@ -223,6 +223,10 @@ public class JsonReader implements ResponseReader {
 	/**
 	 * Deserialize the Json into an object of the specified class.
 	 * 
+	 * <p>
+	 * Note: use @SerializedName("custom-name") to convert from key name to variable name
+	 * </p> 
+	 * 
 	 * @param <T> The type of the desired object
 	 * @param type Class to populate
 	 * @return A new class of the supplied type

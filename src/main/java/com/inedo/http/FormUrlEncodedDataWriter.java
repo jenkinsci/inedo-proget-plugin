@@ -8,8 +8,6 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import org.slf4j.Logger;
-
 /**
  * Attach an "application/x-www-form-urlencoded" form to an http request. 
  * 
@@ -54,11 +52,9 @@ class FormUrlEncodedDataWriter implements DataWriter {
 	}
 
 	@Override
-	public void write(Logger logger) throws IOException {
-		if (logger != null) {
-			logger.trace("With Content:{}\t{}", System.lineSeparator(), new String(postEndcoded, "UTF-8"));
-		}
-
+	public void write(EventManager eventManager) throws IOException {
+	    eventManager.request("With application/x-www-form-urlencoded content:{}\t{}", System.lineSeparator(), new String(postEndcoded, "UTF-8"));
+		
 		try (DataOutputStream wr = new DataOutputStream(connection.getOutputStream())) {
 			wr.write(postEndcoded);
 		}

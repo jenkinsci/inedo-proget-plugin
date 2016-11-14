@@ -1,30 +1,33 @@
 package com.inedo.proget.jenkins;
 
-import com.inedo.http.LogWriter;
+import com.inedo.http.HttpEasyListener;
 
-import hudson.model.TaskListener;
+public abstract class JenkinsLogWriter implements HttpEasyListener {
+	static final String LOG_PREFIX = "[ProGet] ";
+	
+	public abstract void info(String message);
+	
+	public abstract void error(String message);
+	
+	public abstract void fatalError(String message);
+	
+    @Override
+    public void request(String msg, Object... args) {
+        info(getFormattedMessage(msg, args));
+    }
 
-public class JenkinsLogWriter implements LogWriter {
-	private static final String LOG_PREFIX = "[ProGet] ";
-	
-	private final TaskListener listener;
-	
-	public JenkinsLogWriter(TaskListener listener) {
-		this.listener = listener;
-	}
-	
-	@Override
-	public void info(String message) {
-		if (listener != null) {
-			listener.getLogger().println(LOG_PREFIX + message);
-		} else {
-			System.out.println(LOG_PREFIX + message);
-		}
-	}
+    @Override
+    public void details(String msg, Object... args) {
+        // Do Nothing
+    }
 
-	public void error(String message) {
-		if (listener != null) {
-			listener.error(LOG_PREFIX + message);
-		}
+    @Override
+    public void error(String message, Throwable t) {
+        error(message);
+    }
+    
+	private String getFormattedMessage(String message, Object... args) {
+	    String msg = message.replace("{}", "%s");
+	    return String.format(msg, args);
 	}
 }

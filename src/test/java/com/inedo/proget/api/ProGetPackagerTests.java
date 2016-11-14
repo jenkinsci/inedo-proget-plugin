@@ -24,11 +24,11 @@ import com.google.common.io.Files;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import com.inedo.proget.api.ProGetPackager.ZipItem;
-import com.inedo.proget.jenkins.JenkinsEnvrionmentHelper;
+import com.inedo.proget.jenkins.JenkinsHelper;
 import com.inedo.proget.jenkins.UploadPackageBuilder;
 
 public class ProGetPackagerTests {
-	private JenkinsEnvrionmentHelper helper;
+	private JenkinsHelper helper;
 	private ProGetPackager packageUtils = new ProGetPackager();
 
 	@Rule
@@ -36,7 +36,7 @@ public class ProGetPackagerTests {
 	
 	@Before
 	public void prepareTestFiles() throws IOException {
-		helper = new JenkinsEnvrionmentHelper();
+		helper = new JenkinsHelper();
 		
 		preparePackageFiles();
 	}

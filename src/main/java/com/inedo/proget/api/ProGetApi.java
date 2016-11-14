@@ -9,7 +9,6 @@ import java.net.URL;
 
 import com.google.common.net.MediaType;
 import com.inedo.http.HttpEasy;
-import com.inedo.http.LogWriter;
 import com.inedo.proget.domain.Feed;
 import com.inedo.proget.domain.ProGetPackage;
 import com.inedo.proget.domain.Version;
@@ -30,26 +29,18 @@ public class ProGetApi implements Serializable {
     
     private ProGetConfig config;
 	
-	public ProGetApi() {
-		this(GlobalConfig.getProGetConfig(), new JenkinsLogWriter(null));
+	public ProGetApi(JenkinsLogWriter listener) {
+		this(GlobalConfig.getProGetConfig(), listener);
 	}
 	
-	public ProGetApi(ProGetConfig config) {
-		this(config, new JenkinsLogWriter(null));
-	}
-	
-	public ProGetApi(LogWriter logWriter) {
-		this(GlobalConfig.getProGetConfig(), logWriter);
-	}
-	
-	public ProGetApi(ProGetConfig config, LogWriter logWriter) {
+	public ProGetApi(ProGetConfig config, JenkinsLogWriter logWriter) {
 		this.config = config;
 		
 		HttpEasy.withDefaults()
 			.allowAllHosts()
 			.trustAllCertificates()
 			.baseUrl(config.url)
-			.withLogWriter(logWriter);
+			.listeners(logWriter);
 	}
 
 	/**

@@ -8,7 +8,8 @@ import com.inedo.proget.domain.Feed;
 import com.inedo.proget.domain.ProGetPackage;
 import com.inedo.proget.domain.Version;
 import com.inedo.proget.jenkins.GlobalConfig;
-import com.inedo.proget.jenkins.JenkinsEnvrionmentHelper;
+import com.inedo.proget.jenkins.JenkinsConsoleLogWriter;
+import com.inedo.proget.jenkins.JenkinsHelper;
 import com.inedo.proget.jenkins.UploadPackageBuilder;
 import com.inedo.proget.jenkins.DownloadFormat;
 import com.inedo.utils.MockServer;
@@ -56,7 +57,7 @@ public class ProGetApiTests {
 
 		GlobalConfig.injectConfiguration(config);
 		
-		proget = new ProGetApi();
+		proget = new ProGetApi(new JenkinsConsoleLogWriter());
 	}
 	
 	@AfterClass
@@ -89,10 +90,10 @@ public class ProGetApiTests {
 		config.url = "http://rubbish_host";
 
 		try {
-			new ProGetApi(config).getFeeds();
+			new ProGetApi(config, new JenkinsConsoleLogWriter()).getFeeds();
 		} finally {
 			config.url = origUrl;
-			proget = new ProGetApi(config);
+			proget = new ProGetApi(config, new JenkinsConsoleLogWriter());
 		}
 	}
 	
@@ -162,7 +163,7 @@ public class ProGetApiTests {
 	public void uploadPackage() throws IOException {
 		preparePackageFiles();
 		
-		JenkinsEnvrionmentHelper helper = new JenkinsEnvrionmentHelper();
+		JenkinsHelper helper = new JenkinsHelper();
 		ProGetPackager packageUtils = new ProGetPackager();
 		UploadPackageBuilder builder = getExampleBuilder("**/*.*", "");
 		List<ZipItem> files = packageUtils.getFileList(folder.getRoot(), builder.getArtifacts(), builder.getExcludes(), builder.isDefaultExcludes(), builder.isCaseSensitive());

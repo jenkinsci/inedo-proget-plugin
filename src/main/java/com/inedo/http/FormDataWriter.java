@@ -13,8 +13,6 @@ import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import org.slf4j.Logger;
-
 import com.google.common.net.MediaType;
 
 /**
@@ -48,12 +46,9 @@ class FormDataWriter implements DataWriter {
 	}
 
 	@Override
-	public void write(Logger logger) throws IOException {
+	public void write(EventManager eventManager) throws IOException {
 		outputStream = connection.getOutputStream();
-		
-		if (logger != null) {
-			logBuffer = new StringBuilder();
-		}
+		logBuffer = new StringBuilder();
 
 		try {
 			writer = new PrintWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8), true);
@@ -70,9 +65,7 @@ class FormDataWriter implements DataWriter {
 
 			writeFinalBoundary();
 		} finally {
-			if (logger != null) {
-				logger.trace("With Content:{}\t{}", LINE_FEED, logBuffer.toString().replace(LINE_FEED, LINE_FEED + "\t"));
-			}
+		    eventManager.request("With multipart/form-data content:{}\t{}", LINE_FEED, logBuffer.toString().replace(LINE_FEED, LINE_FEED + "\t"));
 
 			if (writer != null) {
 				writer.close();

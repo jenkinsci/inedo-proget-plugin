@@ -2,8 +2,6 @@ package com.inedo.http;
 
 import java.io.IOException;
 
-import org.slf4j.Logger;
-
 /**
  * Http request data writer interface.
  * 
@@ -14,10 +12,10 @@ interface DataWriter {
 	/**
 	 * Add data to Http request.
 	 * 
-	 * @param logger Logger to write details to
+	 * @param eventManager Listener(s) to write details to
 	 * 
 	 * @throws IOException
 	 */
-	public void write(Logger logger) throws IOException;
+	public void write(EventManager eventManager) throws IOException;
 
 }

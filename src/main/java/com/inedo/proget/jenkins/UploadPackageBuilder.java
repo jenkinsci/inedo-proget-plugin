@@ -151,18 +151,17 @@ public class UploadPackageBuilder extends Builder {
 	
 	@Override
 	public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException {
-		JenkinsEnvrionmentHelper helper = new JenkinsEnvrionmentHelper(build, listener);
-		JenkinsLogWriter logWriter = new JenkinsLogWriter(listener);
+		JenkinsHelper helper = new JenkinsHelper(build, listener);
 		
 		if(artifacts.length()==0) {
-			logWriter.error("Files to package not set");
+			helper.getLogWriter().error("Files to package not set");
             return false;
         }
 		
 		String include = helper.expandVariable(this.artifacts);
 		String exclude = helper.expandVariable(this.excludes);
 		
-		logWriter.info("Packaging Artifacts");
+		helper.getLogWriter().info("Packaging Artifacts");
         
     	FilePath ws = build.getWorkspace();
     	
@@ -176,28 +175,28 @@ public class UploadPackageBuilder extends Builder {
 		if (files.isEmpty()) {
 	    	String msg = ws.validateAntFileMask(include, FilePath.VALIDATE_ANT_FILE_MASK_BOUND);
 	    	if(msg != null) {
-	    		logWriter.error(msg);
+	    	    helper.getLogWriter().error(msg);
 	        	return false;
 	        }
 	    	
-	    	logWriter.error("No files found matching Files to package setting '" + include + "'");
+	    	helper.getLogWriter().error("No files found matching Files to package setting '" + include + "'");
 	    	return false;
 		} 
 		
 		PackageMetadata metadata = buildMetadata(helper);
 		if (metadata == null) {
-			logWriter.error("Metadata is incorrectly formatted");
+		    helper.getLogWriter().error("Metadata is incorrectly formatted");
 			return false;
 		}
 		
     	File pkg = packageUtils.createPackage(baseDir, files, metadata);
 		
-		new ProGetApi(logWriter).uploadPackage(feedName, pkg);
+		new ProGetApi(helper.getLogWriter()).uploadPackage(feedName, pkg);
         
         return true;
 	}
 	
-	public PackageMetadata buildMetadata(JenkinsEnvrionmentHelper helper) {
+	public PackageMetadata buildMetadata(JenkinsHelper helper) {
 		PackageMetadata metadata = new PackageMetadata();
 
 		metadata.group = helper.expandVariable(getGroupName());
@@ -302,7 +301,7 @@ public class UploadPackageBuilder extends Builder {
 				return false;
 			}
 			
-			proget = new ProGetApi();
+			proget = new ProGetApi(new JenkinsConsoleLogWriter());
 
 			try {
             	proget.canConnect();
