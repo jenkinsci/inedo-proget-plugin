@@ -5,7 +5,8 @@ import java.util.List;
 
 class EventManager {
     private List<HttpEasyListener> listeners = new ArrayList<HttpEasyListener>();
-    private boolean isDefaultListener; 
+    private boolean isDefaultListener;
+	private boolean setLogRequestDetails = false; 
     
     public EventManager() {
         addListener(new LogWriter());
@@ -17,6 +18,12 @@ class EventManager {
         isDefaultListener = eventManager.isDefaultListener();
     }
 
+
+
+	public void setLogRequestDetails(boolean logRequestDetails) {
+		this.setLogRequestDetails  = logRequestDetails;
+	}
+	
     public void clearListeners() {
         listeners.clear();
     }
@@ -58,6 +65,10 @@ class EventManager {
     }
     
     public void details(String msg, Object... args) {
+    	if (!setLogRequestDetails) {
+    		return;
+    	}
+    	
         for (HttpEasyListener listener : listeners) {
             listener.details(msg, args);
         }

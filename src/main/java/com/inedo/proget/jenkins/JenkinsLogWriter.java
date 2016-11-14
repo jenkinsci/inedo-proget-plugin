@@ -18,7 +18,7 @@ public abstract class JenkinsLogWriter implements HttpEasyListener {
 
     @Override
     public void details(String msg, Object... args) {
-        // Do Nothing
+    	 info(getFormattedMessage(msg, args));
     }
 
     @Override

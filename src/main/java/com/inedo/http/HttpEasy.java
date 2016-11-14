@@ -299,7 +299,7 @@ public class HttpEasy {
 	 * @return A self reference
 	 */
 	public HttpEasy logRequestDetails() {
-	    this.eventManager.addListener(new LogWriter().setLogRequestDetails(true));
+	    this.eventManager.setLogRequestDetails(true);
 		return this;
 	}
 
