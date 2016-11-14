@@ -6,6 +6,7 @@ import hudson.FilePath;
 import hudson.util.ComboBoxModel;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
+import jenkins.security.MasterToSlaveCallable;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.AbstractProject;
@@ -18,6 +19,7 @@ import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 
 import com.inedo.proget.api.ProGetApi;
+import com.inedo.proget.api.ProGetConfig;
 import com.inedo.proget.api.ProGetPackager;
 import com.inedo.proget.api.ProGetPackager.ZipItem;
 import com.inedo.proget.domain.Feed;
@@ -26,6 +28,7 @@ import com.inedo.proget.domain.ProGetPackage;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
@@ -153,48 +156,84 @@ public class UploadPackageBuilder extends Builder {
 	public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException {
 		JenkinsHelper helper = new JenkinsHelper(build, listener);
 		
+		if (!GlobalConfig.isProGetRequiredFieldsConfigured(true)) {
+            helper.getLogWriter().error("Please configure ProGet Plugin global settings");
+            return false;
+        }
+		
 		if(artifacts.length()==0) {
 			helper.getLogWriter().error("Files to package not set");
             return false;
         }
 		
-		String include = helper.expandVariable(this.artifacts);
-		String exclude = helper.expandVariable(this.excludes);
-		
-		helper.getLogWriter().info("Packaging Artifacts");
-        
-    	FilePath ws = build.getWorkspace();
-    	
-    	//base directory is workspace
-    	File baseDir = new File(ws.getRemote());
-        
-    	ProGetPackager packageUtils = new ProGetPackager();
-    	
-    	List<ZipItem> files = packageUtils.getFileList(baseDir, include, exclude, defaultExcludes, caseSensitive);
-          
-		if (files.isEmpty()) {
-	    	String msg = ws.validateAntFileMask(include, FilePath.VALIDATE_ANT_FILE_MASK_BOUND);
-	    	if(msg != null) {
-	    	    helper.getLogWriter().error(msg);
-	        	return false;
-	        }
-	    	
-	    	helper.getLogWriter().error("No files found matching Files to package setting '" + include + "'");
-	    	return false;
-		} 
-		
 		PackageMetadata metadata = buildMetadata(helper);
-		if (metadata == null) {
-		    helper.getLogWriter().error("Metadata is incorrectly formatted");
-			return false;
-		}
-		
-    	File pkg = packageUtils.createPackage(baseDir, files, metadata);
-		
-		new ProGetApi(helper.getLogWriter()).uploadPackage(feedName, pkg);
+        if (metadata == null) {
+            helper.getLogWriter().error("Metadata is incorrectly formatted");
+            return false;
+        }
+
+        return launcher.getChannel().call(new PutPackage(
+                listener, 
+                GlobalConfig.getProGetConfig(),
+                build.getWorkspace(),
+                new PutDetails(this, helper),
+                metadata));
+    }
+	
+	// Define what should be run on the slave for this build
+    private static class PutPackage extends MasterToSlaveCallable<Boolean, IOException> {
+        private final BuildListener listener;
+        private ProGetConfig config;
+        private FilePath workspace;
+        private PutDetails settings;
+        private PackageMetadata metadata;
         
-        return true;
-	}
+        public PutPackage(final BuildListener listener, ProGetConfig config, FilePath workspace, PutDetails settings, PackageMetadata metadata) {
+            this.listener = listener;
+            this.config = config;
+            this.workspace = workspace;
+            this.settings = settings;
+            this.metadata = metadata;
+        }
+
+        public Boolean call() throws IOException {
+            JenkinsLogWriter logWriter = new JenkinsTaskLogWriter(listener);
+            
+            logWriter.info("Packaging Artifacts");
+                        
+            File baseDir = new File(workspace.getRemote());
+            
+            ProGetPackager packageUtils = new ProGetPackager();
+            
+            List<ZipItem> files = packageUtils.getFileList(baseDir, settings.include, settings.exclude, settings.defaultExcludes, settings.caseSensitive);
+              
+            if (files.isEmpty()) {
+                String msg;
+                
+                try {
+                    msg = workspace.validateAntFileMask(settings.include, FilePath.VALIDATE_ANT_FILE_MASK_BOUND);
+                } catch (InterruptedException e) {
+                    throw new IOException("Invalid ANT file mask: " + settings.include, e);
+                }
+                
+                if(msg != null) {
+                    logWriter.error(msg);
+                    return false;
+                }
+                
+                logWriter.error("No files found matching Files to package setting '" + settings.include + "'");
+                return false;
+            } 
+            
+            File pkg = packageUtils.createPackage(baseDir, files, metadata);
+            
+            new ProGetApi(config, logWriter).uploadPackage(settings.feedName, pkg);
+            
+            return true;
+        }
+
+        private static final long serialVersionUID = 1L;
+    }
 	
 	public PackageMetadata buildMetadata(JenkinsHelper helper) {
 		PackageMetadata metadata = new PackageMetadata();
@@ -243,7 +282,7 @@ public class UploadPackageBuilder extends Builder {
 		
 		return metadata;
 	}
-	
+	    
 	@Extension
 	// This indicates to Jenkins that this is an implementation of an extension point.
 	public static final class DescriptorImpl extends BuildStepDescriptor<Builder> {

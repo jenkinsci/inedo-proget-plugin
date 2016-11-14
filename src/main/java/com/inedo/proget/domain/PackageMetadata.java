@@ -1,12 +1,15 @@
 package com.inedo.proget.domain;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class PackageMetadata {
-	/** A string of no more than fifty characters: 
+public class PackageMetadata implements Serializable {
+    private static final long serialVersionUID = 1L;
+
+    /** A string of no more than fifty characters: 
 	 * 		numbers (0-9)
 	 * 		upper- and lower-case letters (a-Z)
 	 * 		dashes (-)
