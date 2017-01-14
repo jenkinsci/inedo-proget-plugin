@@ -12,7 +12,7 @@
  */
 
 plugins {
-  id 'org.jenkins-ci.jpi' version '0.18.1'
+  id 'org.jenkins-ci.jpi' version '0.21.0'
 }
 
 apply plugin: 'java'
