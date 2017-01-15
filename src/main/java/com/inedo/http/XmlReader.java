@@ -75,15 +75,15 @@ public class XmlReader implements ResponseReader {
 	 * 
 	 * <p>
 	 * Example:
-	 * 
+	 * </p>
+	 *  
 	 * <pre>
-	 * {@literal<}serviceResponse returnLength="1">
-	 *   {@literal<}output name="documentId">idd_CD1C398E-1F25-436D-B76A-9E293BB426F5{@literal<}/output>
-	 * {@literal<}/serviceResponse>
+	 * {@literal<}serviceResponse returnLength="1"{@literal>}
+	 *   {@literal<}output name="documentId"{@literal>}idd_CD1C398E-1F25-436D-B76A-9E293BB426F5{@literal<}/output{@literal>}
+	 * {@literal<}/serviceResponse{@literal>}
 	 * 
 	 * String documentId = reader.getXmlReader().textContent("//{@literal*}/output[@name='documentId']");
 	 * </pre>
-	 * </p>
 	 * 
 	 * @param selector search path
 	 * @return Node

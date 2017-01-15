@@ -1,15 +1,19 @@
 package com.inedo.proget.jenkins;
 
 import hudson.Launcher;
+import hudson.AbortException;
 import hudson.Extension;
-import hudson.model.AbstractBuild;
-import hudson.model.BuildListener;
+import hudson.FilePath;
+import hudson.model.Run;
+import hudson.model.TaskListener;
 import hudson.model.AbstractProject;
 import hudson.tasks.Builder;
 import hudson.util.ListBoxModel;
 import jenkins.security.MasterToSlaveCallable;
+import jenkins.tasks.SimpleBuildStep;
 import hudson.tasks.BuildStepDescriptor;
 
+import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
@@ -27,10 +31,13 @@ import java.util.TreeSet;
 
 /**
  * Downloads a universal package from ProGet.
+ * 
+ * See https://github.com/jenkinsci/pipeline-plugin/blob/master/DEVGUIDE.md#user-content-build-wrappers-1 for tips on 
+ * Jenkins pipeline support 
  *
  * @author Andrew Sumner
  */
-public class DownloadPackageBuilder extends Builder {
+public class DownloadPackageBuilder extends Builder implements SimpleBuildStep {
 	private final String feedName;
 	private final String groupName;
 	private final String packageName;
@@ -74,12 +81,12 @@ public class DownloadPackageBuilder extends Builder {
 	}
 	
 	@Override
-    public boolean perform(final AbstractBuild<?, ?> build, final Launcher launcher, final BuildListener listener) throws IOException, InterruptedException {
-	    JenkinsHelper helper = new JenkinsHelper(build, listener);
+	public void perform(Run<?, ?> run, FilePath workspace, Launcher launcher, TaskListener listener) throws InterruptedException, IOException {
+		JenkinsHelper helper = new JenkinsHelper(run, listener);
         
         if (!GlobalConfig.isProGetRequiredFieldsConfigured(false)) {
             helper.getLogWriter().error("Please configure ProGet Plugin global settings");
-            return false;
+            throw new AbortException();
         }
 
         ProGetConfig config = GlobalConfig.getProGetConfig();
@@ -87,18 +94,24 @@ public class DownloadPackageBuilder extends Builder {
         String downloadTo = helper.expandVariable(downloadFolder);
         helper.getLogWriter().info("Download package to " + new File(downloadTo).getAbsolutePath());
 
-        String downloaded = launcher.getChannel().call(new GetPackage(listener, config, feedName, groupName, packageName, version, downloadFormat, downloadTo));
+        String downloaded = launcher.getChannel().call(new GetPackage(
+        			listener, 
+        			config, 
+        			helper.expandVariable(feedName), 
+        			helper.expandVariable(groupName), 
+        			helper.expandVariable(packageName), 
+        			version, 
+        			downloadFormat, 
+        			downloadTo));
 
         if (!downloaded.isEmpty()) {
             helper.injectEnvrionmentVariable("PROGET_FILE", downloaded);
         }
-        
-        return true;
 	}
 
 	// Define what should be run on the slave for this build
 	private static class GetPackage extends MasterToSlaveCallable<String, IOException> {
-	    private final BuildListener listener;
+	    private final TaskListener listener;
 	    private ProGetConfig config;
 	    private final String feedName;
 	    private final String groupName;
@@ -107,7 +120,7 @@ public class DownloadPackageBuilder extends Builder {
 	    private final String downloadFormat;
 	    private final String downloadFolder;
 	    
-	    public GetPackage(final BuildListener listener, ProGetConfig config, String feedName, String groupName, String packageName, String version, String downloadFormat, String downloadFolder) {
+	    public GetPackage(final TaskListener listener, ProGetConfig config, String feedName, String groupName, String packageName, String version, String downloadFormat, String downloadFolder) {
 	        this.listener = listener;
 	        this.config = config;
 	        this.feedName = feedName;
@@ -140,6 +153,7 @@ public class DownloadPackageBuilder extends Builder {
     }
 	
 	
+	@Symbol("downloadProgetPackage")
 	@Extension
 	// This indicates to Jenkins that this is an implementation of an extension point.
 	public static final class DescriptorImpl extends BuildStepDescriptor<Builder> {

@@ -48,7 +48,6 @@ import com.google.common.net.MediaType;
  * <p>
  * <b>Example</b>
  * </p>
- * <p>
  * 
  * <pre>
  * HttpEasyReader r = HttpEasy.request()
@@ -60,7 +59,6 @@ import com.google.common.net.MediaType;
  * String id = r.jsonPath("rows[0].doc._id").getAsString(); 
  * String rev = r.jsonPath("rows[0].doc._rev").getAsString();
  * </pre>
- * </p>
  * 
  * <p>
  * <b>Error Handling</b>
@@ -97,14 +95,12 @@ import com.google.common.net.MediaType;
  * <p>
  * There is no fine grained control, its more of an all or nothing approach:
  * </p>
- * <p>
  * 
  * <pre>
  * HttpEasy.withDefaults()
  * 		.allowAllHosts()
  * 		.trustAllCertificates();
  * </pre>
- * </p>
  * 
  * <p>
  * <b>Proxy</b>
@@ -115,15 +111,12 @@ import com.google.common.net.MediaType;
  * in front of the username (not tested)
  * </p>
  * 
- * <p>
- * 
  * <pre>
  * HttpEasy.withDefaults() 
  *     .proxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(user, password)))) 
  *     .proxyAuth(userName, password) 
  *     .bypassProxyForLocalAddresses(true);
  * </pre>
- * </p>
  * 
  * <p>
  * <b>Redirects</b>
@@ -133,7 +126,6 @@ import com.google.common.net.MediaType;
  * Redirects are NOT automatically followed - at least for REST base calls - even though the documentation
  * for HttpURLConnection says that it should...
  * </p>
- * <p>
  * 
  * <pre>
  * HttpEasyReader response = HttpEasy.request()
@@ -146,7 +138,6 @@ import com.google.common.net.MediaType;
  *     ... 
  * }
  * </pre>
- * </p>
  * 
  * <p>
  * <b>Logging</b>

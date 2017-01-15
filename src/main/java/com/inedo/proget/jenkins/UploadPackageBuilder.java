@@ -1,18 +1,21 @@
 package com.inedo.proget.jenkins;
 
 import hudson.Launcher;
+import hudson.AbortException;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.util.ComboBoxModel;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import jenkins.security.MasterToSlaveCallable;
-import hudson.model.AbstractBuild;
-import hudson.model.BuildListener;
+import jenkins.tasks.SimpleBuildStep;
+import hudson.model.Run;
+import hudson.model.TaskListener;
 import hudson.model.AbstractProject;
 import hudson.tasks.Builder;
 import hudson.tasks.BuildStepDescriptor;
 
+import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
@@ -28,7 +31,6 @@ import com.inedo.proget.domain.ProGetPackage;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
@@ -41,22 +43,25 @@ import javax.servlet.ServletException;
  * 
  * File related code borrowed from https://github.com/jenkinsci/jenkins/blob/master/core/src/main/java/hudson/tasks/ArtifactArchiver.java
  *
+ * See https://github.com/jenkinsci/pipeline-plugin/blob/master/DEVGUIDE.md#user-content-build-wrappers-1 for tips on 
+ * Jenkins pipeline support
+ * 
  * @author Andrew Sumner
  */
-public class UploadPackageBuilder extends Builder {
+public class UploadPackageBuilder extends Builder implements SimpleBuildStep {
 	private final String feedName;
 	private final String groupName;
 	private final String packageName;
 	private final String version;
 	private final String artifacts;
-	private String excludes;
-	private boolean defaultExcludes;
-	private boolean caseSensitive;
-	private String title;
-	private String description;
-	private String icon;
-	private String metadata;
-	private String dependencies;
+	private String excludes = "";
+	private boolean defaultExcludes = true;
+	private boolean caseSensitive = true;
+	private String title = "";
+	private String description = "";
+	private String icon = "";
+	private String metadata = "";
+	private String dependencies = "";
 	
 	// Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
 	@DataBoundConstructor
@@ -153,42 +158,44 @@ public class UploadPackageBuilder extends Builder {
 	}
 	
 	@Override
-	public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException {
-		JenkinsHelper helper = new JenkinsHelper(build, listener);
+	public void perform(Run<?, ?> run, FilePath workspace, Launcher launcher, TaskListener listener) throws InterruptedException, IOException {
+		JenkinsHelper helper = new JenkinsHelper(run, listener);
 		
 		if (!GlobalConfig.isProGetRequiredFieldsConfigured(true)) {
             helper.getLogWriter().error("Please configure ProGet Plugin global settings");
-            return false;
+            throw new AbortException();
         }
 		
 		if(artifacts.length()==0) {
 			helper.getLogWriter().error("Files to package not set");
-            return false;
+			throw new AbortException();
         }
 		
 		PackageMetadata metadata = buildMetadata(helper);
         if (metadata == null) {
             helper.getLogWriter().error("Metadata is incorrectly formatted");
-            return false;
+            throw new AbortException();
         }
 
-        return launcher.getChannel().call(new PutPackage(
+        if (!launcher.getChannel().call(new PutPackage(
                 listener, 
                 GlobalConfig.getProGetConfig(),
-                build.getWorkspace(),
+                workspace,
                 new PutDetails(this, helper),
-                metadata));
+                metadata))) {
+        	throw new AbortException();
+        }
     }
 	
 	// Define what should be run on the slave for this build
     private static class PutPackage extends MasterToSlaveCallable<Boolean, IOException> {
-        private final BuildListener listener;
+        private final TaskListener listener;
         private ProGetConfig config;
         private FilePath workspace;
         private PutDetails settings;
         private PackageMetadata metadata;
         
-        public PutPackage(final BuildListener listener, ProGetConfig config, FilePath workspace, PutDetails settings, PackageMetadata metadata) {
+        public PutPackage(final TaskListener listener, ProGetConfig config, FilePath workspace, PutDetails settings, PackageMetadata metadata) {
             this.listener = listener;
             this.config = config;
             this.workspace = workspace;
@@ -283,6 +290,7 @@ public class UploadPackageBuilder extends Builder {
 		return metadata;
 	}
 	    
+	@Symbol("uploadProgetPackage")
 	@Extension
 	// This indicates to Jenkins that this is an implementation of an extension point.
 	public static final class DescriptorImpl extends BuildStepDescriptor<Builder> {

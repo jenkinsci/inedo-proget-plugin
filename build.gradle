@@ -21,11 +21,12 @@ sourceCompatibility = 1.7
 targetCompatibility = 1.7
 
 group = 'com.inedo.proget'
-version = '0.7-SNAPSHOT'
+version = '0.8-SNAPSHOT'
 description = 'Inedo ProGet Plugin'
 
 ext {
-	jenkinsVersion='1.642.3'
+	//jenkinsVersion='1.642.3'
+	jenkinsVersion='2.32.1'
 }
 
 jenkinsPlugin {

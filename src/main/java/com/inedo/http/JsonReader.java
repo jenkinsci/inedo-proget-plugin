@@ -138,11 +138,11 @@ public class JsonReader implements ResponseReader {
 	 * 
 	 * <p>
 	 * If an element name contains a dot then the dot can be escaped with a double backslash, eg:
+	 * </p>
 	 * 
 	 * <pre>
 	 * ele1.ele2part1\\.ele2part2
 	 * </pre>
-	 * </p>
 	 * 
 	 * @param path A dot separated Json search path
 	 * @return JsonElement or null if not found
@@ -156,11 +156,11 @@ public class JsonReader implements ResponseReader {
 	 * 
 	 * <p>
 	 * If an element name contains a dot then the dot can be escaped with a double backslash, eg:
+	 * </p>
 	 * 
 	 * <pre>
 	 * ele1.ele2part1\\.ele2part2
 	 * </pre>
-	 * </p>
 	 * 
 	 * @param json Json element
 	 * @param path A dot separated Json search path

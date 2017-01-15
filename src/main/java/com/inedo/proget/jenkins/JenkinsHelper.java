@@ -1,6 +1,7 @@
 package com.inedo.proget.jenkins;
 
 import hudson.model.AbstractBuild;
+import hudson.model.Run;
 import hudson.model.TaskListener;
 
 /**
@@ -9,7 +10,7 @@ import hudson.model.TaskListener;
  * @author Andrew Sumner
  */
 public class JenkinsHelper {
-	private final AbstractBuild<?, ?> build;
+	private final Run<?, ?> build;
 	private final TaskListener listener;
 	private JenkinsLogWriter logWriter = null;
 	
@@ -22,7 +23,7 @@ public class JenkinsHelper {
 		this.logWriter = new JenkinsConsoleLogWriter();
 	}
 	
-	public JenkinsHelper(AbstractBuild<?, ?> build, TaskListener listener) {
+	public JenkinsHelper(Run<?, ?> build, TaskListener listener) {
 		this.build = build;
 		this.listener = listener;
 		this.logWriter = new JenkinsTaskLogWriter(listener);
@@ -40,7 +41,10 @@ public class JenkinsHelper {
 		String expanded = variable;
 		
 		try {
-			expanded = build.getEnvironment(listener).expand(variable);
+			// Pipeline script doesn't support getting environment variables
+			if (build instanceof AbstractBuild) {
+				expanded = build.getEnvironment(listener).expand(variable);	
+			}
 		} catch (Exception e) {
 			getLogWriter().info("Exception thrown expanding '" + variable + "' : " + e.getClass().getName() + " " + e.getMessage());
 		}
