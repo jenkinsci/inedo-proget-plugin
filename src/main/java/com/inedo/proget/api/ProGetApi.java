@@ -149,6 +149,7 @@ public class ProGetApi implements Serializable {
 		
 		HttpEasy request = HttpEasy.request()
                 .path(path)
+		.authorization(config.user, config.password)
                 .urlParameters(feedName, groupName, packageName, version);
 		
 		if (latest) {
