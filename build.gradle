@@ -21,11 +21,10 @@ sourceCompatibility = 1.7
 targetCompatibility = 1.7
 
 group = 'com.inedo.proget'
-version = '0.8-SNAPSHOT'
+version = '0.8'
 description = 'Inedo ProGet Plugin'
 
 ext {
-	//jenkinsVersion='1.642.3'
 	jenkinsVersion='2.32.1'
 }
 
@@ -55,12 +54,7 @@ dependencies {
 	
 	testCompile 'junit:junit:4.8.2'
 	testCompile 'org.mockito:mockito-core:2.0.5-beta'
-	//https://maven-repository.com/artifact/org.jenkins-ci.main/jenkins-test-harness/2.6
 	testCompile 'org.jenkins-ci.main:jenkins-test-harness:2.6'
-	
-	// https://issues.jenkins-ci.org/browse/JENKINS-27826
-	//jenkinsTest 'org.jenkins-ci.plugins:matrix-project:1.4@jar'
-	//jenkinsTest 'org.eclipse.hudson:hudson-test-framework:3.3.3'
 	
 	compile 'org.slf4j:slf4j-api:1.7.21'
 	compile 'org.slf4j:slf4j-simple:1.7.21'
