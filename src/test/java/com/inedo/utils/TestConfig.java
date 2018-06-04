@@ -1,11 +1,11 @@
 package com.inedo.utils;
 
-import com.inedo.proget.api.ProGetConfig;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Properties;
+
+import com.inedo.proget.api.ProGetConfig;
 
 /**
  * Reads and supplies properties from the config.properties file that are required by the framework.
@@ -23,6 +23,7 @@ public class TestConfig {
     private static String apiKey;
     private static String username;
     private static String password;
+    private static boolean trustAllCertificates;
 
     /** Ensure properties have been loaded before any property is used. */
     static {
@@ -43,6 +44,7 @@ public class TestConfig {
         apiKey = getOptionalProperty(prop, "apiKey");
         username = getOptionalProperty(prop, "username");
         password = getOptionalProperty(prop, "password");
+        trustAllCertificates = Boolean.valueOf(getOptionalProperty(prop, "trustAllCertificates"));
     }
 
     /**
@@ -149,6 +151,7 @@ public class TestConfig {
         config.apiKey = apiKey;
         config.user = username;
         config.password = password;
+        config.trustAllCertificates = trustAllCertificates;
 
         return config;
     }

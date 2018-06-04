@@ -3,14 +3,9 @@ package com.inedo.http;
 import java.net.Authenticator;
 import java.net.PasswordAuthentication;
 import java.net.Proxy;
-import java.security.cert.X509Certificate;
 import java.util.Arrays;
-import javax.net.ssl.HostnameVerifier;
+
 import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 
 /**
  * Allows setting of default properties used by all subsequent HttpEasy requests. 
@@ -19,38 +14,35 @@ import javax.net.ssl.X509TrustManager;
  */
 public class HttpEasyDefaults {
 	// Static values are set by RestRequestDefaults and apply to all requests
-	private static Proxy proxy = Proxy.NO_PROXY;
+    private static boolean trustAllCertificates = false;
+    private static Proxy proxy = Proxy.NO_PROXY;
 	private static String proxyUser = null;
 	private static String proxyPassword = null;
 	private static boolean bypassProxyForLocalAddresses = true;
 	private static String baseURI = "";
 	private static EventManager eventManager = new EventManager();
-	
-	/**
-	 * Create all-trusting certificate verifier.
-	 * @return A self reference
-	 */
-	public HttpEasyDefaults trustAllCertificates() {
-		// Create a trust manager that does not validate certificate chains
-		TrustManager[] trustAllCerts = new TrustManager[] {
-				new X509TrustManager() {
-					public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-						return null;
-					}
-					
-					public void checkClientTrusted(X509Certificate[] certs, String authType) {
-					}
-					
-					public void checkServerTrusted(X509Certificate[] certs, String authType) {
-					}
-				}
-		};
 
-		// Install the all-trusting trust manager
+    /**
+     * Create all-trusting certificate and host name verifier per HTTPS request.
+     * 
+     * @param trustAllCertificates Set to true to trust all certificates, the default is false
+     * @return A self reference
+     */
+    public HttpEasyDefaults trustAllCertificates(boolean trustAllCertificates) {
+        HttpEasyDefaults.trustAllCertificates = trustAllCertificates;
+
+        return this;
+    }
+
+	/**
+     * Create a global all-trusting certificate verifier.
+     * This might have unintended consequences and you should consider using the {@link #trustAllCertificates(boolean)} instead.
+     * 
+     * @return A self reference
+     */
+	public HttpEasyDefaults trustAllCertificates() {
 		try {
-			SSLContext sc = SSLContext.getInstance("SSL");
-			sc.init(null, trustAllCerts, new java.security.SecureRandom());
-			HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+            HttpsURLConnection.setDefaultSSLSocketFactory(SSLUtilities.getTrustAllCertificatesSocketFactory());
 		} catch (Exception e) {
 		    eventManager.error(e.getMessage(), e);
 		}
@@ -59,23 +51,17 @@ public class HttpEasyDefaults {
 	}
 
 	/**
-	 * Create all-trusting host name verifier.
-	 * 
-	 * @return A self reference
-	 */
+     * Create all-trusting host name verifier.
+     * This might have uninteded consequences and you should consider using the {@link #trustAllCertificates(boolean)} instead.
+     * 
+     * @return A self reference
+     */
 	public HttpEasyDefaults allowAllHosts() {
-		HostnameVerifier allHostsValid = new HostnameVerifier() {
-			public boolean verify(String hostname, SSLSession session) {
-				return true;
-			}
-		};
-
-		// Install the all-trusting host verifier
-		HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
+        HttpsURLConnection.setDefaultHostnameVerifier(SSLUtilities.getTrustAllHostsVerifier());
 		
 		return this;
 	}
-	
+
 	/**
 	 * Add default authorization.
 	 * @param username username if need NTLM authentication format would be DOMAIN\\user
@@ -191,6 +177,10 @@ public class HttpEasyDefaults {
 	private static void setBypassProxyForLocalAddresses(boolean bypassLocalAddresses) {
 		HttpEasyDefaults.bypassProxyForLocalAddresses = bypassLocalAddresses;
 	}
+
+    public static boolean isTrustAllCertificates() {
+        return trustAllCertificates;
+    }
 
     static EventManager getEventManager() {
         return eventManager;

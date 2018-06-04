@@ -10,6 +10,8 @@ import java.net.Proxy;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidParameterException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -20,6 +22,7 @@ import java.util.Map.Entry;
 import javax.net.ssl.HttpsURLConnection;
 
 import org.apache.commons.codec.binary.Base64;
+
 import com.google.common.net.MediaType;
 
 /**
@@ -168,6 +171,7 @@ public class HttpEasy {
 	private Map<String, Object> headers = new LinkedHashMap<String, Object>();
 	private List<Field> fields = new ArrayList<Field>();
 	private Integer timeout = null;
+    private boolean trustAllCertificates = false;
 	
 	/**
 	 * @return Default settings object
@@ -232,10 +236,22 @@ public class HttpEasy {
 	}
 
 	/**
-	 * Set the path part of the URL for the end-point.  baseURI, path and query are helpers only and any of these can take full URL.
-	 * @param path The host and port of the URL
-	 * @return A self reference
-	 */
+     * Instruct the current request to skip validation of any SSL certificates. Only applies to HTTPS connections.
+     * 
+     * @param trustAll Set to true to trust all certificates, the default is false
+     * @return A self reference
+     */
+    public HttpEasy trustAllCertificates(boolean trustAll) {
+        this.trustAllCertificates = trustAll;
+        return this;
+    }
+
+    /**
+     * Set the path part of the URL for the end-point. baseURI, path and query are helpers only and any of these can take full URL.
+     * 
+     * @param path The host and port of the URL
+     * @return A self reference
+     */
 	public HttpEasy path(String path) {
 		this.path = path;
 		return this;
@@ -579,8 +595,8 @@ public class HttpEasy {
 		DataWriter dataWriter = null;
 		URL url = getURL();
 		HttpURLConnection connection = getConnection(url);
-        
-		setHeaders(connection);
+
+        setHeaders(connection);
 
 		connection.setRequestMethod(requestMethod);
 		connection.setUseCaches(false);
@@ -682,7 +698,7 @@ public class HttpEasy {
 		return false;
 	}
 
-	private HttpURLConnection getConnection(URL url) throws IOException {
+    private HttpURLConnection getConnection(URL url) throws IOException {
 		HttpURLConnection connection;
 		Proxy useProxy = HttpEasyDefaults.getProxy();
 
@@ -690,8 +706,17 @@ public class HttpEasy {
 			useProxy = Proxy.NO_PROXY;
 		}
 
-		if (url.getProtocol().equals("https")) {
+        if (url.getProtocol().equalsIgnoreCase("https")) {
 			connection = (HttpsURLConnection) url.openConnection(useProxy);
+			
+            if (trustAllCertificates || HttpEasyDefaults.isTrustAllCertificates()) {
+                try {
+                    ((HttpsURLConnection) connection).setHostnameVerifier(SSLUtilities.getTrustAllHostsVerifier());
+                    ((HttpsURLConnection) connection).setSSLSocketFactory(SSLUtilities.getTrustAllCertificatesSocketFactory());
+                } catch (KeyManagementException | NoSuchAlgorithmException e) {
+                    throw new IOException("Unable to trust all certificates", e);
+                }
+			}
 		} else {
 			connection = (HttpURLConnection) url.openConnection(useProxy);
 		}

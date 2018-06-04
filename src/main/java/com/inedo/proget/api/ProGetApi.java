@@ -38,13 +38,8 @@ public class ProGetApi implements Serializable {
 		
 		HttpEasy.withDefaults()
                 .baseUrl(config.url)
-                .listeners(logWriter);
-
-        if (config.trustAllCertificates) {
-            HttpEasy.withDefaults()
-                    .allowAllHosts()
-                    .trustAllCertificates();
-        }
+                .listeners(logWriter)
+                .trustAllCertificates(config.trustAllCertificates);
 	}
 
 	/**
