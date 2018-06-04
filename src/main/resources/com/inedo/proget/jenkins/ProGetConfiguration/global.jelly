@@ -13,29 +13,24 @@
     so it should be straightforward to find them.
   -->
   <f:section title="Inedo ProGet">
-	<f:entry field="url" title="URL" >
+	<f:entry field="url" title="ProGet URL" >
       <f:textbox />
     </f:entry>
     <f:entry field="apiKey" title="API Key" >
       <f:textbox />
     </f:entry>
-<!--
-    <f:entry field="authentication" title="Authentication Method" >
-    	<f:select />
-    </f:entry>
-    <f:entry field="domain" title="Domain" >
-      <f:textbox />
-    </f:entry>
--->
 	<f:entry field="user" title="User" >
       <f:textbox />
     </f:entry>
     <f:entry field="password" title="Password" >
       <f:password />
     </f:entry>
-    
+    <f:entry field="trustAllCertificates" title="Trust All Certificates" >
+      <f:checkbox />
+    </f:entry>
+        
     <f:validateButton
        title="${%Test Connection}" progress="${%Testing...}"
-       method="testConnection" with="url,authentication,domain,user,password,apiKey" />
+       method="testConnection" with="url,authentication,domain,user,password,apiKey,trustAllCertificates" />
   </f:section>
 </j:jelly>

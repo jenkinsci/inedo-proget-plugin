@@ -12,9 +12,9 @@ import com.inedo.http.HttpEasy;
 import com.inedo.proget.domain.Feed;
 import com.inedo.proget.domain.ProGetPackage;
 import com.inedo.proget.domain.Version;
+import com.inedo.proget.jenkins.DownloadFormat;
 import com.inedo.proget.jenkins.GlobalConfig;
 import com.inedo.proget.jenkins.JenkinsLogWriter;
-import com.inedo.proget.jenkins.DownloadFormat;
 
 /**
  * BuildMaster json api interface 
@@ -37,10 +37,14 @@ public class ProGetApi implements Serializable {
 		this.config = config;
 		
 		HttpEasy.withDefaults()
-			.allowAllHosts()
-			.trustAllCertificates()
-			.baseUrl(config.url)
-			.listeners(logWriter);
+                .baseUrl(config.url)
+                .listeners(logWriter);
+
+        if (config.trustAllCertificates) {
+            HttpEasy.withDefaults()
+                    .allowAllHosts()
+                    .trustAllCertificates();
+        }
 	}
 
 	/**
@@ -149,7 +153,7 @@ public class ProGetApi implements Serializable {
 		
 		HttpEasy request = HttpEasy.request()
                 .path(path)
-		.authorization(config.user, config.password)
+                .authorization(config.user, config.password)
                 .urlParameters(feedName, groupName, packageName, version);
 		
 		if (latest) {

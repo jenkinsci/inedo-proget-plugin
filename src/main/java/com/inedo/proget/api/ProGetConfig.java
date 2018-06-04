@@ -14,11 +14,10 @@ public class ProGetConfig implements Serializable {
     
 	// Global Configuration Items
 	public String url;
-//	public String authentication;
-//	public String domain;
+    public String apiKey;
 	public String user;
 	public String password;
-	public String apiKey;
+    public boolean trustAllCertificates;
     
 	/**
 	 * Get the name of the host the service is running on.
@@ -31,5 +30,4 @@ public class ProGetConfig implements Serializable {
 			return "Unknown";
 		}
 	}
-
 }

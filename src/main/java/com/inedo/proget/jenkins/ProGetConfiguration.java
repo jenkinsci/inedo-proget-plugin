@@ -1,10 +1,8 @@
 package com.inedo.proget.jenkins;
 
 import java.io.IOException;
-import javax.servlet.ServletException;
 
-import jenkins.model.GlobalConfiguration;
-import net.sf.json.JSONObject;
+import javax.servlet.ServletException;
 
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
@@ -16,6 +14,8 @@ import hudson.Extension;
 import hudson.model.Descriptor;
 import hudson.util.FormValidation;
 import hudson.util.Secret;
+import jenkins.model.GlobalConfiguration;
+import net.sf.json.JSONObject;
 
 /**
  * Has fields for global configuration
@@ -35,9 +35,10 @@ public class ProGetConfiguration extends GlobalConfiguration {
          * If you don't want fields to be persisted, use <tt>transient</tt>.
          */
     	private String url;
+        private String apiKey;
     	private String user;
         private Secret password;
-        private String apiKey;
+        private boolean trustAllCertificates;
         
         public DescriptorImpl() {
             super(ProGetConfiguration.class);
@@ -66,6 +67,10 @@ public class ProGetConfiguration extends GlobalConfiguration {
             url = value;
         }
 
+        public void setApiKey(String value) {
+            apiKey = value;
+        }
+
         public void setUser(String value) {
             user = value;
         }
@@ -74,8 +79,8 @@ public class ProGetConfiguration extends GlobalConfiguration {
             password = Secret.fromString(value);
         }
         
-        public void setApiKey(String value) {
-            apiKey = value;
+        public void setTrustAllCertificates(boolean value) {
+            trustAllCertificates = value;
         }
         
         /**
@@ -85,6 +90,10 @@ public class ProGetConfiguration extends GlobalConfiguration {
             return url;
         }
         
+        public String getApiKey() {
+            return apiKey;
+        }
+
         public String getUser() {
             return user;
         }
@@ -93,8 +102,8 @@ public class ProGetConfiguration extends GlobalConfiguration {
             return Secret.toString(password);
         }
         
-        public String getApiKey() {
-            return apiKey;
+        public boolean getTrustAllCertificates() {
+            return trustAllCertificates;
         }
         
         public boolean isRequiredFieldsConfigured(boolean includeUsername) {
@@ -149,17 +158,19 @@ public class ProGetConfiguration extends GlobalConfiguration {
          *  ProGet connection test
          */
 		public FormValidation doTestConnection(
-			@QueryParameter("url") final String url,
-			@QueryParameter("user") final String user,
-			@QueryParameter("password") final String password,
-			@QueryParameter("apiKey") final String apiKey) throws IOException, ServletException {
+                @QueryParameter("url") final String url,
+                @QueryParameter("apiKey") final String apiKey,
+                @QueryParameter("user") final String user,
+                @QueryParameter("password") final String password,
+                @QueryParameter("trustAllCertificates") final boolean trustAllCertificates) throws IOException, ServletException {
 	
 			ProGetConfig config = new ProGetConfig();
 			
 			config.url = url;
+            config.apiKey = apiKey;
 			config.user = user;
 			config.password = password;
-			config.apiKey = apiKey;
+            config.trustAllCertificates = trustAllCertificates;
 			
 			ProGetApi proget = new ProGetApi(config, new JenkinsConsoleLogWriter());
 
