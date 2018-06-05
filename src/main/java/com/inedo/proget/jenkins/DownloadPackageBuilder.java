@@ -1,17 +1,9 @@
 package com.inedo.proget.jenkins;
 
-import hudson.Launcher;
-import hudson.AbortException;
-import hudson.Extension;
-import hudson.FilePath;
-import hudson.model.Run;
-import hudson.model.TaskListener;
-import hudson.model.AbstractProject;
-import hudson.tasks.Builder;
-import hudson.util.ListBoxModel;
-import jenkins.security.MasterToSlaveCallable;
-import jenkins.tasks.SimpleBuildStep;
-import hudson.tasks.BuildStepDescriptor;
+import java.io.File;
+import java.io.IOException;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -24,10 +16,19 @@ import com.inedo.proget.domain.Feed;
 import com.inedo.proget.domain.ProGetPackage;
 import com.inedo.proget.domain.Version;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Set;
-import java.util.TreeSet;
+import hudson.AbortException;
+import hudson.Extension;
+import hudson.FilePath;
+import hudson.Launcher;
+import hudson.model.AbstractProject;
+import hudson.model.Run;
+import hudson.model.TaskListener;
+import hudson.tasks.BuildStepDescriptor;
+import hudson.tasks.Builder;
+import hudson.util.ComboBoxModel;
+import hudson.util.ListBoxModel;
+import jenkins.security.MasterToSlaveCallable;
+import jenkins.tasks.SimpleBuildStep;
 
 /**
  * Downloads a universal package from ProGet.
@@ -100,7 +101,7 @@ public class DownloadPackageBuilder extends Builder implements SimpleBuildStep {
         			helper.expandVariable(feedName), 
         			helper.expandVariable(groupName), 
         			helper.expandVariable(packageName), 
-        			version, 
+        			helper.expandVariable(version),
         			downloadFormat, 
         			downloadTo));
 
@@ -256,13 +257,13 @@ public class DownloadPackageBuilder extends Builder implements SimpleBuildStep {
             return items;
         }
     	
-    	public ListBoxModel doFillGroupNameItems(@QueryParameter String feedName) throws IOException {
+        public ComboBoxModel doFillGroupNameItems(@QueryParameter String feedName) throws IOException {
         	if (!getIsProGetAvailable()) {
         		return null;
         	}
         	
         	Set<String> set = new TreeSet<String>();
-        	ListBoxModel items = new ListBoxModel();
+            ComboBoxModel items = new ComboBoxModel();
         	Feed feed = proget.getFeed(feedName);
     		ProGetPackage[] packages = proget.getPackages(feed.Feed_Id);
     		
@@ -278,13 +279,13 @@ public class DownloadPackageBuilder extends Builder implements SimpleBuildStep {
             return items;
         }
     	
-    	public ListBoxModel doFillPackageNameItems(@QueryParameter String feedName, @QueryParameter String groupName) throws IOException {
+        public ComboBoxModel doFillPackageNameItems(@QueryParameter String feedName, @QueryParameter String groupName) throws IOException {
         	if (!getIsProGetAvailable()) {
         		return null;
         	}
         	
         	Set<String> set = new TreeSet<String>();
-        	ListBoxModel items = new ListBoxModel();
+            ComboBoxModel items = new ComboBoxModel();
         	Feed feed = proget.getFeed(feedName);
     		ProGetPackage[] packages = proget.getPackages(feed.Feed_Id);
     		
@@ -302,13 +303,13 @@ public class DownloadPackageBuilder extends Builder implements SimpleBuildStep {
             return items;
         }
     	
-    	public ListBoxModel doFillVersionItems(@QueryParameter String feedName, @QueryParameter String groupName, @QueryParameter String packageName) throws IOException {
+        public ComboBoxModel doFillVersionItems(@QueryParameter String feedName, @QueryParameter String groupName, @QueryParameter String packageName) throws IOException {
         	if (!getIsProGetAvailable()) {
         		return null;
         	}
         	
         	Set<String> set = new TreeSet<String>();
-        	ListBoxModel items = new ListBoxModel();
+            ComboBoxModel items = new ComboBoxModel();
         	Feed feed = proget.getFeed(feedName);
     		Version[] versions = proget.getPackageVersions(feed.Feed_Id, groupName, packageName);
         	

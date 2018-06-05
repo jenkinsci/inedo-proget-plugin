@@ -1,19 +1,13 @@
 package com.inedo.proget.jenkins;
 
-import hudson.Launcher;
-import hudson.AbortException;
-import hudson.Extension;
-import hudson.FilePath;
-import hudson.util.ComboBoxModel;
-import hudson.util.FormValidation;
-import hudson.util.ListBoxModel;
-import jenkins.security.MasterToSlaveCallable;
-import jenkins.tasks.SimpleBuildStep;
-import hudson.model.Run;
-import hudson.model.TaskListener;
-import hudson.model.AbstractProject;
-import hudson.tasks.Builder;
-import hudson.tasks.BuildStepDescriptor;
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+import java.util.Scanner;
+import java.util.Set;
+import java.util.TreeSet;
+
+import javax.servlet.ServletException;
 
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.AncestorInPath;
@@ -29,14 +23,20 @@ import com.inedo.proget.domain.Feed;
 import com.inedo.proget.domain.PackageMetadata;
 import com.inedo.proget.domain.ProGetPackage;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-import java.util.Scanner;
-import java.util.Set;
-import java.util.TreeSet;
-
-import javax.servlet.ServletException;
+import hudson.AbortException;
+import hudson.Extension;
+import hudson.FilePath;
+import hudson.Launcher;
+import hudson.model.AbstractProject;
+import hudson.model.Run;
+import hudson.model.TaskListener;
+import hudson.tasks.BuildStepDescriptor;
+import hudson.tasks.Builder;
+import hudson.util.ComboBoxModel;
+import hudson.util.FormValidation;
+import hudson.util.ListBoxModel;
+import jenkins.security.MasterToSlaveCallable;
+import jenkins.tasks.SimpleBuildStep;
 
 /**
  * Uploads a universal package from ProGet.
@@ -243,17 +243,17 @@ public class UploadPackageBuilder extends Builder implements SimpleBuildStep {
     }
 	
 	public PackageMetadata buildMetadata(JenkinsHelper helper) {
-		PackageMetadata metadata = new PackageMetadata();
+		PackageMetadata pkgMetadata = new PackageMetadata();
 
-		metadata.group = helper.expandVariable(getGroupName());
-		metadata.packageName = helper.expandVariable(getPackageName());
-		metadata.version = helper.expandVariable(getVersion());
-		metadata.title = getTitle();
-		metadata.description = getDescription();
-		metadata.icon = getIcon();
+        pkgMetadata.group = helper.expandVariable(groupName);
+        pkgMetadata.packageName = helper.expandVariable(packageName);
+        pkgMetadata.version = helper.expandVariable(version);
+        pkgMetadata.title = title;
+        pkgMetadata.description = description;
+        pkgMetadata.icon = icon;
 				
-		if (getMetadata() != null) {
-			try (Scanner scanner = new Scanner(getMetadata())) {
+        if (metadata != null) {
+            try (Scanner scanner = new Scanner(metadata)) {
 				while (scanner.hasNextLine()){
 					String line = scanner.nextLine().trim();
 					
@@ -267,7 +267,7 @@ public class UploadPackageBuilder extends Builder implements SimpleBuildStep {
 						String name = line.substring(0, pos).trim();
 					    String value = line.substring(pos + 1).trim().replace("\\", "\\\\");
 					    
-					    metadata.extendedAttributes.put(name, helper.expandVariable(value));
+					    pkgMetadata.extendedAttributes.put(name, helper.expandVariable(value));
 				    } else {
 				    	return null;
 					}
@@ -281,13 +281,13 @@ public class UploadPackageBuilder extends Builder implements SimpleBuildStep {
 					String dependency = scanner.nextLine().trim();
 					
 					if (!dependency.isEmpty()) {
-					    metadata.dependencies.add(dependency);
+					    pkgMetadata.dependencies.add(dependency);
 					}
 			    } 
 			}
 		}
 		
-		return metadata;
+		return pkgMetadata;
 	}
 	    
 	@Symbol("uploadProgetPackage")

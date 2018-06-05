@@ -16,21 +16,21 @@
     
   <f:entry title="Group name" field="groupName" >
     <j:choose>
-      <j:when test="${descriptor.isProGetAvailable}"><f:select /></j:when>
+      <j:when test="${descriptor.isProGetAvailable}"><f:combobox /></j:when>
       <j:otherwise><f:textbox /></j:otherwise>
     </j:choose>
   </f:entry>
     
   <f:entry title="Package name" field="packageName" >
     <j:choose>
-      <j:when test="${descriptor.isProGetAvailable}"><f:select /></j:when>
+      <j:when test="${descriptor.isProGetAvailable}"><f:combobox /></j:when>
       <j:otherwise><f:textbox /></j:otherwise>
     </j:choose>
   </f:entry>
     
   <f:entry title="Version" field="version" >
     <j:choose>
-      <j:when test="${descriptor.isProGetAvailable}"><f:select default="Latest"/></j:when>
+      <j:when test="${descriptor.isProGetAvailable}"><f:combobox default="Latest"/></j:when>
       <j:otherwise><f:textbox default="Latest"/></j:otherwise>
     </j:choose>
   </f:entry>
