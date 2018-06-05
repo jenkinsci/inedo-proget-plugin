@@ -1,19 +1,9 @@
 package com.inedo.proget.api;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import com.inedo.proget.api.ProGetApi;
-import com.inedo.proget.api.ProGetPackager.ZipItem;
-import com.inedo.proget.domain.Feed;
-import com.inedo.proget.domain.ProGetPackage;
-import com.inedo.proget.domain.Version;
-import com.inedo.proget.jenkins.GlobalConfig;
-import com.inedo.proget.jenkins.JenkinsConsoleLogWriter;
-import com.inedo.proget.jenkins.JenkinsHelper;
-import com.inedo.proget.jenkins.UploadPackageBuilder;
-import com.inedo.proget.jenkins.DownloadFormat;
-import com.inedo.utils.MockServer;
-import com.inedo.utils.TestConfig;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.startsWith;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -27,13 +17,28 @@ import java.util.List;
 import java.util.zip.ZipFile;
 
 import org.apache.commons.io.IOUtils;
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+
+import com.inedo.proget.api.ProGetPackager.ZipItem;
+import com.inedo.proget.domain.Feed;
+import com.inedo.proget.domain.ProGetPackage;
+import com.inedo.proget.domain.Version;
+import com.inedo.proget.jenkins.DownloadFormat;
+import com.inedo.proget.jenkins.GlobalConfig;
+import com.inedo.proget.jenkins.JenkinsConsoleLogWriter;
+import com.inedo.proget.jenkins.JenkinsHelper;
+import com.inedo.proget.jenkins.UploadPackageBuilder;
+import com.inedo.utils.MockServer;
+import com.inedo.utils.TestConfig;
 
 /**
  * Tests for the ProGet API class
  * 
- * TODO: There is timing issue when running all tests against a live server as tests randomly fail.  Running one at a time works fine.   
+ * TODO: Verify that the mocked server uses the same data as the real server
  * 
  * @author Andrew Sumner
  */
@@ -116,7 +121,11 @@ public class ProGetApiTests {
 	@Test
 	public void getPackageVersions() throws IOException  {
 		Feed feed = proget.getFeed("Example");
-		ProGetPackage pkg = proget.getPackages(feed.Feed_Id)[0];
+        ProGetPackage[] pkgs = proget.getPackages(feed.Feed_Id);
+
+        assertThat("Expect at least one package", pkgs.length, is(greaterThan(0)));
+
+        ProGetPackage pkg = pkgs[0];
     	Version[] versions = proget.getPackageVersions(feed.Feed_Id, pkg.Group_Name, pkg.Package_Name);
     	
         assertThat("Expect at least one version", versions.length, is(greaterThan(0)));

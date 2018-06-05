@@ -164,10 +164,12 @@ public class ProGetApi implements Serializable {
 	
 	public void uploadPackage(String feedName, File progetPackage) throws IOException {
 		HttpEasy.request()
-				.path("upack/{feed-name}/upload")
-				.urlParameters(feedName)
-				.data(progetPackage, MediaType.ZIP)
-				.authorization(config.user, config.password)
-				.post();
+                // .header("x-Apikey", config.apiKey)
+                // .queryParam("key", config.apiKey)
+                .path("upack/{feed-name}/upload")
+                .urlParameters(feedName)
+                .data(progetPackage, MediaType.ZIP)
+                .authorization(config.user, config.password)
+                .post();
 	}
 }
