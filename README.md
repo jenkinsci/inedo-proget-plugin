@@ -40,4 +40,26 @@ To login the username will be admin and the password can be found in <project ro
     * Installed and configured with an API key
     * Add a Feed called Example using the universal package format
     * Add a package to the feed - use the ProGetApiTests.uploadPackage() method as this will put an appropriate sized file there that will allow the tests to pass
-* Jenkins System Configuration page updated with BuildMaster server details and the Test Connection button returning success
+* Jenkins:
+    * System Configuration page updated with BuildMaster server details and the Test Connection button returning success
+    * test-freestyle job added to create a package, upload it, and download it
+    * test-pipleline job with this pipeline script definition:
+    
+```
+node {
+    ws {
+        bat '''DEL *.TXT /Q
+        		DEL *.upack /Q
+            ECHO Build Tag: %BUILD_TAG% > Example.txt'''
+        uploadProgetPackage artifacts: 'Example.txt', feedName: 'Example', groupName: 'jenkins/pipleline', packageName: 'JenkinsPackage', version: "1.0.${BUILD_NUMBER}"
+        downloadProgetPackage downloadFolder: "${WORKSPACE}", downloadFormat: 'pkg', feedName: 'Example', groupName: 'jenkins/freestyle', packageName: 'JenkinsPackage', version: "1.0.${BUILD_NUMBER}"
+    }
+}
+```
+
+
+## Automated
+
+Update <project root>/test.properties with the required details and run the tests.  If useMockServer is false then the tests will be run against the installed application, if true it will run against a mock server.  While the mock server is useful for unit testing, the real service is required to test the plugin against application upgrades.
+
+The tests mainly verify the ProGet APIs are still functioning as expected, although there are a couple of tests that attempt to use the plugin from a mocked Jenkins job.  
