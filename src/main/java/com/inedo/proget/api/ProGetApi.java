@@ -9,9 +9,10 @@ import java.net.URL;
 
 import com.google.common.net.MediaType;
 import com.inedo.http.HttpEasy;
+import com.inedo.http.JsonReader;
 import com.inedo.proget.domain.Feed;
 import com.inedo.proget.domain.ProGetPackage;
-import com.inedo.proget.domain.Version;
+import com.inedo.proget.domain.PackageVersion;
 import com.inedo.proget.jenkins.DownloadFormat;
 import com.inedo.proget.jenkins.GlobalConfig;
 import com.inedo.proget.jenkins.JenkinsLogWriter;
@@ -28,6 +29,9 @@ public class ProGetApi implements Serializable {
     private static final long serialVersionUID = 1L;
     
     private ProGetConfig config;
+
+    private boolean recordResult = false;
+    private String jsonString;
 	
 	public ProGetApi(JenkinsLogWriter listener) {
 		this(GlobalConfig.getProGetConfig(), listener);
@@ -41,6 +45,14 @@ public class ProGetApi implements Serializable {
                 .listeners(logWriter)
                 .trustAllCertificates(config.trustAllCertificates);
 	}
+
+    public void setRecordJson(boolean record) {
+        this.recordResult = record;
+    }
+
+    public String getJsonString() {
+        return jsonString;
+    }
 
 	/**
 	 * Check that can connect to ProGet, and check the apiKey if configured.
@@ -80,24 +92,32 @@ public class ProGetApi implements Serializable {
 
 	/** Get all active feeds */
 	public Feed[] getFeeds() throws IOException {
-		Feed[] result = HttpEasy.request()
+        JsonReader reader = HttpEasy.request()
 				.path("api/json/Feeds_GetFeeds?API_Key={}&IncludeInactive_Indicator={}")
 				.urlParameters(config.apiKey, "N")
 				.get()
-				.getJsonReader()
-				.fromJson(Feed[].class);
+                .getJsonReader();
 		
-		return result;
+        if (recordResult) {
+            jsonString = reader.asPrettyString();
+        }
+
+        return reader.fromJson(Feed[].class);
 	}	
 
 	/** Gets the details of a feed by its name */
 	public Feed getFeed(String feedName) throws IOException {
-		Feed feed = HttpEasy.request()
+        JsonReader reader = HttpEasy.request()
 				.path("api/json/Feeds_GetFeed?API_Key={}&Feed_Name={}")
 				.urlParameters(config.apiKey, feedName)
 				.get()
-				.getJsonReader()
-				.fromJson(Feed.class);
+                .getJsonReader();
+
+        if (recordResult) {
+            jsonString = reader.asPrettyString();
+        }
+
+        Feed feed = reader.fromJson(Feed.class);
 		
 		if (feed == null) {
 			throw new IOException("Feed " + feedName + " was not found");
@@ -108,22 +128,32 @@ public class ProGetApi implements Serializable {
 		
 	/** Gets the packages in a ProGet feed */
 	public ProGetPackage[] getPackages(String feedId) throws IOException {
-		return HttpEasy.request()
+        JsonReader reader = HttpEasy.request()
 				.path("api/json/ProGetPackages_GetPackages?API_Key={}&Feed_Id={}&IncludeVersions_Indicator=Y")
 				.urlParameters(config.apiKey, feedId, "Y")
 				.get()
-				.getJsonReader()
-				.fromJson(ProGetPackage[].class);
+                .getJsonReader();
+
+        if (recordResult) {
+            jsonString = reader.asPrettyString();
+        }
+
+        return reader.fromJson(ProGetPackage[].class);
 	}
 
 	/** Gets the package versions in a ProGet feed */
-	public Version[] getPackageVersions(String feedId, String groupName, String packageName) throws IOException {
-		return HttpEasy.request()
+	public PackageVersion[] getPackageVersions(String feedId, String groupName, String packageName) throws IOException {
+        JsonReader reader = HttpEasy.request()
 				.path("api/json/ProGetPackages_GetPackageVersions?API_Key={}&Feed_Id={}&Group_Name={}&Package_Name={}")
 				.urlParameters(config.apiKey, feedId, groupName, packageName)
 				.get()
-				.getJsonReader()
-				.fromJson(Version[].class);
+                .getJsonReader();
+
+        if (recordResult) {
+            jsonString = reader.asPrettyString();
+        }
+
+        return reader.fromJson(PackageVersion[].class);
 	}
 	
 	

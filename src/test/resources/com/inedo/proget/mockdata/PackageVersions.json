@@ -1,0 +1,28 @@
+[
+  {
+    "ProGetPackage_Id": 2,
+    "Package_Name": "ExamplePackage",
+    "Group_Name": "andrew/sumner/proget",
+    "Version_Text": "0.0.1",
+    "PackageHash_Bytes": "I13MbkzmIC0hAWAQ4PuqD2Y0xzc\u003d",
+    "PackageMetadata_Bytes": "e30\u003d",
+    "Published_Date": "2018-06-05T01:51:18.433Z",
+    "Package_Size": 344,
+    "Download_Count": 0,
+    "Cached_Indicator": false,
+    "Virtual_Indicator": false
+  },
+  {
+    "ProGetPackage_Id": 2,
+    "Package_Name": "ExamplePackage",
+    "Group_Name": "andrew/sumner/proget",
+    "Version_Text": "0.0.3",
+    "PackageHash_Bytes": "w+/EiT7o+2AYv+QyvY2zecCwpEc\u003d",
+    "PackageMetadata_Bytes": "eyJ0aXRsZSI6IkV4YW1wbGUgVGl0bGUiLCJpY29uIjoicGFja2FnZTovLzFVUC5pY28iLCJkZXNjcmlwdGlvbiI6IlRoaXMgY29udGFpbnMgW2V4YW1wbGVdKGh0dHA6Ly9leGFtcGxlLm5ldCkgZmlsZXMgc3BlY2lmaWMgdG8gdGVzdCBzdWl0ZSIsImRlcGVuZGVuY2llcyI6WyJteS5kZXBlbmRlbmN5Om9uZSIsIm15LmRlcGVuZGVuY3k6dHdvIl0sInJlYWxseSI6Im9mIGNvdXJzZSIsImZpbGUiOiJDOlxcdGhpc1xcaXNcXGFcXGZvbGRlclxccGF0aCIsImN1c3RvbSI6InllcyJ9",
+    "Published_Date": "2018-06-05T00:49:39.303Z",
+    "Package_Size": 50266,
+    "Download_Count": 14,
+    "Cached_Indicator": false,
+    "Virtual_Indicator": false
+  }
+]

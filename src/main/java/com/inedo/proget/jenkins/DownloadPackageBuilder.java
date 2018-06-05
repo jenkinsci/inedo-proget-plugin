@@ -14,7 +14,7 @@ import com.inedo.proget.api.ProGetConfig;
 import com.inedo.proget.api.ProGetPackager;
 import com.inedo.proget.domain.Feed;
 import com.inedo.proget.domain.ProGetPackage;
-import com.inedo.proget.domain.Version;
+import com.inedo.proget.domain.PackageVersion;
 
 import hudson.AbortException;
 import hudson.Extension;
@@ -311,10 +311,10 @@ public class DownloadPackageBuilder extends Builder implements SimpleBuildStep {
         	Set<String> set = new TreeSet<String>();
             ComboBoxModel items = new ComboBoxModel();
         	Feed feed = proget.getFeed(feedName);
-    		Version[] versions = proget.getPackageVersions(feed.Feed_Id, groupName, packageName);
+    		PackageVersion[] versions = proget.getPackageVersions(feed.Feed_Id, groupName, packageName);
         	
     		
-    		for (Version version : versions) {
+    		for (PackageVersion version : versions) {
         		set.add(version.Version_Text);
 			}
         	

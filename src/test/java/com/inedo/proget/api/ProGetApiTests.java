@@ -25,13 +25,15 @@ import org.junit.rules.TemporaryFolder;
 
 import com.inedo.proget.api.ProGetPackager.ZipItem;
 import com.inedo.proget.domain.Feed;
+import com.inedo.proget.domain.PackageVersion;
 import com.inedo.proget.domain.ProGetPackage;
-import com.inedo.proget.domain.Version;
 import com.inedo.proget.jenkins.DownloadFormat;
 import com.inedo.proget.jenkins.GlobalConfig;
 import com.inedo.proget.jenkins.JenkinsConsoleLogWriter;
 import com.inedo.proget.jenkins.JenkinsHelper;
 import com.inedo.proget.jenkins.UploadPackageBuilder;
+import com.inedo.utils.JsonCompare;
+import com.inedo.utils.MockData;
 import com.inedo.utils.MockServer;
 import com.inedo.utils.TestConfig;
 
@@ -45,6 +47,7 @@ import com.inedo.utils.TestConfig;
 public class ProGetApiTests {
 	private static MockServer mockServer = null;
 	private static ProGetApi proget;
+    private static boolean compareJson = false;
 		
 	@Rule
 	public TemporaryFolder folder = new TemporaryFolder();
@@ -58,11 +61,14 @@ public class ProGetApiTests {
 			config = mockServer.getProGetConfig();
 		} else {
 			config = TestConfig.getProGetConfig();
+            compareJson = true;
 		}
 
 		GlobalConfig.injectConfiguration(config);
 		
 		proget = new ProGetApi(new JenkinsConsoleLogWriter());
+        proget.setRecordJson(compareJson);
+
 	}
 	
 	@AfterClass
@@ -101,12 +107,29 @@ public class ProGetApiTests {
 			proget = new ProGetApi(config, new JenkinsConsoleLogWriter());
 		}
 	}
-	
+
+    @Test
+    public void getFeed() throws IOException {
+        Feed feed = proget.getFeed("Example");
+
+        assertThat("Expect to have a feed", feed.Feed_Name, is("Example"));
+
+        if (compareJson) {
+            JsonCompare.assertFieldsIdentical("Checking getFeed API result against mocked value",
+                    MockData.FEED.getAsString(), proget.getJsonString(), Feed.class);
+        }
+    }
+
 	@Test
-	public void getFeeds() throws IOException  {
+    public void getFeeds() throws IOException {
     	Feed[] feeds = proget.getFeeds();
     	
         assertThat("Expect to have a feed", feeds.length, is(greaterThan(0)));
+        
+        if (compareJson) {
+            JsonCompare.assertArrayFieldsIdentical("Checking getFeeds API result against mocked value",
+                    MockData.FEEDS.getAsString(), proget.getJsonString(), "Feed_Name", "Example", Feed.class);
+        }
 	}
 	
 	@Test
@@ -116,6 +139,11 @@ public class ProGetApiTests {
 		ProGetPackage[] packages = proget.getPackages(feed.Feed_Id);
     	
         assertThat("Expect more than one package", packages.length, is(greaterThan(0)));
+
+        if (compareJson) {
+            JsonCompare.assertArrayFieldsIdentical("Checking getPackages API result against mocked value",
+                    MockData.PACKAGES.getAsString(), proget.getJsonString(), "Package_Name", "ExamplePackage", ProGetPackage.class);
+        }
 	}
 	
 	@Test
@@ -126,9 +154,14 @@ public class ProGetApiTests {
         assertThat("Expect at least one package", pkgs.length, is(greaterThan(0)));
 
         ProGetPackage pkg = pkgs[0];
-    	Version[] versions = proget.getPackageVersions(feed.Feed_Id, pkg.Group_Name, pkg.Package_Name);
+    	PackageVersion[] versions = proget.getPackageVersions(feed.Feed_Id, pkg.Group_Name, pkg.Package_Name);
     	
         assertThat("Expect at least one version", versions.length, is(greaterThan(0)));
+
+        if (compareJson) {
+            JsonCompare.assertArrayFieldsIdentical("Checking getPackageVersions API result against mocked value",
+                    MockData.PACKAGE_VERSIONS.getAsString(), proget.getJsonString(), "Version_Text", "0.0.1", PackageVersion.class);
+        }
 	}
 	
 	@Test

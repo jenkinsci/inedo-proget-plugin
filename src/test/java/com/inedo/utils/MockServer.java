@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.URI;
+
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
@@ -17,9 +18,6 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
 
 import com.inedo.proget.api.ProGetConfig;
-import com.inedo.proget.domain.Feed;
-import com.inedo.proget.domain.ProGetPackage;
-import com.inedo.proget.domain.Version;
 
 /**
  * A Mocked server that replaces a live ProGet installation
@@ -69,28 +67,28 @@ public class MockServer {
 			
 			switch (method) {
 			case "Feeds_GetFeeds":
-				response.setEntity(new StringEntity(Feed.MULTIPLE));
+                response.setEntity(MockData.FEEDS.getInputSteam());
 				break;
 				
 			case "Feeds_GetFeed":
-				response.setEntity(new StringEntity(Feed.SINGLE));
+                response.setEntity(MockData.FEED.getInputSteam());
 				break;
 				
 			case "ProGetPackages_GetPackages":
-				response.setEntity(new StringEntity(ProGetPackage.MULTIPLE));
+                response.setEntity(MockData.PACKAGES.getInputSteam());
 				break;
 
 			case "ProGetPackages_GetPackageVersions":
-				response.setEntity(new StringEntity(Version.MULTIPLE));
+                response.setEntity(MockData.PACKAGE_VERSIONS.getInputSteam());
 				break;
 				
 			case "/upack/Example/upload":
 				response.setStatusCode(HttpStatus.SC_OK);
 				break;
 				
-			case "/upack/Default/download/andrew/sumner/example/examplepackage":		// Latest version 
-			case "/upack/Default/download/andrew/sumner/example/examplepackage/0.0.1":	// Specific version
-			case "/upack/Example/download/andrew/sumner/proget/ExamplePackage/0.0.3": 	// Plugin Test 
+            case "/upack/Example/download/andrew/sumner/proget/ExamplePackage": // Latest version
+            case "/upack/Default/download/andrew/sumner/proget/ExamplePackage/0.0.1": // Specific version
+            case "/upack/Example/download/andrew/sumner/proget/ExamplePackage/0.0.3": // Plugin Test
 				try {
 					File file = new File("src/test/resources/com/inedo/proget/api/example-0.0.1.upack");
 					FileEntity body = new FileEntity(file, ContentType.DEFAULT_BINARY);

@@ -1,0 +1,18 @@
+[
+  {
+    "Feed_Id": 1,
+    "Feed_Name": "Example",
+    "Active_Indicator": true,
+    "Cache_Connectors_Indicator": true,
+    "FeedType_Name": "ProGet",
+    "AllowUnknownLicenses_Indicator": true
+  },
+  {
+    "Feed_Id": 2,
+    "Feed_Name": "More",
+    "Active_Indicator": true,
+    "Cache_Connectors_Indicator": true,
+    "FeedType_Name": "ProGet",
+    "AllowUnknownLicenses_Indicator": true
+  }
+]

@@ -1,0 +1,29 @@
+[
+  {
+    "ProGetPackage_Id": 2,
+    "Feed_Id": 1,
+    "Group_Name": "andrew/sumner/proget",
+    "Package_Name": "ExamplePackage",
+    "Title_Text": "Example Title",
+    "Description_Text": "This contains [example](http://example.net) files specific to test suite",
+    "IconUrl_Text": "package://1UP.ico",
+    "LatestVersion_Text": "0.0.3",
+    "Download_Count": 14
+  },
+  {
+    "ProGetPackage_Id": 3,
+    "Feed_Id": 1,
+    "Group_Name": "jenkins/freestyle",
+    "Package_Name": "JenkinsPackage",
+    "LatestVersion_Text": "1.0.8",
+    "Download_Count": 7
+  },
+  {
+    "ProGetPackage_Id": 4,
+    "Feed_Id": 1,
+    "Group_Name": "jenkins/pipleline",
+    "Package_Name": "JenkinsPackage",
+    "LatestVersion_Text": "1.0.8",
+    "Download_Count": 0
+  }
+]

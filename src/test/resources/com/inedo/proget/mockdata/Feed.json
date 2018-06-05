@@ -1,0 +1,8 @@
+{
+  "Feed_Id": 1,
+  "Feed_Name": "Example",
+  "Active_Indicator": true,
+  "Cache_Connectors_Indicator": true,
+  "FeedType_Name": "ProGet",
+  "AllowUnknownLicenses_Indicator": true
+}
