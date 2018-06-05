@@ -52,7 +52,8 @@ repositories {
 dependencies {
 	compile 'org.apache.httpcomponents:httpclient:4.5.5'
 	compile 'com.google.code.gson:gson:2.8.5'
-//	compile 'com.google.guava:guava:19.0'
+	// Is required when running in Jenkins, but nowhere else
+	compile 'com.google.guava:guava:19.0'
 	
 	testCompile 'junit:junit:4.8.2'
 	testCompile 'org.mockito:mockito-core:2.18.3'
