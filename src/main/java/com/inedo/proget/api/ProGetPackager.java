@@ -50,7 +50,7 @@ public class ProGetPackager implements Serializable {
 		FileOutputStream fos = null;
 		
 		this.sourceFolder = baseFolder;
-		this.zipFile = new File(sourceFolder, metadata.packageName.replace(" ",  "") + ".unpack");
+        this.zipFile = new File(sourceFolder, metadata.packageName.replace(" ", "") + ".upack");
 		
 		try {
 			fos = new FileOutputStream(zipFile);

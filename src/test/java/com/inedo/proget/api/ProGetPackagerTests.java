@@ -1,7 +1,13 @@
 package com.inedo.proget.api;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.fail;
 
 import java.io.BufferedWriter;
@@ -134,7 +140,7 @@ public class ProGetPackagerTests {
 	            
 	            assertThat("Metadata contains custom attribute", json, containsString("custom"));
 	        }  catch (JsonParseException e) {
-	        	fail("unpack.json is not a valid json file");
+                fail("upack.json is not a valid json file");
 	        }
 	        
 	        ze = zip.getEntry("package/sample.data");
