@@ -18,8 +18,6 @@ class EventManager {
         isDefaultListener = eventManager.isDefaultListener();
     }
 
-
-
 	public void setLogRequestDetails(boolean logRequestDetails) {
 		this.setLogRequestDetails  = logRequestDetails;
 	}

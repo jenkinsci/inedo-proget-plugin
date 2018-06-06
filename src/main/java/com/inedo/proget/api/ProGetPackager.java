@@ -68,7 +68,7 @@ public class ProGetPackager implements Serializable {
 	}
 
 	private void appendMetadata(PackageMetadata metadata) throws IOException {
-		String newLine = System.getProperty("line.separator");;
+        String newLine = System.lineSeparator();
 		StringBuilder sb = new StringBuilder();
 		
 		sb.append("{");

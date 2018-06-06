@@ -105,7 +105,7 @@ class FormDataWriter implements DataWriter {
 		StringBuilder buf = new StringBuilder();
 
 		writeFieldBoundary();
-		buf.append("Content-Disposition: form-data; name=\"" + name + "\"").append(LINE_FEED);
+        buf.append("Content-Disposition: form-data; name=\"").append(name).append("\"").append(LINE_FEED);
 		// buf.append("Content-Type: text/plain; charset=utf-8").append(LINE_FEED);
 		buf.append(LINE_FEED);
 		buf.append(String.valueOf(value)).append(LINE_FEED);
@@ -119,13 +119,13 @@ class FormDataWriter implements DataWriter {
 	}
 
 	/**
-	 * Adds a upload file section to the request.
-	 * 
-	 * @param fieldName name attribute in <input type="file" name="..." />
-	 * @param uploadFile a File to be uploaded
-	 * @param type MediaType of the file
-	 * @throws IOException
-	 */
+     * Adds a upload file section to the request.
+     * 
+     * @param fieldName name attribute in <input type="file" name="..." />
+     * @param uploadFile a File to be uploaded
+     * @param type MediaType of the file
+     * @throws IOException If unable to read the response
+     */
 	private void addFilePart(String fieldName, File uploadFile, MediaType type) throws IOException {
 		try (FileInputStream inputStream = new FileInputStream(uploadFile)) {
 			addFilePart(fieldName, inputStream, type, uploadFile.getName());
@@ -133,23 +133,23 @@ class FormDataWriter implements DataWriter {
 	}
 
 	/**
-	 * Adds a upload stream section to the request.
-	 * 
-	 * @param fieldName name attribute in <input type="file" name="..." />
-	 * @param inputStream a File to be uploaded
-	 * @param type MediaType of the file
-	 * @param fileName name of file to be uploaded
-	 * @throws IOException
-	 */
+     * Adds a upload stream section to the request.
+     * 
+     * @param fieldName name attribute in <input type="file" name="..." />
+     * @param inputStream a File to be uploaded
+     * @param type MediaType of the file
+     * @param fileName name of file to be uploaded
+     * @throws IOException If unable to read the response
+     */
 	private void addFilePart(String fieldName, InputStream inputStream, MediaType type, String fileName) throws IOException {
 		StringBuilder buf = new StringBuilder();
 
 		writeFieldBoundary();
-		buf.append("Content-Disposition: form-data; name=\"" + fieldName + "\"; filename=\"" + fileName + "\"").append(LINE_FEED);
+        buf.append("Content-Disposition: form-data; name=\"").append(fieldName).append("\"; filename=\"").append(fileName).append("\"").append(LINE_FEED);
 		if (type == null) {
-			buf.append("Content-Type: " + URLConnection.guessContentTypeFromName(fileName)).append(LINE_FEED);
+            buf.append("Content-Type: ").append(URLConnection.guessContentTypeFromName(fileName)).append(LINE_FEED);
 		} else {
-			buf.append("Content-Type: " + type.toString()).append(LINE_FEED);
+            buf.append("Content-Type: ").append(type.toString()).append(LINE_FEED);
 		}
 
 		// buf.append("Content-Transfer-Encoding: binary").append(LINE_FEED);
