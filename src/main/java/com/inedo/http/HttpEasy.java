@@ -1,5 +1,11 @@
 package com.inedo.http;
 
+//TODO Can this be replaced by one of these?
+
+//http://stackoverflow.com/questions/2793150/using-java-net-urlconnection-to-fire-and-handle-http-requests
+// * https://github.com/kevinsawicki/http-request
+// * http://http.jcabi.com/
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -37,94 +43,82 @@ import com.google.common.net.MediaType;
  * 
  * <p>
  * There are two starting points for creating a rest request:
- * 
- * 1. {@code HttpEasy.withDefaults()} - allows you to set some settings that apply to
- * all requests such as configuring a proxy
- * 1. {@code HttpEasy.request()} - performs the actual call, these HTTP methods are implemented: GET, HEAD, POST, PUT, DELETE
  * </p>
+ * <ol>
+ * <li>{@code HttpEasy.withDefaults()} - allows you to set some settings that apply to
+ * all requests such as configuring a proxy</li>
+ * <li>{@code HttpEasy.request()} - performs the actual call, these HTTP methods are implemented: GET, HEAD, POST, PUT, DELETE</li>
+ * </ol>
  * 
  * <p>
  * Note: if your url can contain weird characters you will want to encode it,
  * something like this: myUrl = URLEncoder.encode(myUrl, "UTF-8");
  * </p>
- *
  * <p>
  * <b>Example</b>
  * </p>
  * 
  * <pre>
  * HttpEasyReader r = HttpEasy.request()
- *                          .baseURI(someUrl) 
- *                          .path(viewPath + {@literal "?startkey=\"{startkey}\"&endkey=\"{endkey}\"}) 
+ *                          .baseURI(someUrl)
+ *                          .path(viewPath + {@literal "?startkey=\"{startkey}\"&endkey=\"{endkey}\"})
  *                          .urlParameters(startKey[0], endKey[0])
  *                          .get();
- * 
- * String id = r.jsonPath("rows[0].doc._id").getAsString(); 
+ *
+ * String id = r.jsonPath("rows[0].doc._id").getAsString();
  * String rev = r.jsonPath("rows[0].doc._rev").getAsString();
  * </pre>
- * 
  * <p>
  * <b>Error Handling</b>
  * </p>
- * 
  * <p>
  * An IOException is thrown whenever a call returns a response code that is not part of the SUCCESS
  * family (ie 200-299).
  * </p>
- * 
  * <p>
  * In order to prevent an exception being thrown for an expected response use
  * one of the following methods:
- * 
+ * <p>
  * * request().doNotFailOn(Integer... reponseCodes)
  * * request().doNotFailOn(Family... responseFamily)
  * </p>
- * 
  * <p>
  * <b>Authentication</b>
  * </p>
- * 
  * <p>
  * Supports two formats
- * 
+ * <p>
  * * http://username:password@where.ever
  * * request().authorization(username, password)
  * </p>
- * 
  * <p>
  * <b>Host and Certificate Verification</b>
  * </p>
- *
  * <p>
- * There is no fine grained control, its more of an all or nothing approach:
+ * This will disable SSL and Hostname checking on HTTPS connections:
  * </p>
  * 
  * <pre>
  * HttpEasy.withDefaults()
- * 		.allowAllHosts()
- * 		.trustAllCertificates();
+ *         .trustAllCertificates(true);
  * </pre>
- * 
  * <p>
  * <b>Proxy</b>
  * </p>
- * 
  * <p>
  * Only basic authentication is supported, although I believe the domain can be added by included "domain/"
  * in front of the username (not tested)
  * </p>
  * 
  * <pre>
- * HttpEasy.withDefaults() 
- *     .proxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(user, password)))) 
- *     .proxyAuth(userName, password) 
+ * HttpEasy.withDefaults()
+ *     .proxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(user, password))))
+ *     .proxyAuth(userName, password)
  *     .bypassProxyForLocalAddresses(true);
  * </pre>
- * 
  * <p>
  * <b>Redirects</b>
  * </p>
- * 
  * <p>
  * Redirects are NOT automatically followed - at least for REST base calls - even though the documentation
  * for HttpURLConnection says that it should...
@@ -132,20 +126,18 @@ import com.google.common.net.MediaType;
  * 
  * <pre>
  * HttpEasyReader response = HttpEasy.request()
- *     .doNotFailOn(Family.REDIRECTION) 
- *     .path(url) 
+ *     .doNotFailOn(Family.REDIRECTION)
+ *     .path(url)
  *     .head();
- * 
+ *
  * if (response.getResponseCodeFamily() == Family.REDIRECTION) {
  *     url = response.getHeaderField("Location");
- *     ... 
+ *     ...
  * }
  * </pre>
- * 
  * <p>
  * <b>Logging</b>
  * </p>
- * 
  * <p>
  * Logging of requests and responses can be enabled by {@link #logRequestDetails} or, if using Eclipse, the TCP/IP Monitor utility.
  * </p>
@@ -188,48 +180,51 @@ public class HttpEasy {
 	}
 
 	/**
-	 * Add a header to request.
-	 * @param name Header name
-	 * @param value Header value
-	 * @return A self reference
-	 */
+     * Add a header to request.
+     * 
+     * @param name Header name
+     * @param value Header value
+     * @return A self reference
+     */
 	public HttpEasy header(String name, String value) {
 		headers.put(name, value);
 		return this;
 	}
 
 	/**
-	 * Add an authorization header to request.
-	 * @param username username
-	 * @param password password
-	 * @return A self reference
-	 */
+     * Add an authorization header to request.
+     * 
+     * @param username username
+     * @param password password
+     * @return A self reference
+     */
 	public HttpEasy authorization(String username, String password) {
 		authString = username + ":" + password;
 		return this;
 	}
 
 	/**
-	 * Sets a specified timeout value, in milliseconds, to be used when opening a communications link to the resource referenced by this URLConnection,
-	 * and when reading from Input stream when a connection is established .
-	 * 
-	 * If the timeout expires a java.net.SocketTimeoutException is raised.
-	 * 
-	 * A timeout of zero is interpreted as an infinite timeout.
-	 * 
-	 * @param milliseconds Timeout value in milliseconds
-	 * @return A self reference
-	 */
+     * Sets a specified timeout value, in milliseconds, to be used when opening a communications link to the resource referenced by this URLConnection,
+     * and when reading from Input stream when a connection is established .
+     * <p>
+     * If the timeout expires a java.net.SocketTimeoutException is raised.
+     * </p>
+     * A timeout of zero is interpreted as an infinite timeout.
+     * 
+     * @param milliseconds Timeout value in milliseconds
+     * @return A self reference
+     */
 	public HttpEasy setTimeout(int milliseconds) {
 		this.timeout = milliseconds;
 		return this;
 	}
 
 	/**
-	 * Set the host and port of the URL for the end-point.  baseURI, path and query are helpers only and any of these can take full URL.
-	 * @param uri The host and port of the URL
-	 * @return A self reference
-	 */
+     * Set the host and port of the URL for the end-point. baseURI, path and query are helpers only and any of these can take full URL.
+     * 
+     * @param uri The host and port of the URL
+     * @return A self reference
+     */
 	public HttpEasy baseURI(String uri) {
 		this.baseURI = uri;
 		return this;
@@ -258,26 +253,28 @@ public class HttpEasy {
 	}
 
 	/**
-	 * Set the query part of the URL for the end-point.  baseURI, path and query are helpers only and any of these can take full URL.
-	 * @param query The host and port of the URL
-	 * @return A self reference
-	 */
+     * Set the query part of the URL for the end-point. baseURI, path and query are helpers only and any of these can take full URL.
+     * 
+     * @param query The host and port of the URL
+     * @return A self reference
+     */
 	public HttpEasy query(String query) {
 		this.query = new StringBuilder(query);
 		return this;
 	}
 
 	/**
-	 * Appends parameter to query portion of url.
-	 * 
-	 * <ul>
-	 * <li>If value is null then parameter will not be added</li>
-	 * <li>If value is empty then parameter will be added as 'name='</li>
-	 * </ul>
-	 * @param name Parameter name
-	 * @param value Parameter value
-	 * @return A self reference
-	 */
+     * Appends parameter to query portion of url.
+     * 
+     * <ul>
+     * <li>If value is null then parameter will not be added</li>
+     * <li>If value is empty then parameter will be added as 'name='</li>
+     * </ul>
+     * 
+     * @param name Parameter name
+     * @param value Parameter value
+     * @return A self reference
+     */
 	public HttpEasy queryParam(String name, Object value) {
 		if (name == null || name.isEmpty()) {
 			return this;
@@ -298,7 +295,6 @@ public class HttpEasy {
 
 	/**
 	 * If called will cause the request and response details to be logged.
-	 * 
 	 * <p>
 	 * An alternative to this if using Eclipse is to use the TCP/IP monitor
 	 * </p>
@@ -327,10 +323,11 @@ public class HttpEasy {
 	}
 	
 	/**
-	 * Set the parameter values for the parameters in the URL. 
-	 * @param pathParams A list of parameters to fill in any parameters required by the URL.  These are replaced in the order they are found in the URL.  
-	 * @return A self reference
-	 */
+     * Set the parameter values for the parameters in the URL.
+     * 
+     * @param pathParams A list of parameters to fill in any parameters required by the URL. These are replaced in the order they are found in the URL.
+     * @return A self reference
+     */
 	public HttpEasy urlParameters(Object... pathParams) {
 		this.urlParams = pathParams;
 		return this;
@@ -393,7 +390,6 @@ public class HttpEasy {
 	 * @param name Field name
 	 * @param value Field value - this should not be URL Encoded!
 	 * @param type Field's media type
-	 * 
 	 * @return A self reference
 	 */
 	public HttpEasy field(String name, Object value, MediaType type) {
@@ -539,56 +535,72 @@ public class HttpEasy {
 		return this;
 	}
 
+    /**
+     * Set the listener to log to.
+     *
+     * @param listener A listener implementation
+     * @return A self reference
+     */
 	public HttpEasy withLogListener(HttpEasyListener listener) {
 		this.eventManager.addListener(listener);
 		return this;
 	}
 
-	/**
-	 * Performs an HTTP GET.
-	 * @return The request response wrapped by {@link HttpEasyReader}
-	 * @throws IOException If any connection or request errors
-	 */
-	public HttpEasyReader get() throws IOException {
-		return new HttpEasyReader(getConnectionMethod("GET"), this);
-	}
+    /**
+     * Performs an HTTP GET.
+     *
+     * @return The request response wrapped by {@link HttpEasyReader}
+     * @throws HttpResponseException if request failed
+     * @throws IOException for connection errors
+     */
+    public HttpEasyReader get() throws HttpResponseException, IOException {
+        return new HttpEasyReader(getConnectionMethod("GET"), this);
+    }
 
-	/**
-	 * Performs an HTTP HEAD.
-	 * @return The request response wrapped by {@link HttpEasyReader}
-	 * @throws IOException If any connection or request errors
-	 */
-	public HttpEasyReader head() throws IOException {
-		return new HttpEasyReader(getConnectionMethod("HEAD"), this);
-	}
+    /**
+     * Performs an HTTP HEAD.
+     *
+     * @return The request response wrapped by {@link HttpEasyReader}
+     * @throws HttpResponseException if request failed
+     * @throws IOException for connection errors
+     */
+    public HttpEasyReader head() throws HttpResponseException, IOException {
+        return new HttpEasyReader(getConnectionMethod("HEAD"), this);
+    }
 
-	/**
-	 * Performs an HTTP POST.
-	 * @return The request response wrapped by {@link HttpEasyReader}
-	 * @throws IOException If any connection or request errors
-	 */
-	public HttpEasyReader post() throws IOException {
-		return new HttpEasyReader(getConnectionMethod("POST"), this);
-	}
+    /**
+     * Performs an HTTP POST.
+     *
+     * @return The request response wrapped by {@link HttpEasyReader}
+     * @throws HttpResponseException if request failed
+     * @throws IOException for connection errors
+     */
+    public HttpEasyReader post() throws HttpResponseException, IOException {
+        return new HttpEasyReader(getConnectionMethod("POST"), this);
+    }
 
-	/**
-	 * Performs an HTTP PUT.
-	 * @return The request response wrapped by {@link HttpEasyReader}
-	 * @throws IOException If any connection or request errors
-	 */
-	
-	public HttpEasyReader put() throws IOException {
-		return new HttpEasyReader(getConnectionMethod("PUT"), this);
-	}
+    /**
+     * Performs an HTTP PUT.
+     *
+     * @return The request response wrapped by {@link HttpEasyReader}
+     * @throws HttpResponseException if request failed
+     * @throws IOException for connection errors
+     */
 
-	/**
-	 * Performs an HTTP DELETE.
-	 * @return The request response wrapped by {@link HttpEasyReader}
-	 * @throws IOException If any connection or request errors
-	 */
-	public HttpEasyReader delete() throws IOException {
-		return new HttpEasyReader(getConnectionMethod("DELETE"), this);
-	}
+    public HttpEasyReader put() throws HttpResponseException, IOException {
+        return new HttpEasyReader(getConnectionMethod("PUT"), this);
+    }
+
+    /**
+     * Performs an HTTP DELETE.
+     *
+     * @return The request response wrapped by {@link HttpEasyReader}
+     * @throws HttpResponseException if request failed
+     * @throws IOException for connection errors
+     */
+    public HttpEasyReader delete() throws HttpResponseException, IOException {
+        return new HttpEasyReader(getConnectionMethod("DELETE"), this);
+    }
 
 	private HttpURLConnection getConnectionMethod(String requestMethod) throws IOException {
 		int fifteenSeconds = 15 * 1000;
@@ -611,7 +623,7 @@ public class HttpEasy {
 		connection.setInstanceFollowRedirects(false);
 		
 		if (requestMethod.equals("POST") || requestMethod.equals("PUT")) {
-			dataWriter = getDataWriter(dataWriter, url, connection);
+            dataWriter = getDataWriter(url, connection);
 			
 			connection.setDoOutput(true);
 		} else {
@@ -650,7 +662,9 @@ public class HttpEasy {
 		return connection;
 	}
 
-	private DataWriter getDataWriter(DataWriter dataWriter, URL url, HttpURLConnection connection) throws UnsupportedEncodingException {
+    private DataWriter getDataWriter(URL url, HttpURLConnection connection) throws UnsupportedEncodingException {
+        DataWriter dataWriter = null;
+
 		if (dataContentType == DataContentType.AUTO_SELECT) {
 			if (!fields.isEmpty()) {
 				if (fieldsHasFile()) {
@@ -815,7 +829,7 @@ public class HttpEasy {
 		}
 		
 		//connection.setRequestProperty("Authorization", "Basic " + java.util.Base64.getEncoder().encodeToString(authString.getBytes(StandardCharsets.UTF_8)));
-		connection.setRequestProperty("Authorization", "Basic " + Base64.encodeBase64String(authString.getBytes(StandardCharsets.UTF_8)));
+        connection.setRequestProperty("Authorization", "Basic " + Base64.encodeBase64String(authString.getBytes(StandardCharsets.UTF_8)));
 	}
 
 	private void setProxyAuthorization(HttpURLConnection connection) {
