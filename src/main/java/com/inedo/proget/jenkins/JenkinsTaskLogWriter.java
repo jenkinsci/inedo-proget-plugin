@@ -3,7 +3,7 @@ package com.inedo.proget.jenkins;
 import hudson.model.TaskListener;
 
 public class JenkinsTaskLogWriter extends JenkinsLogWriter {
-	private final TaskListener listener;
+    private final TaskListener listener;
 		
 	public JenkinsTaskLogWriter(TaskListener listener) {
 		this.listener = listener;
@@ -23,4 +23,5 @@ public class JenkinsTaskLogWriter extends JenkinsLogWriter {
     public void fatalError(String message) {
         listener.fatalError(LOG_PREFIX + message);
     }
+
 }

@@ -7,12 +7,13 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.URL;
 
+import org.concordion.cubano.driver.http.HttpEasy;
+import org.concordion.cubano.driver.http.JsonReader;
+
 import com.google.common.net.MediaType;
-import com.inedo.http.HttpEasy;
-import com.inedo.http.JsonReader;
 import com.inedo.proget.domain.Feed;
-import com.inedo.proget.domain.ProGetPackage;
 import com.inedo.proget.domain.PackageVersion;
+import com.inedo.proget.domain.ProGetPackage;
 import com.inedo.proget.jenkins.DownloadFormat;
 import com.inedo.proget.jenkins.GlobalConfig;
 import com.inedo.proget.jenkins.JenkinsLogWriter;
@@ -42,7 +43,7 @@ public class ProGetApi implements Serializable {
 		
 		HttpEasy.withDefaults()
                 .baseUrl(config.url)
-                .listeners(logWriter)
+                .withLogWriter(logWriter)
                 .trustAllCertificates(config.trustAllCertificates);
 	}
 
