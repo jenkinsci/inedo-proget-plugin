@@ -115,7 +115,7 @@ public class ProGetApiTests {
         assertThat("Expect to have a feed", feed.Feed_Name, is("Example"));
 
         if (compareJson) {
-            JsonCompare.assertFieldsIdentical("Checking getFeed API result against mocked value",
+            JsonCompare.assertFieldsIdentical("API Structure has not changed",
                     MockData.FEED.getAsString(), proget.getJsonString(), Feed.class);
         }
     }
@@ -127,7 +127,7 @@ public class ProGetApiTests {
         assertThat("Expect to have a feed", feeds.length, is(greaterThan(0)));
         
         if (compareJson) {
-            JsonCompare.assertArrayFieldsIdentical("Checking getFeeds API result against mocked value",
+            JsonCompare.assertArrayFieldsIdentical("API Structure has not changed",
                     MockData.FEEDS.getAsString(), proget.getJsonString(), "Feed_Name", "Example", Feed.class);
         }
 	}
@@ -141,7 +141,7 @@ public class ProGetApiTests {
         assertThat("Expect more than one package", packages.length, is(greaterThan(0)));
 
         if (compareJson) {
-            JsonCompare.assertArrayFieldsIdentical("Checking getPackages API result against mocked value",
+            JsonCompare.assertArrayFieldsIdentical("API Structure has not changed",
                     MockData.PACKAGES.getAsString(), proget.getJsonString(), "Package_Name", "ExamplePackage", ProGetPackage.class);
         }
 	}
@@ -159,7 +159,7 @@ public class ProGetApiTests {
         assertThat("Expect at least one version", versions.length, is(greaterThan(0)));
 
         if (compareJson) {
-            JsonCompare.assertArrayFieldsIdentical("Checking getPackageVersions API result against mocked value",
+            JsonCompare.assertArrayFieldsIdentical("API Structure has not changed",
                     MockData.PACKAGE_VERSIONS.getAsString(), proget.getJsonString(), "Version_Text", "0.0.1", PackageVersion.class);
         }
 	}
