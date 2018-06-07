@@ -27,16 +27,16 @@ public class ProGetConfiguration extends GlobalConfiguration {
     @Extension
     public static final class DescriptorImpl extends Descriptor<GlobalConfiguration> {
 
-    	/**
+        /**
          * To persist global configuration information,
          * simply store it in a field and call save().
          *
          * <p>
          * If you don't want fields to be persisted, use <tt>transient</tt>.
          */
-    	private String url;
+        private String url;
         private String apiKey;
-    	private String user;
+        private String user;
         private Secret password;
         private boolean trustAllCertificates;
         
@@ -47,10 +47,10 @@ public class ProGetConfiguration extends GlobalConfiguration {
 
         @Override
         public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
-        	// To persist global configuration information,
+            // To persist global configuration information,
             // set that to properties and call save().
         
-        	req.bindJSON(this, formData);
+            req.bindJSON(this, formData);
             save();
             return super.configure(req,formData);
         }
@@ -107,29 +107,29 @@ public class ProGetConfiguration extends GlobalConfiguration {
         }
         
         public boolean isRequiredFieldsConfigured(boolean includeUsername) {
-        	if( url == null || url.trim().isEmpty()) {
-    			return false;
-    		}
-        	
-        	if (includeUsername) {
-        		if( user == null || user.trim().isEmpty()) {
-        			return false;
-        		}
-        		
-        		if( password == null || Secret.toString(password).trim().isEmpty()) {
-        			return false;
-        		}
-        	}
-        	
-    		return true;
+            if (url == null || url.trim().isEmpty()) {
+                return false;
+            }
+
+            if (includeUsername) {
+                if (user == null || user.trim().isEmpty()) {
+                    return false;
+                }
+
+                if (password == null || Secret.toString(password).trim().isEmpty()) {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         public boolean isApiKeyConfigured() {
-        	if( apiKey == null || apiKey.isEmpty() ) {
-    			return false;
-    		}
-        	
-    		return true;
+            if (apiKey == null || apiKey.isEmpty()) {
+                return false;
+            }
+
+            return true;
         }
 
         /**
@@ -157,41 +157,41 @@ public class ProGetConfiguration extends GlobalConfiguration {
         /**
          *  ProGet connection test
          */
-		public FormValidation doTestConnection(
+        public FormValidation doTestConnection(
                 @QueryParameter("url") final String url,
                 @QueryParameter("apiKey") final String apiKey,
                 @QueryParameter("user") final String user,
                 @QueryParameter("password") final String password,
                 @QueryParameter("trustAllCertificates") final boolean trustAllCertificates) throws IOException, ServletException {
-	
-			ProGetConfig config = new ProGetConfig();
-			
-			config.url = url;
+
+            ProGetConfig config = new ProGetConfig();
+
+            config.url = url;
             config.apiKey = apiKey;
-			config.user = user;
-			config.password = password;
+            config.user = user;
+            config.password = password;
             config.trustAllCertificates = trustAllCertificates;
-			
-			ProGetApi proget = new ProGetApi(config, new JenkinsConsoleLogWriter());
 
-			try {
-				proget.canConnect();
-			} catch (Exception ex) {
-            	return FormValidation.error("Failed. Please check the configuration: " + ex.getClass().getName() + " - " + ex.getMessage());
-			}
-			
-			return FormValidation.ok("Success. Connection with ProGet verified.");			
-		}
+            ProGetApi proget = new ProGetApi(config, new JenkinsConsoleLogWriter());
 
-		public ProGetConfig getProGetConfig() {
-			ProGetConfig config = new ProGetConfig();
-   		 
-			config.url = url;
-			config.user = user;
-			config.password = Secret.toString(password);
-			config.apiKey = apiKey;
-			
-    		return config;
-		}
+            try {
+                proget.canConnect();
+            } catch (Exception ex) {
+                return FormValidation.error("Failed. Please check the configuration: " + ex.getClass().getName() + " - " + ex.getMessage());
+            }
+
+            return FormValidation.ok("Success. Connection with ProGet verified.");
+        }
+
+        public ProGetConfig getProGetConfig() {
+            ProGetConfig config = new ProGetConfig();
+
+            config.url = url;
+            config.user = user;
+            config.password = Secret.toString(password);
+            config.apiKey = apiKey;
+
+            return config;
+        }
     }
 }

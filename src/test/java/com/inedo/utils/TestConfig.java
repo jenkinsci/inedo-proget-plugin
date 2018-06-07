@@ -72,9 +72,9 @@ public class TestConfig {
     /**
      * Get the property for the current environment, if that is not found it will look for "default.{@literal <key>}".
      *
-     * @param properties	A set of properties
-     * @param key	Id of the property to look up
-     * @return 		Property value if found, throws exception if not found
+     * @param properties A set of properties
+     * @param key Id of the property to look up
+     * @return Property value if found, throws exception if not found
      */
     protected static String getProperty(Properties properties, String key) {
         String value = retrieveProperty(properties, key);
@@ -89,9 +89,9 @@ public class TestConfig {
     /**
      * Get the property for the current environment, if that is not found it will look for "default.{@literal <key>}".
      *
-     * @param properties	A set of properties
-     * @param key	Id of the property to look up
-     * @return 		Property value if found, empty string if not found
+     * @param properties A set of properties
+     * @param key Id of the property to look up
+     * @return Property value if found, empty string if not found
      */
     protected static String getOptionalProperty(Properties properties, String key) {
         return retrieveProperty(properties, key);
@@ -100,10 +100,10 @@ public class TestConfig {
     /**
      * Get the property for the current environment, if that is not found it will look for "default.{@literal <key>}".
      *
-     * @param properties	A set of properties
-     * @param key			Id of the property to look up
-     * @param defaultValue	value to use if property is not found
-     * @return 		Property value if found, defaultValue if not found
+     * @param properties A set of properties
+     * @param key Id of the property to look up
+     * @param defaultValue value to use if property is not found
+     * @return Property value if found, defaultValue if not found
      */
     protected static String getOptionalProperty(Properties properties, String key, String defaultValue) {
         String value = retrieveProperty(properties, key);

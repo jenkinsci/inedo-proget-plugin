@@ -1,8 +1,8 @@
 package com.inedo.proget.jenkins;
 
 import hudson.EnvVars;
-import hudson.model.EnvironmentContributingAction;
 import hudson.model.AbstractBuild;
+import hudson.model.EnvironmentContributingAction;
 
 /**
  * Allow plugin to update environment variables
@@ -21,8 +21,8 @@ public class VariableInjectionAction implements EnvironmentContributingAction {
     }
 
     @Override
-	public void buildEnvVars(AbstractBuild<?, ?> build, EnvVars envVars) {
-    	if (envVars != null && key != null && value != null) {
+    public void buildEnvVars(AbstractBuild<?, ?> build, EnvVars envVars) {
+        if (envVars != null && key != null && value != null) {
             envVars.put(key, value);
         }
     }

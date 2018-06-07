@@ -12,22 +12,22 @@ import java.net.UnknownHostException;
 public class ProGetConfig implements Serializable {
     private static final long serialVersionUID = 1L;
     
-	// Global Configuration Items
-	public String url;
+    // Global Configuration Items
+    public String url;
     public String apiKey;
-	public String user;
-	public String password;
+    public String user;
+    public String password;
     public boolean trustAllCertificates;
     
-	/**
-	 * Get the name of the host the service is running on.
-	 */
-	public String getHost() {
-		try {
-			return InetAddress.getLocalHost().getHostName();
-		} catch (UnknownHostException e) {
-			System.err.println(e.getMessage());
-			return "Unknown";
-		}
-	}
+    /**
+     * Get the name of the host the service is running on.
+     */
+    public String getHost() {
+        try {
+            return InetAddress.getLocalHost().getHostName();
+        } catch (UnknownHostException e) {
+            System.err.println(e.getMessage());
+            return "Unknown";
+        }
+    }
 }

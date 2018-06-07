@@ -6,10 +6,10 @@ public abstract class JenkinsLogWriter extends LogWriter {
     static final String LOG_PREFIX = "[ProGet] ";
 
     public abstract void info(String message);
-	
-	public abstract void error(String message);
-	
-	public abstract void fatalError(String message);
+
+    public abstract void error(String message);
+
+    public abstract void fatalError(String message);
 
     @Override
     public void info(String msg, Object... args) {
