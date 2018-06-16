@@ -44,7 +44,8 @@ public class ProGetApi implements Serializable {
         HttpEasy.withDefaults()
                 .baseUrl(config.url)
                 .withLogWriter(logWriter)
-                .trustAllCertificates(config.trustAllCertificates);
+                .trustAllCertificates(config.trustAllCertificates)
+                .sensitiveParameters("API_Key");
     }
 
     public void setRecordJson(boolean record) {
@@ -194,8 +195,6 @@ public class ProGetApi implements Serializable {
 
     public void uploadPackage(String feedName, File progetPackage) throws IOException {
         HttpEasy.request()
-                // .header("x-Apikey", config.apiKey)
-                // .queryParam("key", config.apiKey)
                 .path("upack/{feed-name}/upload")
                 .urlParameters(feedName)
                 .data(progetPackage, MediaType.ZIP)

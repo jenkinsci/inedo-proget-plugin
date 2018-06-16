@@ -40,8 +40,6 @@ import com.inedo.utils.TestConfig;
 /**
  * Tests for the ProGet API class
  * 
- * TODO: Verify that the mocked server uses the same data as the real server
- * 
  * @author Andrew Sumner
  */
 public class ProGetApiTests {
@@ -128,7 +126,7 @@ public class ProGetApiTests {
         
         if (compareJson) {
             JsonCompare.assertArrayFieldsIdentical("API Structure has not changed",
-                    MockData.FEEDS.getAsString(), proget.getJsonString(), "Feed_Name", "Example", Feed.class);
+                    MockData.FEEDS.getAsString(), proget.getJsonString(), "[?(@.Feed_Name=='Example')]", Feed.class);
         }
     }
 
@@ -142,7 +140,7 @@ public class ProGetApiTests {
 
         if (compareJson) {
             JsonCompare.assertArrayFieldsIdentical("API Structure has not changed",
-                    MockData.PACKAGES.getAsString(), proget.getJsonString(), "Package_Name", "ExamplePackage", ProGetPackage.class);
+                    MockData.PACKAGES.getAsString(), proget.getJsonString(), "[?(@.Package_Name=='ExamplePackage')]", ProGetPackage.class);
         }
     }
 
@@ -160,7 +158,7 @@ public class ProGetApiTests {
 
         if (compareJson) {
             JsonCompare.assertArrayFieldsIdentical("API Structure has not changed",
-                    MockData.PACKAGE_VERSIONS.getAsString(), proget.getJsonString(), "Version_Text", "0.0.1", PackageVersion.class);
+                    MockData.PACKAGE_VERSIONS.getAsString(), proget.getJsonString(), "[?(@.Version_Text=='0.0.1')]", PackageVersion.class);
         }
     }
 
