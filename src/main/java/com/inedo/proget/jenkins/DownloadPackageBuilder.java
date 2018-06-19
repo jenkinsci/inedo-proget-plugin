@@ -90,8 +90,7 @@ public class DownloadPackageBuilder extends Builder implements SimpleBuildStep {
         JenkinsHelper helper = new JenkinsHelper(run, listener);
         
         if (!GlobalConfig.isRequiredFieldsConfigured(false)) {
-            helper.getLogWriter().error("Please configure ProGet Plugin global settings");
-            throw new AbortException();
+            throw new AbortException("Please configure ProGet Plugin global settings");
         }
 
         ProGetConfig config = GlobalConfig.getProGetConfig();

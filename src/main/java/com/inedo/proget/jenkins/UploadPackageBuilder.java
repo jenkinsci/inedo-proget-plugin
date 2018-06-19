@@ -168,19 +168,16 @@ public class UploadPackageBuilder extends Builder implements SimpleBuildStep {
         JenkinsHelper helper = new JenkinsHelper(run, listener);
 
         if (!GlobalConfig.isRequiredFieldsConfigured(true)) {
-            helper.getLogWriter().error("Please configure ProGet Plugin global settings");
-            throw new AbortException();
+            throw new AbortException("Please configure ProGet Plugin global settings");
         }
 
         if (artifacts.length() == 0) {
-            helper.getLogWriter().error("Files to package not set");
-            throw new AbortException();
+            throw new AbortException("Files to package not set");
         }
 
         PackageMetadata metadata = buildMetadata(helper);
         if (metadata == null) {
-            helper.getLogWriter().error("Metadata is incorrectly formatted");
-            throw new AbortException();
+            throw new AbortException("Metadata is incorrectly formatted");
         }
 
         if (!launcher.getChannel().call(new PutPackage(
@@ -189,7 +186,7 @@ public class UploadPackageBuilder extends Builder implements SimpleBuildStep {
                 workspace,
                 new PutDetails(this, helper),
                 metadata))) {
-            throw new AbortException();
+            throw new AbortException("Failed to upload package");
         }
     }
 
