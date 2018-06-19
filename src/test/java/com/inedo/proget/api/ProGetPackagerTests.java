@@ -30,8 +30,8 @@ import com.google.common.io.Files;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import com.inedo.proget.api.ProGetPackager.ZipItem;
-import com.inedo.proget.jenkins.JenkinsHelper;
 import com.inedo.proget.jenkins.UploadPackageBuilder;
+import com.inedo.proget.jenkins.utils.JenkinsHelper;
 
 public class ProGetPackagerTests {
     private JenkinsHelper helper;

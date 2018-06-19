@@ -17,7 +17,7 @@ public class GlobalConfig {
         config = value;
     }
 
-    public static boolean isProGetRequiredFieldsConfigured(boolean includeUsername) {
+    public static boolean isRequiredFieldsConfigured(boolean includeUsername) {
         if (config != null) {
             return true;
         }

@@ -2,6 +2,8 @@ package com.inedo.proget.jenkins;
 
 import java.io.Serializable;
 
+import com.inedo.proget.jenkins.utils.JenkinsHelper;
+
 public class PutDetails implements Serializable {
     private static final long serialVersionUID = 1L;
     

@@ -16,7 +16,7 @@ import com.inedo.proget.domain.PackageVersion;
 import com.inedo.proget.domain.ProGetPackage;
 import com.inedo.proget.jenkins.DownloadFormat;
 import com.inedo.proget.jenkins.GlobalConfig;
-import com.inedo.proget.jenkins.JenkinsLogWriter;
+import com.inedo.proget.jenkins.utils.JenkinsLogWriter;
 
 /**
  * BuildMaster json api interface 
@@ -44,6 +44,7 @@ public class ProGetApi implements Serializable {
         HttpEasy.withDefaults()
                 .baseUrl(config.url)
                 .withLogWriter(logWriter)
+                .logRequest(config.logApiRequests)
                 .trustAllCertificates(config.trustAllCertificates)
                 .sensitiveParameters("API_Key");
     }

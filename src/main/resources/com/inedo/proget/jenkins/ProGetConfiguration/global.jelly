@@ -25,6 +25,9 @@
     <f:entry field="password" title="Password" >
       <f:password />
     </f:entry>
+    <f:entry field="logApiRequests" title="Log API Requests" >
+      <f:checkbox />
+    </f:entry>
     <f:entry field="trustAllCertificates" title="Trust All Certificates" >
       <f:checkbox />
     </f:entry>

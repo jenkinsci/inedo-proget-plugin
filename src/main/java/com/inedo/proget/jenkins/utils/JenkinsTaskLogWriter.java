@@ -1,4 +1,4 @@
-package com.inedo.proget.jenkins;
+package com.inedo.proget.jenkins.utils;
 
 import hudson.model.TaskListener;
 
@@ -11,17 +11,16 @@ public class JenkinsTaskLogWriter extends JenkinsLogWriter {
 
     @Override
     public void info(String message) {
-        listener.getLogger().println(LOG_PREFIX + message);
+        listener.getLogger().println(prefixLines(message));
     }
 
     @Override
     public void error(String message) {
-        listener.error(LOG_PREFIX + message);
+        listener.error(prefixLines(message));
     }
     
     @Override
     public void fatalError(String message) {
-        listener.fatalError(LOG_PREFIX + message);
+        listener.fatalError(prefixLines(message));
     }
-
 }

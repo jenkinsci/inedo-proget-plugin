@@ -1,4 +1,4 @@
-package com.inedo.proget.jenkins;
+package com.inedo.proget.jenkins.utils;
 
 import org.concordion.cubano.driver.http.LogWriter;
 
@@ -29,5 +29,9 @@ public abstract class JenkinsLogWriter extends LogWriter {
     @Override
     public void error(String message, Throwable t) {
         error(message);
+    }
+    
+    protected String prefixLines(String message) {
+        return message.replaceAll("(?m)^", LOG_PREFIX);
     }
 }

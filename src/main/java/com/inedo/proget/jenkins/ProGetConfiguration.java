@@ -9,6 +9,7 @@ import org.kohsuke.stapler.StaplerRequest;
 
 import com.inedo.proget.api.ProGetApi;
 import com.inedo.proget.api.ProGetConfig;
+import com.inedo.proget.jenkins.utils.JenkinsConsoleLogWriter;
 
 import hudson.Extension;
 import hudson.model.Descriptor;
@@ -38,6 +39,7 @@ public class ProGetConfiguration extends GlobalConfiguration {
         private String apiKey;
         private String user;
         private Secret password;
+        private boolean logApiRequests;
         private boolean trustAllCertificates;
         
         public DescriptorImpl() {
@@ -79,6 +81,10 @@ public class ProGetConfiguration extends GlobalConfiguration {
             password = Secret.fromString(value);
         }
         
+        public void setLogApiRequests(boolean logApiRequests) {
+            this.logApiRequests = logApiRequests;
+        }
+
         public void setTrustAllCertificates(boolean value) {
             trustAllCertificates = value;
         }
@@ -102,6 +108,10 @@ public class ProGetConfiguration extends GlobalConfiguration {
             return Secret.toString(password);
         }
         
+        public boolean getLogApiRequests() {
+            return logApiRequests;
+        }
+
         public boolean getTrustAllCertificates() {
             return trustAllCertificates;
         }
@@ -190,6 +200,8 @@ public class ProGetConfiguration extends GlobalConfiguration {
             config.user = user;
             config.password = Secret.toString(password);
             config.apiKey = apiKey;
+            config.logApiRequests = logApiRequests;
+            config.trustAllCertificates = trustAllCertificates;
 
             return config;
         }

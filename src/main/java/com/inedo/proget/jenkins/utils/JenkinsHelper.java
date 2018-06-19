@@ -1,4 +1,4 @@
-package com.inedo.proget.jenkins;
+package com.inedo.proget.jenkins.utils;
 
 import hudson.model.AbstractBuild;
 import hudson.model.Run;
@@ -65,6 +65,6 @@ public class JenkinsHelper {
     }
 
     public static void fail(String value) {
-        throw new RuntimeException(JenkinsLogWriter.LOG_PREFIX + value);
+        throw new RuntimeException(value);
     }
 }

@@ -22,6 +22,10 @@ import com.inedo.proget.api.ProGetPackager.ZipItem;
 import com.inedo.proget.domain.Feed;
 import com.inedo.proget.domain.PackageMetadata;
 import com.inedo.proget.domain.ProGetPackage;
+import com.inedo.proget.jenkins.utils.JenkinsConsoleLogWriter;
+import com.inedo.proget.jenkins.utils.JenkinsHelper;
+import com.inedo.proget.jenkins.utils.JenkinsLogWriter;
+import com.inedo.proget.jenkins.utils.JenkinsTaskLogWriter;
 
 import hudson.AbortException;
 import hudson.Extension;
@@ -163,7 +167,7 @@ public class UploadPackageBuilder extends Builder implements SimpleBuildStep {
     public void perform(Run<?, ?> run, FilePath workspace, Launcher launcher, TaskListener listener) throws InterruptedException, IOException {
         JenkinsHelper helper = new JenkinsHelper(run, listener);
 
-        if (!GlobalConfig.isProGetRequiredFieldsConfigured(true)) {
+        if (!GlobalConfig.isRequiredFieldsConfigured(true)) {
             helper.getLogWriter().error("Please configure ProGet Plugin global settings");
             throw new AbortException();
         }
@@ -344,7 +348,7 @@ public class UploadPackageBuilder extends Builder implements SimpleBuildStep {
                 return isProGetAvailable;
             }
 
-            if (!GlobalConfig.isProGetRequiredFieldsConfigured(true)) {
+            if (!GlobalConfig.isRequiredFieldsConfigured(true)) {
                 connectionError = "Please configure ProGet Plugin global settings";
                 isProGetAvailable = false;
                 return false;
