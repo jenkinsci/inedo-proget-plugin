@@ -19,10 +19,11 @@ import com.inedo.proget.jenkins.GlobalConfig;
 import com.inedo.proget.jenkins.utils.JenkinsLogWriter;
 
 /**
- * BuildMaster json api interface 
+ * BuildMaster json api interface
  * 
- * http://localhost:81/api/json
- * http://inedo.com/support/documentation/proget/reference/universal-feed-api-and-package-format
+ * TODO I think some of these can be moved to universal api now...
+ * https://inedo.com/support/documentation/proget/reference/api/native
+ * https://inedo.com/support/documentation/proget/reference/universal-feed-api-and-package-format
  * 
  * @author Andrew Sumner
  */
@@ -134,6 +135,21 @@ public class ProGetApi implements Serializable {
         JsonReader reader = HttpEasy.request()
                 .path("api/json/ProGetPackages_GetPackages?API_Key={}&Feed_Id={}&IncludeVersions_Indicator=Y")
                 .urlParameters(config.apiKey, feedId, "Y")
+                .get()
+                .getJsonReader();
+
+        if (recordResult) {
+            jsonString = reader.asPrettyString();
+        }
+
+        return reader.fromJson(ProGetPackage[].class);
+    }
+
+    /** Gets the packages in a ProGet feed */
+    public ProGetPackage[] getPackages(String feedId, String groupName) throws IOException {
+        JsonReader reader = HttpEasy.request()
+                .path("api/json/ProGetPackages_GetPackages?API_Key={}&Feed_Id={}&Group_Name={}&IncludeVersions_Indicator=Y")
+                .urlParameters(config.apiKey, feedId, groupName, "Y")
                 .get()
                 .getJsonReader();
 

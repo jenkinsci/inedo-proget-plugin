@@ -2,7 +2,7 @@ package com.inedo.proget.jenkins;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.jenkinsci.Symbol;
@@ -245,7 +245,7 @@ public class DownloadPackageBuilder extends Builder implements SimpleBuildStep {
                 return null;
             }
 
-            Set<String> set = new TreeSet<String>();
+            SortedSet<String> set = new TreeSet<>();
             ListBoxModel items = new ListBoxModel();
             Feed[] feeds = proget.getFeeds();
 
@@ -253,6 +253,7 @@ public class DownloadPackageBuilder extends Builder implements SimpleBuildStep {
                 set.add(feed.Feed_Name);
             }
 
+            items.add("");
             for (String value : set) {
                 items.add(value);
             }
@@ -265,13 +266,16 @@ public class DownloadPackageBuilder extends Builder implements SimpleBuildStep {
                 return null;
             }
 
-            Set<String> set = new TreeSet<String>();
+            SortedSet<String> set = new TreeSet<>();
             ComboBoxModel items = new ComboBoxModel();
-            Feed feed = proget.getFeed(feedName);
-            ProGetPackage[] packages = proget.getPackages(feed.Feed_Id);
 
-            for (ProGetPackage pkg : packages) {
-                set.add(pkg.Group_Name);
+            if (feedName != null && !feedName.isEmpty()) {
+                Feed feed = proget.getFeed(feedName);
+                ProGetPackage[] packages = proget.getPackages(feed.Feed_Id);
+
+                for (ProGetPackage pkg : packages) {
+                    set.add(pkg.Group_Name);
+                }
             }
 
             items.add("");
@@ -287,13 +291,14 @@ public class DownloadPackageBuilder extends Builder implements SimpleBuildStep {
                 return null;
             }
 
-            Set<String> set = new TreeSet<String>();
+            SortedSet<String> set = new TreeSet<>();
             ComboBoxModel items = new ComboBoxModel();
-            Feed feed = proget.getFeed(feedName);
-            ProGetPackage[] packages = proget.getPackages(feed.Feed_Id);
 
-            for (ProGetPackage pkg : packages) {
-                if (pkg.Group_Name.equals(groupName)) {
+            if (feedName != null && !feedName.isEmpty()) {
+                Feed feed = proget.getFeed(feedName);
+                ProGetPackage[] packages = proget.getPackages(feed.Feed_Id, groupName);
+
+                for (ProGetPackage pkg : packages) {
                     set.add(pkg.Package_Name);
                 }
             }
@@ -311,13 +316,16 @@ public class DownloadPackageBuilder extends Builder implements SimpleBuildStep {
                 return null;
             }
 
-            Set<String> set = new TreeSet<String>();
+            SortedSet<String> set = new TreeSet<>();
             ComboBoxModel items = new ComboBoxModel();
-            Feed feed = proget.getFeed(feedName);
-            PackageVersion[] versions = proget.getPackageVersions(feed.Feed_Id, groupName, packageName);
 
-            for (PackageVersion version : versions) {
-                set.add(version.Version_Text);
+            if (feedName != null && !feedName.isEmpty()) {
+                Feed feed = proget.getFeed(feedName);
+                PackageVersion[] versions = proget.getPackageVersions(feed.Feed_Id, groupName, packageName);
+
+                for (PackageVersion version : versions) {
+                    set.add(version.Version_Text);
+                }
             }
 
             items.add("");
