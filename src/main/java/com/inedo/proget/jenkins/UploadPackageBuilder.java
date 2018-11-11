@@ -475,17 +475,8 @@ public class UploadPackageBuilder extends Builder implements SimpleBuildStep {
         }
 
         public FormValidation doCheckVersion(@QueryParameter String value) throws IOException, ServletException {
-            int countDots = 0;
-
-            int pos = value.indexOf(".");
-            while (pos > -1) {
-                countDots++;
-                pos = value.indexOf(".", pos + 1);
-            }
-
-            if (countDots != 2) {
-                return FormValidation.error("Version must be in a three-part dot format eg 0.0.0");
-            }
+            if (value.length() == 0)
+                return FormValidation.error("This setting is required");
 
             return FormValidation.ok();
         }
