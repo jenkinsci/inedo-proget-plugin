@@ -17,12 +17,12 @@ public class GlobalConfig {
         config = value;
     }
 
-    public static boolean isRequiredFieldsConfigured(boolean includeUsername) {
+    public static boolean isRequiredFieldsConfigured() {
         if (config != null) {
             return true;
         }
 
-        return getSharedDescriptor().isRequiredFieldsConfigured(includeUsername);
+        return getSharedDescriptor().isRequiredFieldsConfigured();
     }
 
     public static boolean isProGetApiKeyFieldConfigured() {
@@ -31,6 +31,14 @@ public class GlobalConfig {
         }
 
         return getSharedDescriptor().isApiKeyConfigured();
+    }
+
+    public static boolean isUserNameConfigured() {
+        if (config != null) {
+            return true;
+        }
+
+        return getSharedDescriptor().isUserNameConfigured();
     }
 
     public static ProGetConfig getProGetConfig() {

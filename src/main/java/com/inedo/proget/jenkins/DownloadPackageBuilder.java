@@ -89,7 +89,7 @@ public class DownloadPackageBuilder extends Builder implements SimpleBuildStep {
     public void perform(Run<?, ?> run, FilePath workspace, Launcher launcher, TaskListener listener) throws InterruptedException, IOException {
         JenkinsHelper helper = new JenkinsHelper(run, listener);
         
-        if (!GlobalConfig.isRequiredFieldsConfigured(false)) {
+        if (!GlobalConfig.isRequiredFieldsConfigured()) {
             throw new AbortException("Please configure ProGet Plugin global settings");
         }
 
@@ -213,11 +213,11 @@ public class DownloadPackageBuilder extends Builder implements SimpleBuildStep {
                 return isProGetAvailable;
             }
 
-            if (!GlobalConfig.isRequiredFieldsConfigured(false)) {
-                connectionError = "Please configure ProGet Plugin global settings";
-                isProGetAvailable = false;
-                return false;
-            }
+            // if (!GlobalConfig.isRequiredFieldsConfigured(false)) {
+            // connectionError = "Please configure ProGet Plugin global settings";
+            // isProGetAvailable = false;
+            // return false;
+            // }
 
             proget = new ProGetApi(new JenkinsConsoleLogWriter());
 

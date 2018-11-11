@@ -116,19 +116,21 @@ public class ProGetConfiguration extends GlobalConfiguration {
             return trustAllCertificates;
         }
         
-        public boolean isRequiredFieldsConfigured(boolean includeUsername) {
+        public boolean isRequiredFieldsConfigured() {
             if (url == null || url.trim().isEmpty()) {
                 return false;
             }
 
-            if (includeUsername) {
-                if (user == null || user.trim().isEmpty()) {
-                    return false;
-                }
+            return true;
+        }
 
-                if (password == null || Secret.toString(password).trim().isEmpty()) {
-                    return false;
-                }
+        public boolean isUserNameConfigured() {
+            if (user == null || user.trim().isEmpty()) {
+                return false;
+            }
+
+            if (password == null || Secret.toString(password).trim().isEmpty()) {
+                return false;
             }
 
             return true;

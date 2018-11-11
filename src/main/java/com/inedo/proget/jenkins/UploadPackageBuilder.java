@@ -167,8 +167,12 @@ public class UploadPackageBuilder extends Builder implements SimpleBuildStep {
     public void perform(Run<?, ?> run, FilePath workspace, Launcher launcher, TaskListener listener) throws InterruptedException, IOException {
         JenkinsHelper helper = new JenkinsHelper(run, listener);
 
-        if (!GlobalConfig.isRequiredFieldsConfigured(true)) {
+        if (!GlobalConfig.isRequiredFieldsConfigured()) {
             throw new AbortException("Please configure ProGet Plugin global settings");
+        }
+
+        if (!GlobalConfig.isUserNameConfigured()) {
+            throw new AbortException("Please configure user credentials in ProGet Plugin global settings");
         }
 
         if (artifacts.length() == 0) {
@@ -346,12 +350,6 @@ public class UploadPackageBuilder extends Builder implements SimpleBuildStep {
                 return isProGetAvailable;
             }
 
-            if (!GlobalConfig.isRequiredFieldsConfigured(true)) {
-                connectionError = "Please configure ProGet Plugin global settings";
-                isProGetAvailable = false;
-                return false;
-            }
-
             proget = new ProGetApi(new JenkinsConsoleLogWriter());
 
             try {
@@ -489,9 +487,6 @@ public class UploadPackageBuilder extends Builder implements SimpleBuildStep {
             if (required && value.length() == 0)
                 return FormValidation.error("This setting is required");
         
-            if (value.length() > 50)
-                return FormValidation.error("No more than 50 characters allowed");
-
             return FormValidation.ok();
         }
 
