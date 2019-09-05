@@ -7,6 +7,7 @@ import javax.servlet.ServletException;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
+import com.google.common.base.Strings;
 import com.inedo.proget.api.ProGetApi;
 import com.inedo.proget.api.ProGetConfig;
 import com.inedo.proget.jenkins.utils.JenkinsConsoleLogWriter;
@@ -77,8 +78,8 @@ public class ProGetConfiguration extends GlobalConfiguration {
             user = value;
         }
         
-        public void setPassword(String value) {
-            password = Secret.fromString(value);
+        public void setPassword(Secret value) {
+            password = value;
         }
         
         public void setLogApiRequests(boolean logApiRequests) {
@@ -104,8 +105,8 @@ public class ProGetConfiguration extends GlobalConfiguration {
             return user;
         }
         
-        public String getPassword() {
-            return Secret.toString(password);
+        public Secret getPassword() {
+            return password;
         }
         
         public boolean getLogApiRequests() {
@@ -129,7 +130,7 @@ public class ProGetConfiguration extends GlobalConfiguration {
                 return false;
             }
 
-            if (password == null || Secret.toString(password).trim().isEmpty()) {
+            if (Strings.isNullOrEmpty(Secret.toString(password))) {
                 return false;
             }
 
@@ -173,7 +174,7 @@ public class ProGetConfiguration extends GlobalConfiguration {
                 @QueryParameter("url") final String url,
                 @QueryParameter("apiKey") final String apiKey,
                 @QueryParameter("user") final String user,
-                @QueryParameter("password") final String password,
+                @QueryParameter("password") final Secret password,
                 @QueryParameter("trustAllCertificates") final boolean trustAllCertificates) throws IOException, ServletException {
 
             ProGetConfig config = new ProGetConfig();
@@ -181,7 +182,7 @@ public class ProGetConfiguration extends GlobalConfiguration {
             config.url = url;
             config.apiKey = apiKey;
             config.user = user;
-            config.password = password;
+            config.password = Secret.toString(password);
             config.trustAllCertificates = trustAllCertificates;
 
             ProGetApi proget = new ProGetApi(config, new JenkinsConsoleLogWriter());

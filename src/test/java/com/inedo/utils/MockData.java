@@ -3,7 +3,8 @@ package com.inedo.utils;
 import java.io.IOException;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.http.entity.InputStreamEntity;
+
+import hidden.jth.org.apache.http.entity.InputStreamEntity;
 
 public enum MockData {
     FEED("Feed.json"), 
