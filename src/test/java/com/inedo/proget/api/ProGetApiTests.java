@@ -158,7 +158,7 @@ public class ProGetApiTests {
 
         if (compareJson) {
             JsonCompare.assertArrayFieldsIdentical("API Structure has not changed",
-                    MockData.PACKAGE_VERSIONS.getAsString(), proget.getJsonString(), "[?(@.Version_Text=='0.0.1')]", PackageVersion.class);
+                    MockData.PACKAGE_VERSIONS.getAsString(), proget.getJsonString(), "[0]", PackageVersion.class);
         }
     }
 

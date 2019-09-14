@@ -44,7 +44,9 @@ public class PluginTests {
 
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();
-    @ClassRule public static JenkinsRule j = new JenkinsRule();
+
+    @ClassRule
+    public static JenkinsRule jenkins = new JenkinsRule();
 
     @Before
     public void before() throws IOException, InterruptedException {
@@ -80,7 +82,7 @@ public class PluginTests {
         DownloadFormat downloadFormat = DownloadFormat.PACKAGE;
         String downloadFolder = folder.getRoot().getAbsolutePath();
 
-        FreeStyleProject project = j.createFreeStyleProject();
+        FreeStyleProject project = jenkins.createFreeStyleProject();
 
         // TODO This belongs in upload rather than download
         project.getBuildersList().add(new TestBuilder() {
@@ -123,7 +125,7 @@ public class PluginTests {
         String version = "0.0.${BUILD_NUMBER}";
         String artifact = "XX.${BUILD_NUMBER}.TXT";
         
-        FreeStyleProject project = j.createFreeStyleProject();
+        FreeStyleProject project = jenkins.createFreeStyleProject();
 
         // TODO This belongs in upload rather than download
         project.getBuildersList().add(new TestBuilder() {
@@ -149,7 +151,7 @@ public class PluginTests {
         EnvironmentVariablesNodeProperty prop = new EnvironmentVariablesNodeProperty();
         EnvVars envVars = prop.getEnvVars();
         envVars.put("sampleEnvVarKey", "sampleEnvVarValue");
-        j.jenkins.getGlobalNodeProperties().add(prop);
+        jenkins.jenkins.getGlobalNodeProperties().add(prop);
     }
 
     public class HoldFileName {
