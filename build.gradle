@@ -63,6 +63,7 @@ dependencies {
 	testCompile 'junit:junit:4.12'
 	testCompile 'org.mockito:mockito-core:2.28.2'
 	testCompile 'org.jenkins-ci.main:jenkins-test-harness:2.55'
+	testCompile "org.jenkins-ci.main:jenkins-war:${jenkinsVersion}"
 }
 
 task wrapper(type: Wrapper) {
