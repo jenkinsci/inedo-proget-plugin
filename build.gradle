@@ -32,7 +32,7 @@ jenkinsPlugin {
     coreVersion = "$jenkinsVersion"
     displayName = 'Inedo ProGet Plugin.'
     shortName = 'inedo-proget'
-    url = 'http://wiki.jenkins-ci.org/display/JENKINS/Inedo+ProGet+Plugin'
+    url = 'https://github.com/jenkinsci/inedo-proget-plugin'
     gitHubUrl = 'https://github.com/jenkinsci/inedo-proget-plugin'
     developers {
         developer {

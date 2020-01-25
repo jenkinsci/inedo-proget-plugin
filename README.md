@@ -1,65 +1,106 @@
-[![Build Status](https://jenkins.ci.cloudbees.com/job/plugins/job/inedo-proget-plugin/badge/icon)](https://jenkins.ci.cloudbees.com/job/plugins/job/inedo-proget-plugin/)
+Inedo ProGet Plugin
+========================
 
+[![Jenkins Plugin](https://img.shields.io/jenkins/plugin/v/inedo-proget.svg)](https://plugins.jenkins.io/inedo-proget)
+[![GitHub release](https://img.shields.io/github/release/jenkinsci/inedo-proget-plugin.svg?label=changelog)](https://github.com/jenkinsci/inedo-proget-plugin/releases/latest)
+[![Jenkins Plugin Installs](https://img.shields.io/jenkins/plugin/i/inedo-proget.svg?color=blue)](https://plugins.jenkins.io/inedo-proget)
+
+## About this plugin
 This plugin integrates [Inedo ProGet](http://inedo.com/proget) with Jenkins allowing Jenkins jobs to create and upload, or download and extract, universal packages.
 
-It requires ProGet version 4.0.12 or higher to work correctly.
+## Usage
+The plugin requires a minimum ProGet version of 4.0.12 or higher to work correctly.
 
-See the [Wiki page](http://wiki.jenkins-ci.org/display/JENKINS/Inedo+ProGet+Plugin) for more details.
+### Installing and configuring the plugin
 
-# Building The Plugin
+This plugin can be installed from any Jenkins installation connected to the Internet using the **Plugin Manager** screen.
 
-The plugin is built using <a href="http://www.gradle.org/">Gradle</a> and the <a href="https://wiki.jenkins-ci.org/display/JENKINS/Gradle+JPI+Plugin">Gradle Jenkins JPI Plugin</a>.  The code base includes the Gradle Wrapper, which will automatically download the correct version of Gradle. 
+To configure the plugin:
 
-Gradle can be run from the command line or from your IDE:
+**First** you need to ensure that an api key as been configured in ProGet at ProGet > Administration > API Keys & Access Logs 
+Without this the plugin will still work to a certain point but will have reduced functionality in the job configuration - i.e. you will need to fill in certain details rather than select values from a drop down list, of feeds, groups and packages.
 
-## Command line
+![ProGet API Key](/docs/images/proget_api_key.png)
 
-From the command line, `cd` to the folder containing a copy of this project, and run 
+**Next**, you need to go to Jenkins' system config screen to tell Jenkins where's your ProGet installation resides and the username and password of a user with permission to upload files to ProGet.
 
-  `./gradlew clean jpi` on Unix-based systems, or 
-  
-  `gradlew clean jpi` on Windows.
-  
-This will download the required dependencies, clean the existing project, recompile all source code and build the jpi file required by jenkins. 
+![ProGet Configuration](/docs/images/proget_configuration.png)
 
-## IDE
+**Finally**, you need to add either an "ProGet Upload Package" or "ProGet Download Package" build step to your Jenkins job.
 
-For Eclipse and NetBeans, you will need to install a Gradle plugin to your IDE before importing the project. See [Gradle tooling](https://www.gradle.org/tooling) for details.
+#### Upload Package
+In it basic form, this simply require specifying the files in your work space that you'd like to package, supplying some metadata that that describes the package and the job is done.
+Please consult the help text in the plugin configuration screen for more information on each setting.
 
-On importing the project to your IDE, the required dependencies will be downloaded.
+![ProGet Upload](/docs/images/proget_upload.png)
 
-# Testing The Plugin
+There are some more advanced options that allow you to tweak the files that will be included in the package and the supply additional metadata.
 
-## Manual
-To spin up a Jenkins instance with this plugin installed for manual testing, run `gradlew clean server` (see "building the plugin" above). The Jenkins instance will be available on port 8080 on your localhost. You may need to specify a path to your JDK, if so use `gradlew clean server -Dorg.gradle.java.home=/JDK_PATH`
+![ProGet Upload Advanced](/docs/images/proget_download.png)
 
-To login the username will be admin and the password can be found in <project root>/work/secrets/initialAdminPassword
+#### Download Package
+Downloads a universal ProGet package in the requested format (package, zip, or tgz) to specified folder and will optionally unpack it for you.
+The environment variable PROGET_FILE will be populated with the name of the downloaded file
+Please consult the help text in the plugin configuration screen for more information on each setting.
 
-### Prerequisites
-* ProGet:
-    * Installed and configured with an API key
-    * Add a Feed called Example using the universal package format
-    * Add a package to the feed - use the ProGetApiTests.uploadPackage() method as this will put an appropriate sized file there that will allow the tests to pass
-* Jenkins:
-    * System Configuration page updated with BuildMaster server details and the Test Connection button returning success
-    * test-freestyle job added to create a package, upload it, and download it
-    * test-pipleline job with this pipeline script definition:
-    
-```
+![ProGet Download](/docs/images/proget_download.png)
+
+
+#### Pipeline Script
+Script can be generated using the pipeline syntax snippet generator.
+
+<table style="border: 1px solid grey; border-collapse: collapse; width: 100%;">
+<tr style="text-align: left; background-color: lightgrey">
+    <th>Scripted Pipeline Example</th>
+</tr>
+<tr>
+<td><pre>
 node {
-    ws {
-        bat '''DEL *.TXT /Q
-        		DEL *.upack /Q
-            ECHO Build Tag: %BUILD_TAG% > Example.txt'''
-        uploadProgetPackage artifacts: 'Example.txt', feedName: 'Example', groupName: 'jenkins/pipleline', packageName: 'JenkinsPackage', version: "1.0.${BUILD_NUMBER}"
-        downloadProgetPackage downloadFolder: "${WORKSPACE}", downloadFormat: 'pkg', feedName: 'Example', groupName: 'jenkins/freestyle', packageName: 'JenkinsPackage', version: "1.0.${BUILD_NUMBER}"
-    }
+    bat '''
+        DEL *.TXT /Q
+        DEL *.upack /Q
+        ECHO Build Tag: %BUILD_TAG% > Example.txt
+    '''
+    uploadProgetPackage artifacts: 'Example.txt', feedName: 'Example', groupName: 'jenkins/pipleline', packageName: 'JenkinsPackage', version: "1.0.${BUILD_NUMBER}"
+    downloadProgetPackage downloadFolder: "${WORKSPACE}", downloadFormat: 'pkg', feedName: 'Example', groupName: 'jenkins/pipleline', packageName: 'JenkinsPackage', version: "1.0.${BUILD_NUMBER}"
 }
-```
+</pre></td>
+</tr>
+</table>
 
+<table style="border: 1px solid grey; border-collapse: collapse; width: 100%;">
+<tr style="text-align: left; background-color: lightgrey">
+    <th>Declarative Pipeline Example</th>
+</tr>
+<tr>
+<td><pre>
+pipeline {
+  agent any
+ 
+  stages {
+    stage('Main') {
+      steps {
+        bat '''
+            DEL *.TXT /Q
+            DEL *.upack /Q
+            ECHO Build Tag: %BUILD_TAG% > Example.txt
+        '''
+        uploadProgetPackage artifacts: 'Example.txt', feedName: 'Example', groupName: 'jenkins/pipleline', packageName: 'JenkinsPackage', version: "1.0.${BUILD_NUMBER}"
+        downloadProgetPackage downloadFolder: "${WORKSPACE}", downloadFormat: 'pkg', feedName: 'Example', groupName: 'jenkins/pipleline', packageName: 'JenkinsPackage', version: "1.0.${BUILD_NUMBER}"
+      }
+    }
+  }
+}
+</pre></td>
+</tr>
+</table>
 
-## Automated
+## Reporting an Issue
+Select Create Issue on the [JIRA home page](https://issues.jenkins-ci.org/secure/Dashboard.jspa) and ensure that the component is set to inedo-proget-plugin.
 
-Update <project root>/test.properties with the required details and run the tests.  If useMockServer is false then the tests will be run against the installed application, if true it will run against a mock server.  While the mock server is useful for unit testing, the real service is required to test the plugin against application upgrades.
+For more information see the Jenkins guide on [how to report an issue](https://wiki.jenkins.io/display/JENKINS/How+to+report+an+issue).
 
-The tests mainly verify the ProGet APIs are still functioning as expected, although there are a couple of tests that attempt to use the plugin from a mocked Jenkins job.  
+## More information
+
+* [Changelog](https://github.com/jenkinsci/inedo-proget-plugin/releases)
+* [Developer documentation](./docs/DEVELOPER.md)
