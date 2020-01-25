@@ -49,12 +49,8 @@ Please consult the help text in the plugin configuration screen for more informa
 #### Pipeline Script
 Script can be generated using the pipeline syntax snippet generator.
 
-<table style="border: 1px solid grey; border-collapse: collapse; width: 100%;">
-<tr style="text-align: left; background-color: lightgrey">
-    <th>Scripted Pipeline Example</th>
-</tr>
-<tr>
-<td><pre>
+*Scripted Pipeline Example*
+````
 node {
     bat '''
         DEL *.TXT /Q
@@ -64,16 +60,10 @@ node {
     uploadProgetPackage artifacts: 'Example.txt', feedName: 'Example', groupName: 'jenkins/pipleline', packageName: 'JenkinsPackage', version: "1.0.${BUILD_NUMBER}"
     downloadProgetPackage downloadFolder: "${WORKSPACE}", downloadFormat: 'pkg', feedName: 'Example', groupName: 'jenkins/pipleline', packageName: 'JenkinsPackage', version: "1.0.${BUILD_NUMBER}"
 }
-</pre></td>
-</tr>
-</table>
+````
 
-<table style="border: 1px solid grey; border-collapse: collapse; width: 100%;">
-<tr style="text-align: left; background-color: lightgrey">
-    <th>Declarative Pipeline Example</th>
-</tr>
-<tr>
-<td><pre>
+*Declarative Pipeline Example*
+````
 pipeline {
   agent any
  
@@ -91,9 +81,7 @@ pipeline {
     }
   }
 }
-</pre></td>
-</tr>
-</table>
+````
 
 ## Reporting an Issue
 Select Create Issue on the [JIRA home page](https://issues.jenkins-ci.org/secure/Dashboard.jspa) and ensure that the component is set to inedo-proget-plugin.
