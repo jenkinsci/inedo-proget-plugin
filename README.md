@@ -82,6 +82,11 @@ pipeline {
   }
 }
 ````
+Available download formats:
+1. unpack
+2. pkg
+3. zip
+4. tgz
 
 ## Reporting an Issue
 Select Create Issue on the [JIRA home page](https://issues.jenkins-ci.org/secure/Dashboard.jspa) and ensure that the component is set to inedo-proget-plugin.
