@@ -196,8 +196,12 @@ public class ProGetApi implements Serializable {
 
         HttpEasy request = HttpEasy.request()
                 .path(path)
-                .authorization(config.user, config.password)
                 .urlParameters(feedName, groupName, packageName, version);
+        if(config.apiKey != null) {
+            request.header("X-ApiKey",config.apiKey);
+        } else {
+            request.authorization(config.user, config.password);
+        }
 
         if (latest) {
             request.query("latest");
@@ -211,11 +215,16 @@ public class ProGetApi implements Serializable {
     }
 
     public void uploadPackage(String feedName, File progetPackage) throws IOException {
-        HttpEasy.request()
+
+        HttpEasy request  = HttpEasy.request()
                 .path("upack/{feed-name}/upload")
-                .urlParameters(feedName)
-                .data(progetPackage, MediaType.ZIP)
-                .authorization(config.user, config.password)
-                .post();
+                .urlParameters( feedName)
+                .data(progetPackage, MediaType.ZIP);
+        if(config.apiKey != null) {
+            request.header("X-ApiKey",config.apiKey);
+        } else {
+            request.authorization(config.user, config.password);
+        }
+        request.post();
     }
 }
