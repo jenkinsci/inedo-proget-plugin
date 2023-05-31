@@ -171,7 +171,7 @@ public class UploadPackageBuilder extends Builder implements SimpleBuildStep {
             throw new AbortException("Please configure ProGet Plugin global settings");
         }
 
-        if (!GlobalConfig.isUserNameConfigured()) {
+        if (!GlobalConfig.isUserNameConfigured() && !GlobalConfig.isProGetApiKeyFieldConfigured()) {
             throw new AbortException("Please configure user credentials in ProGet Plugin global settings");
         }
 
